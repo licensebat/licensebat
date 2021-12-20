@@ -7,6 +7,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "licensebat"
+path = "src/main.rs"
+
 [dependencies]
 # core libs
 licensebat-core = { path = "../licensebat-core" }
