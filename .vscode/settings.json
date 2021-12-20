@@ -1,0 +1,8 @@
+{
+  "editor.tabSize": 4,
+  "html.format.enable": false,
+  "rust-analyzer.cargo.features": [],
+  "rust-analyzer.cargo.allFeatures": false,
+  "rust-analyzer.inlayHints.enable": false,
+  "rest-client.followredirect": true,
+}

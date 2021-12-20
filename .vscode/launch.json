@@ -1,0 +1,48 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug DEV",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=licensebat-cli",
+          "--package=licensebat-cli",
+          "--manifest-path=licensebat-cli/Cargo.toml"
+        ],
+        "filter": {
+          "name": "licensebat-cli",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=licensebat-cli",
+          "--package=licensebat-clii",
+          "--",
+          "--nocapture"
+        ],
+        "filter": {
+          "name": "licensebat-cli",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

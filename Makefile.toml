@@ -1,0 +1,64 @@
+
+[tasks.watch-pro]
+workspace = false
+command = "cargo"
+watch = true
+args = ["run", "--manifest-path", "./licensebat-cli/Cargo.toml", "--release"]
+
+[tasks.watch-dev]
+workspace = false
+command = "cargo"
+watch = true
+args = ["run", "--manifest-path", "./licensebat-cli/Cargo.toml", "--features", "development", "--no-default-features"]
+
+[tasks.udeps]
+workspace = false
+install_crate = "udeps"
+toolchain = "nightly"
+command = "cargo"
+args = ["udeps", "--all-targets"]
+
+[tasks.format]
+clear = true
+workspace = false
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
+[tasks.clippy-z]
+clear = true
+workspace = false
+install_crate = "cargo-clippy"
+toolchain = "nightly"
+command = "cargo"
+args = ["clippy", "-Z", "unstable-options"]
+
+[tasks.clippymaker]
+workspace = false
+install_crate = "cargo-clippy"
+command = "cargo"
+args = ["clippy"]
+
+[tasks.clippy-pedantic]
+workspace = false
+install_crate = "cargo-clippy"
+command = "cargo"
+args = ["clippy", "--all", "--", "-D", "clippy::pedantic", "-D", "clippy::nursery", "-D", "warnings"]
+
+
+[tasks.test-single]
+command = "cargo"
+args = ["test", "single_thread_test", "--", "--test-threads=1", "--ignored"]
+
+[tasks.test-all]
+run_task = [
+    { name = ["test", "test-single"], parallel = false },
+]
+
+[tasks.all]
+dependencies = [
+    "check",
+    "format",
+    "clippy",
+    "test-all"
+]

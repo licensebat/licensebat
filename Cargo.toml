@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "licensebat-cli",
+    "licensebat-core",
+    "licensebat-dependency-collector-dart",
+    "licensebat-dependency-collector-js",
+    "licensebat-dependency-retriever-dart-hosted",
+    "licensebat-dependency-retriever-js-npm",
+]

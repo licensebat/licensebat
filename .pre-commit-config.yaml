@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: fmt
+        name: fmt
+        description: Format files with rustfmt
+        entry: cargo make format
+        language: system
+        files: \.rs$
+        args: []
+      - id: clippy
+        name: clippy
+        description: Clippy for the warnings
+        entry: cargo clippy
+        language: system
+        files: \.rs$
+        pass_filenames: false
+        types: [file, rust]

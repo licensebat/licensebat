@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        rust: [stable]
+        os: [ubuntu-latest]
+    steps:
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: ${{ matrix.rust }}
+            override: true
+            components: rustfmt, clippy
+      - uses: davidB/rust-cargo-make@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run cargo fmt
+        run: cargo make format
+      - name: Run cargo clippy
+        run: cargo make clippy-stable
+      - name: Run tests
+        run: cargo test
