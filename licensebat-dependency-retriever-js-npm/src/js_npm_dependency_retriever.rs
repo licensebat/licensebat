@@ -98,6 +98,7 @@ fn build_retrieved_dependency(
         version: dependency.version.to_string(),
         url: Some(url),
         dependency_type: "npm".to_owned(),
+        validated: false,
         is_valid: has_licenses && error.is_none(),
         is_ignored: false,
         error: if let Some(err) = error {

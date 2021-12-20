@@ -15,5 +15,6 @@ serde_yaml = "0.8"
 yarn-lock-parser = "0.1.1"
 # utils
 futures = { version = "0.3.6" } 
+tracing = "0.1"
 # errors
 thiserror = "1.0.21"

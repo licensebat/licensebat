@@ -1,4 +1,4 @@
-use crate::dependencies::RetrievedDependency;
+use crate::dependency::RetrievedDependency;
 
 /// Trait to be implemented by every [`DependencyRetriever`].
 /// It will get the information needed about a specific dependency.

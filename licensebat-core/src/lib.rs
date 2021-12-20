@@ -8,11 +8,11 @@
 //! [`licensebat-cli`]: https://crates.io/crates/licensebat-cli
 //! [`licensebat-core`]: http://crates.io/crates/licensebat-core
 
-mod dependencies;
+mod dependency;
 pub mod dependency_collector;
 pub mod dependency_retriever;
 pub mod licrc;
 
-pub use dependencies::*;
+pub use dependency::*;
 pub use dependency_collector::DependencyCollector;
 pub use dependency_retriever::DependencyRetriever;

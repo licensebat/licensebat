@@ -25,6 +25,8 @@ pub struct RetrievedDependency {
     pub url: Option<String>,
     /// List of licenses of the dependency.
     pub licenses: Option<Vec<String>>,
+    /// Set to true if the dependency has been validated against the licrc.
+    pub validated: bool,
     /// Indicates if the license is valid for our project or not according to our .licrc configuration file.
     pub is_valid: bool,
     /// Indicates if the dependency has been ignored according to our .licrc configuration file.

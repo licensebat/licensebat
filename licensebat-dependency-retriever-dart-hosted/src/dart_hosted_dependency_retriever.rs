@@ -174,6 +174,7 @@ fn retrieved_dependency(
         version: dependency.version.clone(),
         url,
         dependency_type: "Dart".to_string(),
+        validated: false,
         is_valid: licenses.is_some() && error.is_none(),
         is_ignored: false,
         error: if error.is_some() {

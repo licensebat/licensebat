@@ -726,6 +726,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "thiserror",
+ "tracing",
  "yarn-lock-parser",
 ]
 

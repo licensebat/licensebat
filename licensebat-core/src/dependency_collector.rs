@@ -1,4 +1,4 @@
-use crate::dependencies::RetrievedDependency;
+use crate::dependency::RetrievedDependency;
 use futures::{future::BoxFuture, stream::FuturesUnordered};
 use std::fmt::Debug;
 
