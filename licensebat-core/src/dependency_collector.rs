@@ -11,11 +11,11 @@ pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<
 /// Error raised by a collector while parsing/getting the dependencies.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error(transparent)]
+    #[error("Error deserialiazing yaml: {0}")]
     YamlSerde(#[from] serde_yaml::Error),
-    #[error(transparent)]
+    #[error("Error deserialiazing json: {0}")]
     JsonSerde(#[from] serde_json::Error),
-    #[error(transparent)]
+    #[error("Error parsing yarn.lock file {0}")]
     YarnLock(#[from] yarn_lock_parser::YarnLockError),
 }
 

@@ -7,7 +7,7 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug DEV",
+      "name": "Debug CLI",
       "cargo": {
         "args": [
           "build",
@@ -20,13 +20,13 @@
           "kind": "bin"
         }
       },
-      "args": [],
+      "args": ["-d=.dev/package-lock.json", "-l=.dev/.licrc"],
       "cwd": "${workspaceFolder}"
     },
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug unit tests",
+      "name": "Debug CLI unit tests",
       "cargo": {
         "args": [
           "test",
@@ -41,7 +41,7 @@
           "kind": "bin"
         }
       },
-      "args": [],
+      "args": ["-d=.dev/package-lock.json"],
       "cwd": "${workspaceFolder}"
     }
   ]

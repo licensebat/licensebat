@@ -6,6 +6,9 @@ description = "Types and Traits for building Licensebat libraries"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = []
+licrc-from-file = ["toml"]
 
 [dependencies]
 # serialization
@@ -16,5 +19,6 @@ yarn-lock-parser = "0.1.1"
 # utils
 futures = { version = "0.3.6" } 
 tracing = "0.1"
+toml = {version = "0.5", optional = true }
 # errors
 thiserror = "1.0.21"

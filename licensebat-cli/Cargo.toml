@@ -13,6 +13,25 @@ path = "src/main.rs"
 
 [dependencies]
 # core libs
-licensebat-core = { path = "../licensebat-core" }
+licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"] }
+licensebat-dependency-collector-dart = { path = "../licensebat-dependency-collector-dart" }
+licensebat-dependency-collector-js = { path = "../licensebat-dependency-collector-js" }
+# main dependencies
+tokio = { version = "1.15.0", features = ["rt-multi-thread", "macros", "fs"] }
+reqwest = "0.11"
+# tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "time"] }
+tracing-futures = "0.2"
 # cli
 structopt = "0.3.25"
+# serde
+serde = "1.0"
+serde_json = "1.0"
+toml = "0.5"
+# errors
+anyhow = "1.0"
+thiserror = "1.0"
+# utils
+dotenv = "0.15"
+futures = "0.3"
