@@ -9,6 +9,7 @@ use serde_json::Value;
 use std::convert::Infallible;
 use tracing::instrument;
 
+#[derive(Debug)]
 pub struct NpmDependencyRetriever {
     client: Client,
 }

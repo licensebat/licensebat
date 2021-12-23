@@ -1,7 +1,8 @@
 use crate::common::{retrieve_from_npm, NPM};
 use crate::npm_dependency::NpmDependencies;
-use licensebat_core::Dependency;
-use licensebat_core::{dependency_collector::RetrievedDependencyStreamResult, DependencyCollector};
+use licensebat_core::{
+    dependency_collector::RetrievedDependencyStreamResult, Dependency, DependencyCollector,
+};
 use reqwest::Client;
 use tracing::instrument;
 

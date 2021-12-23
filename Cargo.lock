@@ -117,6 +117,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 
 [[package]]
+name = "cargo-lock"
+version = "7.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fb04b88bd5b2036e30704f95c6ee16f3b5ca3b4ca307da2889d9006648e5c88"
+dependencies = [
+ "semver",
+ "serde",
+ "toml",
+ "url",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -741,6 +753,7 @@ dependencies = [
 name = "licensebat-core"
 version = "0.1.0"
 dependencies = [
+ "cargo-lock",
  "futures",
  "serde",
  "serde_json",
@@ -784,6 +797,18 @@ dependencies = [
 [[package]]
 name = "licensebat-dependency-collector-rust"
 version = "0.1.0"
+dependencies = [
+ "cargo-lock",
+ "futures",
+ "licensebat-core",
+ "licensebat-dependency-retriever-rust-crates-io",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
+ "tracing",
+]
 
 [[package]]
 name = "licensebat-dependency-retriever-dart-hosted"
@@ -1554,6 +1579,9 @@ name = "semver"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "serde"

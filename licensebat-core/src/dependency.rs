@@ -3,7 +3,7 @@ use std::fmt::Debug;
 
 /// Generic dependency.
 /// Language agnostic, just holds the name and the version.
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd, Default)]
 pub struct Dependency {
     /// Dependency name
     pub name: String,
@@ -13,7 +13,7 @@ pub struct Dependency {
 
 /// A dependency that has been retrieved.
 /// It holds information about licenses, errors while validating...
-#[derive(Serialize, Deserialize, Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
+#[derive(Serialize, Deserialize, Debug, Eq, Ord, PartialEq, PartialOrd, Clone, Default)]
 pub struct RetrievedDependency {
     /// Dependency name.
     pub name: String,

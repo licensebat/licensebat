@@ -2,13 +2,13 @@
 mod tests {
     use askalono::Store;
     use licensebat_core::DependencyRetriever;
-    use licensebat_dependency_retriever_dart_hosted::DartHostedDependencyRetriever;
+    use licensebat_dependency_retriever_dart_hosted::DartHosted;
 
     const LICENSE_CACHE: &[u8] = std::include_bytes!("../../datasets/license-cache.bin.zstd");
 
-    fn create_dependency_retriever() -> DartHostedDependencyRetriever {
+    fn create_dependency_retriever() -> DartHosted {
         let store = Store::from_cache(LICENSE_CACHE).ok();
-        DartHostedDependencyRetriever::new(store)
+        DartHosted::new(store)
     }
 
     #[tokio::test]

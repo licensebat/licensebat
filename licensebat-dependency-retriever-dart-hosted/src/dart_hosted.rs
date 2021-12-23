@@ -10,21 +10,21 @@ use selectors::Element;
 use std::{sync::Arc, vec};
 use tracing::instrument;
 
-pub struct DartHostedDependencyRetriever {
+pub struct DartHosted {
     pub store: Arc<Option<Store>>,
     client: Client,
 }
 
-impl DartHostedDependencyRetriever {
+impl DartHosted {
     /// Creates a new [`DependencyRetriever`].
-    /// If you want to reuse a [`reqwest::Client`]  pool
+    /// If you want to reuse a [`reqwest::Client`]
     /// consider using the [`with_client`] method.
     #[must_use]
     pub fn new(store: Option<Store>) -> Self {
         Self::with_client(Client::new(), store)
     }
 
-    /// Creates a retriever reusing a [`reqwest::Client`]
+    /// Creates a [`DependencyRetriever`] reusing a [`reqwest::Client`]
     #[must_use]
     pub fn with_client(client: Client, store: Option<Store>) -> Self {
         Self {
@@ -34,7 +34,7 @@ impl DartHostedDependencyRetriever {
     }
 }
 
-impl Clone for DartHostedDependencyRetriever {
+impl Clone for DartHosted {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -43,7 +43,23 @@ impl Clone for DartHostedDependencyRetriever {
     }
 }
 
-impl DependencyRetriever for DartHostedDependencyRetriever {
+impl std::fmt::Debug for DartHosted {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DartHosted")
+            .field("client", &self.client)
+            .field(
+                "store",
+                if self.store.is_some() {
+                    &"Some(Store)"
+                } else {
+                    &"None"
+                },
+            )
+            .finish()
+    }
+}
+
+impl DependencyRetriever for DartHosted {
     type Error = reqwest::Error;
     type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
@@ -152,10 +168,7 @@ fn boxed_retrieved_dependency(
     error: Option<String>, // TODO: this is never called as Some!
     url: Option<String>,
     comment: Option<Comment>,
-) -> BoxFuture<
-    'static,
-    Result<RetrievedDependency, <DartHostedDependencyRetriever as DependencyRetriever>::Error>,
-> {
+) -> BoxFuture<'static, Result<RetrievedDependency, <DartHosted as DependencyRetriever>::Error>> {
     let dep = retrieved_dependency(dependency, licenses, error, url, comment);
     future::ok(dep).boxed()
 }

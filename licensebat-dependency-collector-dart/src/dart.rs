@@ -4,7 +4,7 @@ use licensebat_core::{
     dependency_collector::RetrievedDependencyStreamResult, Comment, DependencyCollector,
     DependencyRetriever, RetrievedDependency,
 };
-use licensebat_dependency_retriever_dart_hosted::DartHostedDependencyRetriever;
+use licensebat_dependency_retriever_dart_hosted::DartHosted;
 
 use crate::dart_dependency::{DartDependencies, DartDependency};
 use reqwest::Client;
@@ -15,9 +15,9 @@ const LICENSE_CACHE: &[u8] = std::include_bytes!("../../datasets/license-cache.b
 
 /// Dart Dependency Collector
 #[derive(Debug)]
-pub struct DartDependencyCollector(pub Client);
+pub struct Dart(pub Client);
 
-impl DependencyCollector for DartDependencyCollector {
+impl DependencyCollector for Dart {
     fn get_name(&self) -> String {
         DART.to_string()
     }
@@ -37,7 +37,7 @@ impl DependencyCollector for DartDependencyCollector {
         // It takes ~1100ms to be built.
         let store = Store::from_cache(LICENSE_CACHE).ok();
         log::trace!("Store took {} ms", now.elapsed().as_millis());
-        let retriever = DartHostedDependencyRetriever::with_client(self.0.clone(), store);
+        let retriever = DartHosted::with_client(self.0.clone(), store);
         Ok(dependencies
             .into_iter()
             .map(|dep| get_dependency(dep, retriever.clone()).boxed())
@@ -52,10 +52,7 @@ impl DependencyCollector for DartDependencyCollector {
 /// sdk dependencies will be directly validated and ignored.
 /// hosted dependencies will be found by scrapping the dart pub website as it seems to be the only solution.
 /// git dependencies will require to access GitHub repos, check the path and ref, and look for a LICENSE file.
-async fn get_dependency(
-    dependency: DartDependency,
-    retriever: DartHostedDependencyRetriever,
-) -> RetrievedDependency {
+async fn get_dependency(dependency: DartDependency, retriever: DartHosted) -> RetrievedDependency {
     match dependency.source.as_ref() {
         "sdk" => resolve_sdk_dependency(&dependency),
         "hosted" => resolve_hosted_dependency(dependency, retriever).await,
@@ -81,7 +78,7 @@ fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
 #[allow(clippy::too_many_lines, clippy::single_match_else)]
 async fn resolve_hosted_dependency(
     dependency: DartDependency,
-    retriever: DartHostedDependencyRetriever,
+    retriever: DartHosted,
 ) -> RetrievedDependency {
     if let Some(dependency_name) = &dependency.description.name {
         retriever
@@ -198,7 +195,7 @@ mod tests {
         };
         let cache = File::open("../datasets/license-cache.bin.zstd").unwrap();
         let store = Store::from_cache(cache).ok();
-        let retriever = DartHostedDependencyRetriever::new(store);
+        let retriever = DartHosted::new(store);
         let res = get_dependency(dep, retriever).await;
         assert_eq!(res.name, dependency_name);
         assert!(res.licenses.is_some());

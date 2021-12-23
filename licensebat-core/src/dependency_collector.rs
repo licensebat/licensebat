@@ -8,6 +8,7 @@ pub type RetrievedDependencyStream<'a> = FuturesUnordered<BoxFuture<'a, Retrieve
 /// [`DependencyCollector`] result returning either a [`RetrievedDependencyStream`] or a [`DependencyCollectorError`]
 pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<'a>, Error>;
 
+// TODO: REMOVE DEPENDENCIES FROM serde_json, serde_value, cargo_lock, yarn_lock
 /// Error raised by a collector while parsing/getting the dependencies.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -17,6 +18,8 @@ pub enum Error {
     JsonSerde(#[from] serde_json::Error),
     #[error("Error parsing yarn.lock file {0}")]
     YarnLock(#[from] yarn_lock_parser::YarnLockError),
+    #[error("Error parsing Cargo.lock file {0}")]
+    CargoLock(#[from] cargo_lock::Error),
 }
 
 /// Trait to be implemented for every dependency collector.

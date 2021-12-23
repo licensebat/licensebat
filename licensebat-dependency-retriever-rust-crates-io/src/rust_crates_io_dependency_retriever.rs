@@ -7,6 +7,7 @@ use reqwest::Client;
 use serde_json::Value;
 use tracing::instrument;
 
+#[derive(Debug)]
 pub struct RustCratesIoDependencyRetriever {
     client: Client,
 }
