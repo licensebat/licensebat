@@ -4,7 +4,7 @@ mod tests {
     use licensebat_dependency_retriever_js_npm::NpmDependencyRetriever;
 
     #[tokio::test]
-    async fn npm_ranger_works() {
+    async fn it_works() {
         // https://registry.npmjs.org/exit
         let retriever = NpmDependencyRetriever::default();
         let dep: RetrievedDependency = retriever.get_dependency("exit", "0.1.2").await.unwrap();

@@ -32,7 +32,7 @@
           "test",
           "--no-run",
           "--bin=licensebat-cli",
-          "--package=licensebat-clii",
+          "--package=licensebat-cli",
           "--",
           "--nocapture"
         ],

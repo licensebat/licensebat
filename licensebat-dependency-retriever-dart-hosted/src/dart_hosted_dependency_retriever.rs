@@ -149,7 +149,7 @@ impl DependencyRetriever for DartHostedDependencyRetriever {
 fn boxed_retrieved_dependency(
     dependency: &Dependency,
     licenses: Option<Vec<String>>,
-    error: Option<String>,
+    error: Option<String>, // TODO: this is never called as Some!
     url: Option<String>,
     comment: Option<Comment>,
 ) -> BoxFuture<
@@ -170,12 +170,12 @@ fn retrieved_dependency(
     let has_licenses = licenses.is_some();
 
     RetrievedDependency {
-        name: dependency.name.to_string(),
+        name: dependency.name.clone(),
         version: dependency.version.clone(),
         url,
-        dependency_type: "Dart".to_string(),
+        dependency_type: "Dart".to_owned(),
         validated: false,
-        is_valid: licenses.is_some() && error.is_none(),
+        is_valid: has_licenses && error.is_none(),
         is_ignored: false,
         error: if error.is_some() {
             error

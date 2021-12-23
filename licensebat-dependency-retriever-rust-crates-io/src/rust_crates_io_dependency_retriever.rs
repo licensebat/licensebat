@@ -1,4 +1,3 @@
-use crate::NpmMetadata;
 use futures::{
     future::{self, BoxFuture},
     FutureExt, TryFutureExt,
@@ -6,22 +5,26 @@ use futures::{
 use licensebat_core::{Comment, Dependency, DependencyRetriever, RetrievedDependency};
 use reqwest::Client;
 use serde_json::Value;
-use std::convert::Infallible;
 use tracing::instrument;
 
-pub struct NpmDependencyRetriever {
+pub struct RustCratesIoDependencyRetriever {
     client: Client,
 }
 
-impl Default for NpmDependencyRetriever {
-    /// Creates a new [`DependencyRetriever`].
-    /// If you want to reuse a [`reqwest::Client`] pool consider using the [`with_client`] method.
+impl Default for RustCratesIoDependencyRetriever {
+    /// Creates a new [`RustCratesIoDependencyRetriever`].
     fn default() -> Self {
-        Self::with_client(Client::new())
+        Self::new()
     }
 }
 
-impl NpmDependencyRetriever {
+impl RustCratesIoDependencyRetriever {
+    /// Creates a new [`RustCratesIoDependencyRetriever`].
+    #[must_use]
+    pub fn new() -> Self {
+        Self::with_client(Client::new())
+    }
+
     /// Creates a new [`DependencyRetriever`] using the given [`reqwest::Client`].
     #[must_use]
     pub const fn with_client(client: Client) -> Self {
@@ -29,71 +32,57 @@ impl NpmDependencyRetriever {
     }
 }
 
-impl DependencyRetriever for NpmDependencyRetriever {
-    type Error = Infallible;
+impl DependencyRetriever for RustCratesIoDependencyRetriever {
+    type Error = std::convert::Infallible;
     type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
-    /// Gets a dependency from NPM.
-    /// This method attacks the npm api.
     #[instrument(skip(self), level = "debug")]
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
-        let url = format!("https://registry.npmjs.org/{}", dep_name);
+        let url = format!(
+            "https://crates.io/api/v1/crates/{}/{}",
+            dep_name, dep_version
+        );
 
         let dependency = Dependency {
             name: dep_name.to_string(),
             version: dep_version.to_string(),
         };
+
         let dep_clone = dependency.clone();
-        let dependency_version = dep_version.to_string();
 
         self.client
             .get(&url)
+            .header("User-Agent", "licensebat-cli (licensebat.com)")
             .send()
             .and_then(reqwest::Response::json)
             .map_ok(|metadata: Value| {
-                // get general license
-                let license = metadata["license"].clone();
-                // get info from specific version
-                let version = metadata["versions"][dependency_version].clone();
-                serde_json::from_value::<NpmMetadata>(version)
-                    .ok()
-                    .and_then(|mut md| {
-                        if md.license.is_none() {
-                            // use generic if no license is found in the version
-                            md.license = match license {
-                                Value::String(lic) => Some(lic),
-                                Value::Object(lic) => lic
-                                    .get("type")
-                                    .and_then(serde_json::Value::as_str)
-                                    .map(std::borrow::ToOwned::to_owned),
-                                _ => None,
-                            }
-                        }
-                        md.get_licenses()
-                    })
+                let license = metadata["version"]["license"].clone();
+                vec![license.as_str().unwrap().to_string()]
+                // TODO: GET LICENSE IN CASE OF non-standard license
+                // we should get the repo info, get the cargo.toml, read the license_file key, get the file,
+                // read it and use askalono to get the license.
+                // TODO: ADD SUPPORT FOR MULTIPLE LICENSES
             })
-            .map_ok(move |licenses: Option<Vec<String>>| {
-                build_retrieved_dependency(&dep_clone, licenses, None)
-            })
-            .or_else(move |e| {
-                future::ok(build_retrieved_dependency(&dependency, None, Some(e))).boxed()
-            })
+            .map_ok(move |licenses| build_retrieved_dependency(&dep_clone, Some(licenses), None))
+            .or_else(move |e| future::ok(build_retrieved_dependency(&dependency, None, Some(e))))
             .boxed()
     }
 }
 
+#[instrument(level = "debug")]
 fn build_retrieved_dependency(
     dependency: &Dependency,
     licenses: Option<Vec<String>>,
     error: Option<reqwest::Error>,
 ) -> RetrievedDependency {
     let url = format!(
-        "https://www.npmjs.com/package/{}/v/{}",
+        "https://crates.io/crates/{}/{}",
         dependency.name, dependency.version
     );
 
     let has_licenses = licenses.is_some();
 
+    // TODO: THIS SHOULD BE EXTRACTED AS IT SEEMS TO BE THE SAME FOR ALL DEPENDENCY TYPES
     RetrievedDependency {
         name: dependency.name.clone(),
         version: dependency.version.clone(),

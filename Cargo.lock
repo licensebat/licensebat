@@ -782,6 +782,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "licensebat-dependency-collector-rust"
+version = "0.1.0"
+
+[[package]]
 name = "licensebat-dependency-retriever-dart-hosted"
 version = "0.1.0"
 dependencies = [
@@ -805,6 +809,20 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "licensebat-dependency-retriever-rust-crates-io"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "licensebat-core",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
  "tracing",
 ]
 

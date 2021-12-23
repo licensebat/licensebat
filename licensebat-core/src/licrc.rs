@@ -1,6 +1,5 @@
 use crate::RetrievedDependency;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use tracing::instrument;
 
 /// Represents the Privateer configuration file.
@@ -27,7 +26,7 @@ pub enum Error {
 #[cfg(feature = "licrc-from-file")]
 impl LicRc {
     #[instrument(skip(relative_path))]
-    pub fn from_relative_path(relative_path: impl AsRef<Path>) -> Result<Self, Error> {
+    pub fn from_relative_path(relative_path: impl AsRef<std::path::Path>) -> Result<Self, Error> {
         let licrc_path = std::env::current_dir()?.join(relative_path);
         let licrc_content = std::fs::read_to_string(licrc_path)?;
         let licrc = toml::from_str(&licrc_content)?;

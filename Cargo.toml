@@ -4,6 +4,8 @@ members = [
     "licensebat-core",
     "licensebat-dependency-collector-dart",
     "licensebat-dependency-collector-js",
+    "licensebat-dependency-collector-rust",
     "licensebat-dependency-retriever-dart-hosted",
     "licensebat-dependency-retriever-js-npm",
+    "licensebat-dependency-retriever-rust-crates-io",
 ]
