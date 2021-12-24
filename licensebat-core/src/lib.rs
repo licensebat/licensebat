@@ -3,16 +3,16 @@
 //! Libraries authors that want to provide [`DependencyCollector`] or [`DependencyRetriever`] implementations
 //! should depend on the [`licensebat-core`] crate,.
 //!
-//! [`DependencyCollector`]: crate::dependency_collector::DependencyCollector
-//! [`DependencyRetriever`]: crate::dependency_retriever::DependencyRetriever
+//! [`DependencyCollector`]: crate::collector::DependencyCollector
+//! [`DependencyRetriever`]: crate::retriever::DependencyRetriever
 //! [`licensebat-cli`]: https://crates.io/crates/licensebat-cli
 //! [`licensebat-core`]: http://crates.io/crates/licensebat-core
 
+pub mod collector;
 mod dependency;
-pub mod dependency_collector;
-pub mod dependency_retriever;
 pub mod licrc;
+pub mod retriever;
 
+pub use collector::Collector;
 pub use dependency::*;
-pub use dependency_collector::DependencyCollector;
-pub use dependency_retriever::DependencyRetriever;
+pub use retriever::Retriever;

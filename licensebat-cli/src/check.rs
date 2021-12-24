@@ -1,6 +1,6 @@
 use crate::Cli;
 use futures::StreamExt;
-use licensebat_core::{licrc::LicRc, DependencyCollector, RetrievedDependency};
+use licensebat_core::{licrc::LicRc, Collector, RetrievedDependency};
 
 #[derive(Debug, thiserror::Error)]
 pub enum CheckError {
@@ -24,7 +24,7 @@ pub async fn run(cli: Cli) -> anyhow::Result<Vec<RetrievedDependency>> {
 
     // 3. use a collector to get a stream of  dependencies
     tracing::debug!("Getting dependencies from file content");
-    let npm = licensebat_dependency_collector_js::Npm::default();
+    let npm = licensebat_collector_js::Npm::default();
     let mut stream = npm.get_dependencies(&dep_file_content)?;
 
     // 4. validate the dependencies according to the .licrc config

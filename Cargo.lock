@@ -734,9 +734,9 @@ dependencies = [
  "anyhow",
  "dotenv",
  "futures",
+ "licensebat-collector-dart",
+ "licensebat-collector-js",
  "licensebat-core",
- "licensebat-dependency-collector-dart",
- "licensebat-dependency-collector-js",
  "reqwest",
  "serde",
  "serde_json",
@@ -747,6 +747,52 @@ dependencies = [
  "tracing",
  "tracing-futures",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "licensebat-collector-dart"
+version = "0.1.0"
+dependencies = [
+ "askalono",
+ "futures",
+ "licensebat-core",
+ "licensebat-retriever-dart",
+ "reqwest",
+ "serde",
+ "serde_yaml",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "licensebat-collector-js"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "licensebat-core",
+ "licensebat-retriever-js",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "yarn-lock-parser",
+]
+
+[[package]]
+name = "licensebat-collector-rust"
+version = "0.1.0"
+dependencies = [
+ "cargo-lock",
+ "futures",
+ "licensebat-core",
+ "licensebat-retriever-rust",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
+ "tracing",
 ]
 
 [[package]]
@@ -765,53 +811,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "licensebat-dependency-collector-dart"
-version = "0.1.0"
-dependencies = [
- "askalono",
- "futures",
- "licensebat-core",
- "licensebat-dependency-retriever-dart-hosted",
- "reqwest",
- "serde",
- "serde_yaml",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "licensebat-dependency-collector-js"
-version = "0.1.0"
-dependencies = [
- "futures",
- "licensebat-core",
- "licensebat-dependency-retriever-js-npm",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "yarn-lock-parser",
-]
-
-[[package]]
-name = "licensebat-dependency-collector-rust"
-version = "0.1.0"
-dependencies = [
- "cargo-lock",
- "futures",
- "licensebat-core",
- "licensebat-dependency-retriever-rust-crates-io",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "toml",
- "tracing",
-]
-
-[[package]]
-name = "licensebat-dependency-retriever-dart-hosted"
+name = "licensebat-retriever-dart"
 version = "0.1.0"
 dependencies = [
  "askalono",
@@ -825,7 +825,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "licensebat-dependency-retriever-js-npm"
+name = "licensebat-retriever-js"
 version = "0.1.0"
 dependencies = [
  "futures",
@@ -838,7 +838,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "licensebat-dependency-retriever-rust-crates-io"
+name = "licensebat-retriever-rust"
 version = "0.1.0"
 dependencies = [
  "futures",
