@@ -2,10 +2,7 @@
 members = [
     "licensebat-cli",
     "licensebat-core",
-    "licensebat-collector-dart",
-    "licensebat-collector-js",
-    "licensebat-collector-rust",
-    "licensebat-retriever-dart",
-    "licensebat-retriever-js",
-    "licensebat-retriever-rust",
+    "licensebat-js",
+    "licensebat-dart",
+    "licensebat-rust"
 ]

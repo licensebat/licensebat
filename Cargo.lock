@@ -734,9 +734,10 @@ dependencies = [
  "anyhow",
  "dotenv",
  "futures",
- "licensebat-collector-dart",
- "licensebat-collector-js",
  "licensebat-core",
+ "licensebat-dart",
+ "licensebat-js",
+ "licensebat-rust",
  "reqwest",
  "serde",
  "serde_json",
@@ -747,52 +748,6 @@ dependencies = [
  "tracing",
  "tracing-futures",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "licensebat-collector-dart"
-version = "0.1.0"
-dependencies = [
- "askalono",
- "futures",
- "licensebat-core",
- "licensebat-retriever-dart",
- "reqwest",
- "serde",
- "serde_yaml",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "licensebat-collector-js"
-version = "0.1.0"
-dependencies = [
- "futures",
- "licensebat-core",
- "licensebat-retriever-js",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
- "yarn-lock-parser",
-]
-
-[[package]]
-name = "licensebat-collector-rust"
-version = "0.1.0"
-dependencies = [
- "cargo-lock",
- "futures",
- "licensebat-core",
- "licensebat-retriever-rust",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "toml",
- "tracing",
 ]
 
 [[package]]
@@ -811,7 +766,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "licensebat-retriever-dart"
+name = "licensebat-dart"
 version = "0.1.0"
 dependencies = [
  "askalono",
@@ -820,12 +775,14 @@ dependencies = [
  "reqwest",
  "scraper",
  "selectors",
+ "serde",
+ "serde_yaml",
  "tokio",
  "tracing",
 ]
 
 [[package]]
-name = "licensebat-retriever-js"
+name = "licensebat-js"
 version = "0.1.0"
 dependencies = [
  "futures",
@@ -835,12 +792,14 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
+ "yarn-lock-parser",
 ]
 
 [[package]]
-name = "licensebat-retriever-rust"
+name = "licensebat-rust"
 version = "0.1.0"
 dependencies = [
+ "cargo-lock",
  "futures",
  "licensebat-core",
  "reqwest",
