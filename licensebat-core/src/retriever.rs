@@ -8,7 +8,7 @@ use futures::future::{self, BoxFuture};
 /// It will get the information needed about a specific dependency.
 pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// The associated error which can be returned.
-    type Error: std::fmt::Debug;
+    type Error: std::fmt::Debug + std::fmt::Display;
 
     /// Future that resolves to a [`RetrievedDependency`].
     type Future: futures::Future<Output = Result<RetrievedDependency, Self::Error>> + Send;

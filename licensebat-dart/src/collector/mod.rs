@@ -1,30 +1,30 @@
 mod dart_dependency;
 
 use self::dart_dependency::{DartDependencies, DartDependency};
-use crate::retriever::HostedRetriever;
-use askalono::Store;
+use crate::retriever::Retriever;
 use futures::prelude::*;
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
-    RetrievedDependency, Retriever,
+    RetrievedDependency,
 };
-use reqwest::Client;
-use tracing::{self as log, instrument};
+use std::sync::Arc;
+use tracing::instrument;
 
 const DART: &str = "dart";
-const LICENSE_CACHE: &[u8] = std::include_bytes!("../../../datasets/license-cache.bin.zstd");
 
 /// Dart Dependency Collector
 #[derive(Debug)]
-pub struct DartCollector(pub Client);
+pub struct DartCollector<R> {
+    retriever: Arc<R>,
+}
 
-impl Collector for DartCollector {
+impl<R: Retriever> Collector for DartCollector<R> {
     fn get_name(&self) -> String {
         DART.to_string()
     }
 }
 
-impl FileCollector for DartCollector {
+impl<R: Retriever> FileCollector for DartCollector<R> {
     fn get_dependency_filename(&self) -> String {
         "pubspec.lock".to_string()
     }
@@ -34,16 +34,9 @@ impl FileCollector for DartCollector {
         let dependencies = serde_yaml::from_str::<DartDependencies>(dependency_file_content)?
             .into_vec_collection();
 
-        let now = std::time::Instant::now();
-        // TODO: think of sharing this reference as a static reference or data in the handler
-        // to avoid reconstructing this store per request.
-        // It takes ~1100ms to be built.
-        let store = Store::from_cache(LICENSE_CACHE).ok();
-        log::trace!("Store took {} ms", now.elapsed().as_millis());
-        let retriever = HostedRetriever::with_client(self.0.clone(), store);
         Ok(dependencies
             .into_iter()
-            .map(|dep| get_dependency(dep, retriever.clone()).boxed())
+            .map(|dep| get_dependency(dep, self.retriever.clone()).boxed())
             .collect())
     }
 }
@@ -55,9 +48,9 @@ impl FileCollector for DartCollector {
 /// sdk dependencies will be directly validated and ignored.
 /// hosted dependencies will be found by scrapping the dart pub website as it seems to be the only solution.
 /// git dependencies will require to access GitHub repos, check the path and ref, and look for a LICENSE file.
-async fn get_dependency(
+async fn get_dependency<R: Retriever>(
     dependency: DartDependency,
-    retriever: HostedRetriever,
+    retriever: Arc<R>,
 ) -> RetrievedDependency {
     match dependency.source.as_ref() {
         "sdk" => resolve_sdk_dependency(&dependency),
@@ -82,9 +75,9 @@ fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
 
 /// Resolves the license by scrapping the Dart pub website and then the license in github if available.
 #[allow(clippy::too_many_lines, clippy::single_match_else)]
-async fn resolve_hosted_dependency(
+async fn resolve_hosted_dependency<R: Retriever>(
     dependency: DartDependency,
-    retriever: HostedRetriever,
+    retriever: Arc<R>,
 ) -> RetrievedDependency {
     if let Some(dependency_name) = &dependency.description.name {
         retriever
@@ -182,6 +175,7 @@ fn build_retrieved_dependency(
 mod tests {
     use super::dart_dependency::Description;
     use super::*;
+    use crate::retriever::HostedRetriever;
     use std::fs::File;
 
     #[tokio::test]
@@ -200,8 +194,8 @@ mod tests {
             },
         };
         let cache = File::open("../datasets/license-cache.bin.zstd").unwrap();
-        let store = Store::from_cache(cache).ok();
-        let retriever = HostedRetriever::new(store);
+        let store = askalono::Store::from_cache(cache).ok();
+        let retriever = Arc::new(HostedRetriever::new(store));
         let res = get_dependency(dep, retriever).await;
         assert_eq!(res.name, dependency_name);
         assert!(res.licenses.is_some());

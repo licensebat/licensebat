@@ -1,9 +1,10 @@
+use super::Retriever;
 use askalono::{Store, TextData};
 use futures::{
     future::{self, BoxFuture},
     FutureExt, TryFutureExt,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever};
+use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 use selectors::Element;
@@ -13,6 +14,14 @@ use tracing::instrument;
 pub struct HostedRetriever {
     pub store: Arc<Option<Store>>,
     client: Client,
+}
+
+impl Retriever for HostedRetriever {}
+
+impl Default for HostedRetriever {
+    fn default() -> Self {
+        Self::new(None)
+    }
 }
 
 impl HostedRetriever {
@@ -59,7 +68,7 @@ impl std::fmt::Debug for HostedRetriever {
     }
 }
 
-impl Retriever for HostedRetriever {
+impl CoreRetriever for HostedRetriever {
     type Error = reqwest::Error;
     type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
@@ -162,13 +171,14 @@ impl Retriever for HostedRetriever {
     }
 }
 
+// TODO: SIMPLIFY THIS SIGNATURE TO AVOID THE BOXFUTURE?
 fn boxed_retrieved_dependency(
     dependency: &Dependency,
     licenses: Option<Vec<String>>,
     error: Option<String>, // TODO: this is never called as Some!
     url: Option<String>,
     comment: Option<Comment>,
-) -> BoxFuture<'static, Result<RetrievedDependency, <HostedRetriever as Retriever>::Error>> {
+) -> BoxFuture<'static, Result<RetrievedDependency, <HostedRetriever as CoreRetriever>::Error>> {
     let dep = retrieved_dependency(dependency, licenses, error, url, comment);
     future::ok(dep).boxed()
 }

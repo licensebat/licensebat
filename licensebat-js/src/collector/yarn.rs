@@ -1,9 +1,9 @@
 use crate::{
     collector::common::{retrieve_from_npm, NPM},
-    retriever::NpmRetriever,
+    retriever::{NpmRetriever, Retriever},
 };
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector, Retriever,
+    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
 };
 use std::sync::Arc;
 use tracing::instrument;

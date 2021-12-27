@@ -1,18 +1,20 @@
-use crate::retriever::npm_metadata::NpmMetadata;
+use crate::retriever::{npm_metadata::NpmMetadata, Retriever};
 use futures::{
     future::{self, BoxFuture},
     FutureExt, TryFutureExt,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever};
+use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
 use reqwest::Client;
 use serde_json::Value;
 use std::convert::Infallible;
 use tracing::instrument;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NpmRetriever {
     client: Client,
 }
+
+impl Retriever for NpmRetriever {}
 
 impl Default for NpmRetriever {
     /// Creates a new [`Retriever`].
@@ -30,7 +32,7 @@ impl NpmRetriever {
     }
 }
 
-impl Retriever for NpmRetriever {
+impl CoreRetriever for NpmRetriever {
     type Error = Infallible;
     type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 

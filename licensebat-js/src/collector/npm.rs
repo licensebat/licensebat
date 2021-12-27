@@ -3,17 +3,17 @@ use crate::{
         common::{retrieve_from_npm, NPM},
         npm_dependency::NpmDependencies,
     },
-    retriever::NpmRetriever,
+    retriever::{NpmRetriever, Retriever},
 };
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector, Retriever,
+    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
 };
 use std::sync::Arc;
 use tracing::instrument;
 
 /// NPM dependency collector
-#[derive(Debug)]
-pub struct NpmCollector<R: Retriever = NpmRetriever> {
+#[derive(Debug, Clone)]
+pub struct NpmCollector<R: Retriever> {
     retriever: Arc<R>,
 }
 
