@@ -60,8 +60,10 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
             } else if source.is_remote_registry() {
                 // remote registry
                 // TODO: create remote registry retriever
+                todo!("implement remote registry")
             } else {
                 // TODO: create local registry retriever
+                todo!("implement local registry")
             }
         }
         // git

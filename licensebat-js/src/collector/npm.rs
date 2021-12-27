@@ -53,6 +53,6 @@ impl<R: Retriever> FileCollector for NpmCollector<R> {
                 name: key,
                 version: value.version,
             });
-        retrieve_from_npm(npm_deps.into_iter(), self.retriever.clone())
+        retrieve_from_npm(npm_deps, self.retriever.clone())
     }
 }
