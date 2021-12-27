@@ -53,6 +53,7 @@ impl<R: Retriever> FileCollector for NpmCollector<R> {
                 name: key,
                 version: value.version,
             });
-        retrieve_from_npm(npm_deps, self.retriever.clone())
+        let retriever = self.retriever.clone();
+        Ok(retrieve_from_npm(npm_deps, &retriever))
     }
 }

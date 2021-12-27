@@ -33,7 +33,7 @@ toolchain = "nightly"
 command = "cargo"
 args = ["clippy", "-Z", "unstable-options"]
 
-[tasks.clippymaker]
+[tasks.clippy]
 workspace = false
 install_crate = "cargo-clippy"
 command = "cargo"

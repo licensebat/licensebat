@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 //! Core types and traits for [`licensebat-cli`].
 //!
 //! Libraries authors that want to provide [`DependencyCollector`] or [`DependencyRetriever`] implementations

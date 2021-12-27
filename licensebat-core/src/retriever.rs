@@ -26,9 +26,11 @@ impl Retriever for EmptyRetriever {
     type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
-        let mut dep = RetrievedDependency::default();
-        dep.name = dep_name.to_string();
-        dep.version = dep_version.to_string();
+        let dep = RetrievedDependency {
+            name: dep_name.to_string(),
+            version: dep_version.to_string(),
+            ..RetrievedDependency::default()
+        };
         Box::pin(future::ok(dep))
     }
 }

@@ -56,7 +56,7 @@ impl LicRc {
         }
 
         if let Some(licenses) = dependency.licenses.clone() {
-            licenses.iter().for_each(|lic| {
+            for lic in &licenses {
                 if let Some(accepted) = self.licenses.accepted.as_ref() {
                     if !accepted.contains(lic) {
                         make_invalid(dependency, lic);
@@ -66,7 +66,7 @@ impl LicRc {
                         make_invalid(dependency, lic);
                     }
                 }
-            });
+            }
         } else {
             tracing::error!("Licenses are None!! At this point, this shouldn't happen. Check out the dependency validation logic");
         }

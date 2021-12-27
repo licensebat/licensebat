@@ -8,6 +8,9 @@ pub enum CheckError {
     DependencyFile(#[from] std::io::Error),
 }
 
+/// # Errors
+///
+/// Errors can be caused by anything.
 pub async fn run(cli: Cli) -> anyhow::Result<Vec<RetrievedDependency>> {
     tracing::info!(
         dependency_file = %cli.dependency_file,
