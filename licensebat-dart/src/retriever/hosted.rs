@@ -1,7 +1,7 @@
 use super::Retriever;
 use askalono::{Store, TextData};
 use futures::{
-    future::{self, BoxFuture},
+    future::{BoxFuture},
     FutureExt, TryFutureExt,
 };
 use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
@@ -90,97 +90,87 @@ impl CoreRetriever for HostedRetriever {
             .get(format!("{}/license", url))
             .send()
             .and_then(reqwest::Response::text)
-            .and_then(move |html| {
-                let url = url.clone();
-                // scrape the html looking for the license
-                let document = Html::parse_document(&html);
-                let declared_license = Selector::parse(r#"h3[class="title"]"#).ok()
-                    .and_then(|selector| {
-                        document
-                            .select(&selector)
-                            .filter(|s| s.inner_html() == "License")
-                            .map(|s| s.next_sibling_element().and_then(|sibling| get_imprecise_license(&sibling)))
-                            .next()
-                            .flatten()
-                    });
-
-                let mut official_license = Selector::parse(r#".detail-container.detail-body-main .highlight pre"#).ok().and_then( |selector| {
-                    document.select(&selector).map(|s| s.inner_html()).next()
-                });
-
-                // there are some licenses that are not printed in the same way in pub.dev
-                if official_license.is_none() {
-                    official_license = Selector::parse(r#".detail-container.detail-body-main .tab-content"#).ok().and_then( |selector| {
+            .map(move |html| {
+                html.map(|html| {
+                    let url = url.clone();
+                    // scrape the html looking for the license
+                    let document = Html::parse_document(&html);
+                    let declared_license = Selector::parse(r#"h3[class="title"]"#).ok()
+                        .and_then(|selector| {
+                            document
+                                .select(&selector)
+                                .filter(|s| s.inner_html() == "License")
+                                .map(|s| s.next_sibling_element().and_then(|sibling| get_imprecise_license(&sibling)))
+                                .next()
+                                .flatten()
+                        });
+    
+                    let mut official_license = Selector::parse(r#".detail-container.detail-body-main .highlight pre"#).ok().and_then( |selector| {
                         document.select(&selector).map(|s| s.inner_html()).next()
                     });
-                }
-
-                let declared_licenses = declared_license.clone().map(|x| vec![x]);
-
-                if let (Some(official_license), Some(store)) = (official_license, store.as_ref()) {
-                    // Some licenses, like BSD are represented in an imprecise way in pub dev,
-                    // so we must scrape the github license file.
-                    // Nevertheless, there are some of them that ar ok, as MIT,
-                    // so we'll short circuit these ones.
-                    #[allow(clippy::single_match_else)]
-                    match declared_license.as_deref() {
-                        Some("MIT") => boxed_retrieved_dependency(&dependency, declared_licenses, None, Some(url), None),
-                        _ => {
-                            let result = store.analyze(&TextData::from(official_license.as_str()));
-                            tracing::debug!(
-                                "Detailed scrapping: SCORE {:?}, LICENSE: {}",
-                                result.score,
-                                result.name
-                            );
-                            // TODO:  MAGIC NUMBER HERE! THIS SHOULD BE CONFIGURABLE
-                            let (license, comment) = if result.score >= 0.8 {
-                                let comment = if Some(result.name.replace("-", " ")) == declared_license {
-                                    None
+    
+                    // there are some licenses that are not printed in the same way in pub.dev
+                    if official_license.is_none() {
+                        official_license = Selector::parse(r#".detail-container.detail-body-main .tab-content"#).ok().and_then( |selector| {
+                            document.select(&selector).map(|s| s.inner_html()).next()
+                        });
+                    }
+    
+                    let declared_licenses = declared_license.clone().map(|x| vec![x]);
+    
+                    if let (Some(official_license), Some(store)) = (official_license, store.as_ref()) {
+                        // Some licenses, like BSD are represented in an imprecise way in pub dev,
+                        // so we must scrape the github license file.
+                        // Nevertheless, there are some of them that ar ok, as MIT,
+                        // so we'll short circuit these ones.
+                        #[allow(clippy::single_match_else)]
+                        match declared_license.as_deref() {
+                            Some("MIT") => retrieved_dependency(&dependency, declared_licenses, None, Some(url), None),
+                            _ => {
+                                let result = store.analyze(&TextData::from(official_license.as_str()));
+                                tracing::debug!(
+                                    "Detailed scrapping: SCORE {:?}, LICENSE: {}",
+                                    result.score,
+                                    result.name
+                                );
+                                // TODO:  MAGIC NUMBER HERE! THIS SHOULD BE CONFIGURABLE
+                                let (license, comment) = if result.score >= 0.8 {
+                                    let comment = if Some(result.name.replace("-", " ")) == declared_license {
+                                        None
+                                    } else {
+                                        let comment = format!(
+                                            "Pub Dev license: {}. Our score for **{}** is **{:.2}%**.",
+                                            declared_license.unwrap_or_else(|| "NOT DECLARED".to_owned()),
+                                            result.name,
+                                            result.score * 100.0
+                                        );
+                                        Some(comment)
+                                    };
+                                    (Some(result.name.to_string()), comment)
                                 } else {
                                     let comment = format!(
-                                        "Pub Dev license: {}. Our score for **{}** is **{:.2}%**.",
-                                        declared_license.unwrap_or_else(|| "NOT DECLARED".to_owned()),
+                                        "Using **Pub Dev Generic License**. Our analysis, though, estimated that it could be **{}** with a **{:.2}%** score.",
                                         result.name,
                                         result.score * 100.0
                                     );
-                                    Some(comment)
+                                    (declared_license.clone(), Some(comment))
                                 };
-                                (Some(result.name.to_string()), comment)
-                            } else {
-                                let comment = format!(
-                                    "Using **Pub Dev Generic License**. Our analysis, though, estimated that it could be **{}** with a **{:.2}%** score.",
-                                    result.name,
-                                    result.score * 100.0
-                                );
-                                (declared_license.clone(), Some(comment))
-                            };
-
-                            boxed_retrieved_dependency(
-                                &dependency,
-                                license.map(|l| vec![l]),
-                                None,
-                                Some(url),
-                                comment.map(Comment::non_removable),
-                            )
+    
+                                retrieved_dependency(
+                                    &dependency,
+                                    license.map(|l| vec![l]),
+                                    None,
+                                    Some(url),
+                                    comment.map(Comment::non_removable),
+                                )
+                            }
                         }
+                    } else {
+                        retrieved_dependency(&dependency, declared_licenses, None, Some(url), Some(Comment::removable("Using **Pub Dev Generic License**. We couldn't get the original license.")))
                     }
-                } else {
-                    boxed_retrieved_dependency(&dependency, declared_licenses, None, Some(url), Some(Comment::removable("Using **Pub Dev Generic License**. We couldn't get the original license.")))
-                }
+                })
             }).boxed()
     }
-}
-
-// TODO: SIMPLIFY THIS SIGNATURE TO AVOID THE BOXFUTURE?
-fn boxed_retrieved_dependency(
-    dependency: &Dependency,
-    licenses: Option<Vec<String>>,
-    error: Option<String>, // TODO: this is never called as Some!
-    url: Option<String>,
-    comment: Option<Comment>,
-) -> BoxFuture<'static, Result<RetrievedDependency, <HostedRetriever as CoreRetriever>::Error>> {
-    let dep = retrieved_dependency(dependency, licenses, error, url, comment);
-    future::ok(dep).boxed()
 }
 
 fn retrieved_dependency(

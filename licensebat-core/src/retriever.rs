@@ -1,11 +1,11 @@
 use crate::dependency::RetrievedDependency;
 use futures::future::{self, BoxFuture};
 
-// TODO: THINK OF THIS TRAIT. Not sure if it makes sense to have it shared amongst retrievers as some of them may have other signatures or needs.
-// imagine needing more information than just the name and version. For example, in a git repo, we're going to need the repo url and the branch/tag/ref aside from other information.
-
-/// Trait to be implemented by every [`Retriever`].
-/// It will get the information needed about a specific dependency.
+/// Generic trait for [`Retriever`].
+/// Most of the retrievers will use this trait.
+/// Some others, may need specific information. For instance, it may be necessary to know the repo url and branch/tag/ref.
+/// For those kind of retrievers this trait won't make any sense.
+/// So, this trait only exists to avoid duplicating code as it's the most common behavior in retrievers.
 pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// The associated error which can be returned.
     type Error: std::fmt::Debug + std::fmt::Display;
