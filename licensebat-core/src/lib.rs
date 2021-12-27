@@ -13,6 +13,6 @@ mod dependency;
 pub mod licrc;
 pub mod retriever;
 
-pub use collector::Collector;
+pub use collector::{Collector, FileCollector};
 pub use dependency::*;
 pub use retriever::Retriever;

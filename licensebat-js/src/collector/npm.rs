@@ -1,32 +1,44 @@
-use crate::collector::{
-    common::{retrieve_from_npm, NPM},
-    npm_dependency::NpmDependencies,
+use crate::{
+    collector::{
+        common::{retrieve_from_npm, NPM},
+        npm_dependency::NpmDependencies,
+    },
+    retriever::NpmRetriever,
 };
-use licensebat_core::{collector::RetrievedDependencyStreamResult, Collector, Dependency};
-use reqwest::Client;
+use licensebat_core::{
+    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector, Retriever,
+};
+use std::sync::Arc;
 use tracing::instrument;
 
 /// NPM dependency collector
 #[derive(Debug)]
-pub struct NpmCollector(Client);
+pub struct NpmCollector<R: Retriever = NpmRetriever> {
+    retriever: Arc<R>,
+}
 
-impl Default for NpmCollector {
+impl Default for NpmCollector<NpmRetriever> {
     fn default() -> Self {
-        Self::with_client(Client::new())
+        let retriever = NpmRetriever::default();
+        Self::new(retriever)
     }
 }
 
-impl NpmCollector {
-    pub fn with_client(client: Client) -> Self {
-        Self(client)
+impl<R: Retriever> NpmCollector<R> {
+    pub fn new(retriever: R) -> Self {
+        Self {
+            retriever: Arc::new(retriever),
+        }
     }
 }
 
-impl Collector for NpmCollector {
+impl<R: Retriever> Collector for NpmCollector<R> {
     fn get_name(&self) -> String {
         NPM.to_string()
     }
+}
 
+impl<R: Retriever> FileCollector for NpmCollector<R> {
     fn get_dependency_filename(&self) -> String {
         String::from("package-lock.json")
     }
@@ -41,6 +53,6 @@ impl Collector for NpmCollector {
                 name: key,
                 version: value.version,
             });
-        retrieve_from_npm(npm_deps.into_iter(), self.0.clone())
+        retrieve_from_npm(npm_deps.into_iter(), self.retriever.clone())
     }
 }

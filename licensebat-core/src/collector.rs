@@ -22,12 +22,14 @@ pub enum Error {
     CargoLock(#[from] cargo_lock::Error),
 }
 
-/// Trait to be implemented for every collector.
-/// It holds information about the dependency file,
-/// and exposes the method used to retrieve all the dependencies from it.
+/// Base trait for collectors.
 pub trait Collector: Debug + Send + Sync {
-    /// Gets the name of the [`DependencyCollector`] (npm, dart, rust, go, python...).
+    /// Gets the name of the [`Collector`] (npm, dart, rust, go, python...).
     fn get_name(&self) -> String;
+}
+
+/// Trait to be implemented for every collector dealing with a dependency file
+pub trait FileCollector: Collector {
     /// Gets the name of the file holding all the dependencies.
     /// i.e. for npm package-lock.json, for rust cargo.lock
     fn get_dependency_filename(&self) -> String;

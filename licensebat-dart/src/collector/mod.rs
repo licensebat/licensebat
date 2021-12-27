@@ -5,7 +5,8 @@ use crate::retriever::HostedRetriever;
 use askalono::Store;
 use futures::prelude::*;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Comment, RetrievedDependency, Retriever,
+    collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
+    RetrievedDependency, Retriever,
 };
 use reqwest::Client;
 use tracing::{self as log, instrument};
@@ -21,7 +22,9 @@ impl Collector for DartCollector {
     fn get_name(&self) -> String {
         DART.to_string()
     }
+}
 
+impl FileCollector for DartCollector {
     fn get_dependency_filename(&self) -> String {
         "pubspec.lock".to_string()
     }

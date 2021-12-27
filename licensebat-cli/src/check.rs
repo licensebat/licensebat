@@ -1,6 +1,6 @@
 use crate::Cli;
 use futures::StreamExt;
-use licensebat_core::{licrc::LicRc, Collector, RetrievedDependency};
+use licensebat_core::{licrc::LicRc, FileCollector, RetrievedDependency};
 
 #[derive(Debug, thiserror::Error)]
 pub enum CheckError {

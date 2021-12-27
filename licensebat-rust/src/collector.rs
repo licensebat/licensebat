@@ -1,7 +1,8 @@
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, RetrievedDependency, Retriever,
+    collector::RetrievedDependencyStreamResult, Collector, FileCollector, RetrievedDependency,
+    Retriever,
 };
 
 use std::{str::FromStr, sync::Arc};
@@ -23,9 +24,11 @@ impl<R: Retriever> RustCollector<R> {
 
 impl<R: Retriever> Collector for RustCollector<R> {
     fn get_name(&self) -> String {
-        "Rust".to_string()
+        String::from("rust")
     }
+}
 
+impl<R: Retriever> FileCollector for RustCollector<R> {
     fn get_dependency_filename(&self) -> String {
         String::from("Cargo-lock")
     }
@@ -97,7 +100,7 @@ mod tests {
 
         let dep = deps.next().await.unwrap();
 
-        assert_eq!(rust.get_name(), "Rust");
+        assert_eq!(rust.get_name(), "rust");
         assert_eq!(rust.get_dependency_filename(), "Cargo-lock");
         assert_eq!(dep.name, "mime");
         assert_eq!(dep.version, "0.3.16");
@@ -119,7 +122,7 @@ mod tests {
 
         let dep = deps.next().await.unwrap();
 
-        assert_eq!(rust.get_name(), "Rust");
+        assert_eq!(rust.get_name(), "rust");
         assert_eq!(rust.get_dependency_filename(), "Cargo-lock");
         assert_eq!(dep.name, "mime");
         assert_eq!(dep.version, "3.0.0-beta.4");
@@ -142,7 +145,7 @@ mod tests {
 
         let dep = deps.next().await.unwrap();
 
-        assert_eq!(rust.get_name(), "Rust");
+        assert_eq!(rust.get_name(), "rust");
         assert_eq!(rust.get_dependency_filename(), "Cargo-lock");
         assert_eq!(dep.name, "mime");
         assert_eq!(dep.version, "3.0.0");
