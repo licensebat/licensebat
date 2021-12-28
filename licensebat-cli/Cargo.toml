@@ -6,8 +6,12 @@ description = "CLI tool to manage dependencies' license validation"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/licensebat/licensebat-cli"
+homepage = "https://licensebat.com"
+categories = ["command-line-utilities", "development-tools"]
+keywords = ["license", "validation", "policy", "compliance", "cli"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "actively-developed" }
 
 [[bin]]
 name = "licensebat"

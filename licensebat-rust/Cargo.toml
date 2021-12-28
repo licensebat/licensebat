@@ -6,13 +6,16 @@ authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your Rust dependencies"
 license = "MIT"
 repository = "https://github.com/licensebat/licensebat-rust"
+homepage = "https://licensebat.com"
+categories = ["development-tools"]
+keywords = ["license", "validation", "policy", "compliance", "rust"]
 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 # core
-licensebat-core = { path = "../licensebat-core" }
+licensebat-core = { path = "../licensebat-core", version = "0.0.1" }
 # serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
