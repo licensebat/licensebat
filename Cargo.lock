@@ -729,7 +729,7 @@ checksum = "8e167738f1866a7ec625567bae89ca0d44477232a4f7c52b1c7f2adc2c98804f"
 
 [[package]]
 name = "licensebat-cli"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anyhow",
  "dotenv",
@@ -752,7 +752,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-core"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "cargo-lock",
  "futures",
@@ -767,7 +767,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-dart"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "askalono",
  "futures",
@@ -783,7 +783,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-js"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "futures",
  "licensebat-core",
@@ -797,7 +797,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-rust"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "cargo-lock",
  "futures",

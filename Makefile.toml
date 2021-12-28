@@ -9,7 +9,7 @@ args = ["run", "--manifest-path", "./licensebat-cli/Cargo.toml", "--release"]
 workspace = false
 command = "cargo"
 watch = true
-args = ["run", "--manifest-path", "./licensebat-cli/Cargo.toml", "--features", "development", "--no-default-features"]
+args = ["run", "--manifest-path", "./licensebat-cli/Cargo.toml"]
 
 [tasks.udeps]
 workspace = false

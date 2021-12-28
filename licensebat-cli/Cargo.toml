@@ -1,9 +1,11 @@
 [package]
 name = "licensebat-cli"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "CLI tool to manage dependencies' license validation"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/licensebat/licensebat-cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

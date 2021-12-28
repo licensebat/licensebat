@@ -1,9 +1,11 @@
 [package]
 name = "licensebat-js"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your JS/TS dependencies"
+license = "MIT"
+repository = "https://github.com/licensebat/licensebat-js"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
