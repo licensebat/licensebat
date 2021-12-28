@@ -1,28 +1,34 @@
-use super::Retriever;
 use futures::{
     future::{self, BoxFuture},
-    FutureExt, TryFutureExt,
+    Future, FutureExt, TryFutureExt,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
+use licensebat_core::{Comment, Dependency, RetrievedDependency};
 use reqwest::Client;
 use serde_json::Value;
 use tracing::instrument;
 
-#[derive(Debug)]
-pub struct CratesIoRetriever {
+/// Trait used by the [`CratesIo`] struct to retrieve dependencies.
+pub trait Retriever: Send + Sync + std::fmt::Debug {
+    /// Future that resolves to a [`RetrievedDependency`].
+    /// It cannot fail.
+    type Response: Future<Output = RetrievedDependency> + Send;
+    /// Validates dependency's information from the original source.
+    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+}
+
+#[derive(Debug, Clone)]
+pub struct CratesIo {
     client: Client,
 }
 
-impl Retriever for CratesIoRetriever {}
-
-impl Default for CratesIoRetriever {
+impl Default for CratesIo {
     /// Creates a new [`CratesIoRetriever`].
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl CratesIoRetriever {
+impl CratesIo {
     /// Creates a new [`CratesIoRetriever`].
     #[must_use]
     pub fn new() -> Self {
@@ -36,12 +42,11 @@ impl CratesIoRetriever {
     }
 }
 
-impl CoreRetriever for CratesIoRetriever {
-    type Error = std::convert::Infallible;
-    type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
+impl Retriever for CratesIo {
+    type Response = BoxFuture<'static, RetrievedDependency>;
 
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
+    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
         let url = format!(
             "https://crates.io/api/v1/crates/{}/{}",
             dep_name, dep_version
@@ -69,6 +74,7 @@ impl CoreRetriever for CratesIoRetriever {
             })
             .map_ok(move |licenses| build_retrieved_dependency(&dep_clone, Some(licenses), None))
             .or_else(move |e| future::ok(build_retrieved_dependency(&dependency, None, Some(e))))
+            .map(std::result::Result::<RetrievedDependency, std::convert::Infallible>::unwrap)
             .boxed()
     }
 }

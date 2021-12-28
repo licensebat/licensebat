@@ -14,17 +14,17 @@ const DART: &str = "dart";
 
 /// Dart Dependency Collector
 #[derive(Debug)]
-pub struct DartCollector<R> {
+pub struct Dart<R> {
     retriever: Arc<R>,
 }
 
-impl<R: Retriever> Collector for DartCollector<R> {
+impl<R: Retriever> Collector for Dart<R> {
     fn get_name(&self) -> String {
         DART.to_string()
     }
 }
 
-impl<R: Retriever> FileCollector for DartCollector<R> {
+impl<R: Retriever> FileCollector for Dart<R> {
     fn get_dependency_filename(&self) -> String {
         "pubspec.lock".to_string()
     }

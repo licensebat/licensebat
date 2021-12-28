@@ -1,5 +1,6 @@
+use crate::retriever::npm::Retriever;
 use futures::FutureExt;
-use licensebat_core::{collector::RetrievedDependencyStream, Dependency, Retriever};
+use licensebat_core::{collector::RetrievedDependencyStream, Dependency};
 use std::sync::Arc;
 // use tracing::instrument;
 
@@ -12,11 +13,6 @@ where
     R: Retriever + 'a,
 {
     deps.into_iter()
-        .map(|dep| {
-            retriever
-                .get_dependency(&dep.name, &dep.version)
-                .map(std::result::Result::unwrap) // TODO: this will never be not ok! so if'ts ok. consider removing the need of using this as a result.
-                .boxed()
-        })
+        .map(|dep| retriever.get_dependency(&dep.name, &dep.version).boxed())
         .collect()
 }

@@ -1,6 +1,6 @@
 use crate::{
     collector::common::{retrieve_from_npm, NPM},
-    retriever::{NpmRetriever, Retriever},
+    retriever::{self, npm::Retriever},
 };
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
@@ -10,18 +10,18 @@ use tracing::instrument;
 
 /// Yarn dependency collector
 #[derive(Debug)]
-pub struct YarnCollector<R: Retriever> {
+pub struct Yarn<R: Retriever> {
     retriever: Arc<R>,
 }
 
-impl Default for YarnCollector<NpmRetriever> {
+impl Default for Yarn<retriever::Npm> {
     fn default() -> Self {
-        let retriever = NpmRetriever::default();
+        let retriever = retriever::Npm::default();
         Self::new(retriever)
     }
 }
 
-impl<R: Retriever> YarnCollector<R> {
+impl<R: Retriever> Yarn<R> {
     pub fn new(retriever: R) -> Self {
         Self {
             retriever: Arc::new(retriever),
@@ -29,13 +29,13 @@ impl<R: Retriever> YarnCollector<R> {
     }
 }
 
-impl<R: Retriever> Collector for YarnCollector<R> {
+impl<R: Retriever> Collector for Yarn<R> {
     fn get_name(&self) -> String {
         NPM.to_string()
     }
 }
 
-impl<R: Retriever> FileCollector for YarnCollector<R> {
+impl<R: Retriever> FileCollector for Yarn<R> {
     fn get_dependency_filename(&self) -> String {
         String::from("yarn.lock")
     }

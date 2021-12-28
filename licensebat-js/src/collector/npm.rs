@@ -3,7 +3,7 @@ use crate::{
         common::{retrieve_from_npm, NPM},
         npm_dependency::NpmDependencies,
     },
-    retriever::{NpmRetriever, Retriever},
+    retriever::{self, npm::Retriever},
 };
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
@@ -13,18 +13,18 @@ use tracing::instrument;
 
 /// NPM dependency collector
 #[derive(Debug, Clone)]
-pub struct NpmCollector<R: Retriever> {
+pub struct Npm<R: Retriever> {
     retriever: Arc<R>,
 }
 
-impl Default for NpmCollector<NpmRetriever> {
+impl Default for Npm<retriever::Npm> {
     fn default() -> Self {
-        let retriever = NpmRetriever::default();
+        let retriever = retriever::Npm::default();
         Self::new(retriever)
     }
 }
 
-impl<R: Retriever> NpmCollector<R> {
+impl<R: Retriever> Npm<R> {
     pub fn new(retriever: R) -> Self {
         Self {
             retriever: Arc::new(retriever),
@@ -32,13 +32,13 @@ impl<R: Retriever> NpmCollector<R> {
     }
 }
 
-impl<R: Retriever> Collector for NpmCollector<R> {
+impl<R: Retriever> Collector for Npm<R> {
     fn get_name(&self) -> String {
         NPM.to_string()
     }
 }
 
-impl<R: Retriever> FileCollector for NpmCollector<R> {
+impl<R: Retriever> FileCollector for Npm<R> {
     fn get_dependency_filename(&self) -> String {
         String::from("package-lock.json")
     }

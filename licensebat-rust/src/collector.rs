@@ -1,4 +1,4 @@
-use crate::retriever::Retriever;
+use crate::retriever::crates_io::Retriever;
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
@@ -54,7 +54,6 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
                 // TODO: use crates.io retriever
                 return retriever
                     .get_dependency(package.name.as_str(), &package.version.to_string())
-                    .map(std::result::Result::unwrap) // infallible
                     .await;
             } else if source.is_remote_registry() {
                 // remote registry
@@ -82,33 +81,34 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
 #[cfg(test)]
 mod tests {
     use super::*;
-    use futures::StreamExt;
+    use futures::{
+        future::{ready, BoxFuture},
+        StreamExt,
+    };
 
     #[derive(Debug)]
-    struct EmptyRetriever(licensebat_core::retriever::EmptyRetriever);
+    struct MockRetriever;
 
-    impl licensebat_core::Retriever for EmptyRetriever {
-        type Error =
-            <licensebat_core::retriever::EmptyRetriever as licensebat_core::Retriever>::Error;
-        type Future =
-            <licensebat_core::retriever::EmptyRetriever as licensebat_core::Retriever>::Future;
+    impl Retriever for MockRetriever {
+        type Response = BoxFuture<'static, RetrievedDependency>;
 
-        fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
-            self.0.get_dependency(dep_name, dep_version)
+        fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
+            ready(RetrievedDependency {
+                name: dep_name.to_string(),
+                version: dep_version.to_string(),
+                ..RetrievedDependency::default()
+            })
+            .boxed()
         }
     }
 
-    impl Retriever for EmptyRetriever {}
-
-    impl EmptyRetriever {
-        fn new() -> Self {
-            Self(licensebat_core::retriever::EmptyRetriever::default())
-        }
+    fn build_collector() -> RustCollector<MockRetriever> {
+        RustCollector::new(MockRetriever)
     }
 
     #[tokio::test]
     async fn it_works_for_crates_registry() {
-        let rust = RustCollector::new(EmptyRetriever::new());
+        let rust = build_collector();
         let lock_content = r#"
         [[package]]
         name = "mime"
@@ -130,7 +130,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_works_for_crates_registry_with_special_version() {
-        let rust = RustCollector::new(EmptyRetriever::new());
+        let rust = build_collector();
         let lock_content = r#"
         [[package]]
         name = "mime"
@@ -153,7 +153,7 @@ mod tests {
     #[tokio::test]
     #[should_panic]
     async fn git_is_not_implemented() {
-        let rust = RustCollector::new(EmptyRetriever::new());
+        let rust = build_collector();
         let lock_content = r#"
         [[package]]
         name = "mime"

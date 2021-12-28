@@ -1,22 +1,28 @@
-use crate::retriever::{npm_metadata::NpmMetadata, Retriever};
+use crate::retriever::npm_metadata::NpmMetadata;
 use futures::{
     future::{self, BoxFuture},
-    FutureExt, TryFutureExt,
+    Future, FutureExt, TryFutureExt,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
+use licensebat_core::{Comment, Dependency, RetrievedDependency};
 use reqwest::Client;
 use serde_json::Value;
-use std::convert::Infallible;
 use tracing::instrument;
 
+/// Trait used by the [`Npm`] struct to retrieve dependencies.
+pub trait Retriever: Send + Sync + std::fmt::Debug {
+    /// Future that resolves to a [`RetrievedDependency`].
+    /// It cannot fail.
+    type Response: Future<Output = RetrievedDependency> + Send;
+    /// Validates dependency's information from the original source.
+    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+}
+
 #[derive(Debug, Clone)]
-pub struct NpmRetriever {
+pub struct Npm {
     client: Client,
 }
 
-impl Retriever for NpmRetriever {}
-
-impl Default for NpmRetriever {
+impl Default for Npm {
     /// Creates a new [`Retriever`].
     /// If you want to reuse a [`reqwest::Client`] pool consider using the [`with_client`] method.
     fn default() -> Self {
@@ -24,7 +30,7 @@ impl Default for NpmRetriever {
     }
 }
 
-impl NpmRetriever {
+impl Npm {
     /// Creates a new [`Retriever`] using the given [`reqwest::Client`].
     #[must_use]
     pub const fn with_client(client: Client) -> Self {
@@ -32,14 +38,13 @@ impl NpmRetriever {
     }
 }
 
-impl CoreRetriever for NpmRetriever {
-    type Error = Infallible;
-    type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
+impl Retriever for Npm {
+    type Response = BoxFuture<'static, RetrievedDependency>;
 
     /// Gets a dependency from NPM.
     /// This method attacks the npm api.
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
+    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
         let url = format!("https://registry.npmjs.org/{}", dep_name);
 
         let dependency = Dependency {
@@ -78,9 +83,8 @@ impl CoreRetriever for NpmRetriever {
             .map_ok(move |licenses: Option<Vec<String>>| {
                 build_retrieved_dependency(&dep_clone, licenses, None)
             })
-            .or_else(move |e| {
-                future::ok(build_retrieved_dependency(&dependency, None, Some(e))).boxed()
-            })
+            .or_else(move |e| future::ok(build_retrieved_dependency(&dependency, None, Some(e))))
+            .map(std::result::Result::<RetrievedDependency, std::convert::Infallible>::unwrap)
             .boxed()
     }
 }

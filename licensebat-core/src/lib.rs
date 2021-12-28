@@ -2,8 +2,7 @@
 
 //! Core types and traits for [`licensebat-cli`].
 //!
-//! Libraries authors that want to provide [`DependencyCollector`] or [`DependencyRetriever`] implementations
-//! should depend on the [`licensebat-core`] crate,.
+//! Libraries authors that want to provide [`Collector`] implmentation should use this crate.
 //!
 //! [`DependencyCollector`]: crate::collector::DependencyCollector
 //! [`DependencyRetriever`]: crate::retriever::DependencyRetriever
@@ -13,8 +12,6 @@
 pub mod collector;
 mod dependency;
 pub mod licrc;
-pub mod retriever;
 
 pub use collector::{Collector, FileCollector};
 pub use dependency::*;
-pub use retriever::Retriever;
