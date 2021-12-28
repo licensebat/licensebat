@@ -1,30 +1,37 @@
-use super::Retriever;
 use askalono::{Store, TextData};
 use futures::{
     future::{BoxFuture},
-    FutureExt, TryFutureExt,
+    FutureExt, TryFutureExt, Future,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
+use licensebat_core::{Comment, Dependency, RetrievedDependency};
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 use selectors::Element;
 use std::{sync::Arc, vec};
 use tracing::instrument;
 
-pub struct HostedRetriever {
+/// Trait used by the [`Hosted`] struct to retrieve dependencies.
+pub trait Retriever: Send + Sync + std::fmt::Debug {
+    /// The associated error which can be returned.
+    type Error: std::fmt::Debug + std::fmt::Display;
+    /// Future that resolves to a [`RetrievedDependency`].
+    type Response: Future<Output = Result<RetrievedDependency, Self::Error>> + Send;
+    /// Validates dependency's information from the original source.
+    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+}
+
+pub struct Hosted {
     pub store: Arc<Option<Store>>,
     client: Client,
 }
 
-impl Retriever for HostedRetriever {}
-
-impl Default for HostedRetriever {
+impl Default for Hosted {
     fn default() -> Self {
         Self::new(None)
     }
 }
 
-impl HostedRetriever {
+impl Hosted {
     /// Creates a new [`Retriever`].
     /// If you want to reuse a [`reqwest::Client`]
     /// consider using the [`with_client`] method.
@@ -43,7 +50,7 @@ impl HostedRetriever {
     }
 }
 
-impl Clone for HostedRetriever {
+impl Clone for Hosted {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -52,9 +59,9 @@ impl Clone for HostedRetriever {
     }
 }
 
-impl std::fmt::Debug for HostedRetriever {
+impl std::fmt::Debug for Hosted {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HostedRetriever")
+        f.debug_struct("Hosted")
             .field("client", &self.client)
             .field(
                 "store",
@@ -68,12 +75,12 @@ impl std::fmt::Debug for HostedRetriever {
     }
 }
 
-impl CoreRetriever for HostedRetriever {
+impl Retriever for Hosted {
     type Error = reqwest::Error;
-    type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
+    type Response = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
+    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
         let url = format!(
             "https://pub.dev/packages/{}/versions/{}",
             dep_name, dep_version,

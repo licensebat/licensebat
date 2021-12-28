@@ -1,14 +1,13 @@
 #[cfg(test)]
 mod hosted_retriever_tests {
     use askalono::Store;
-    use licensebat_core::Retriever;
-    use licensebat_dart::retriever::HostedRetriever;
+    use licensebat_dart::retriever::{self, hosted::Retriever};
 
     const LICENSE_CACHE: &[u8] = std::include_bytes!("../../datasets/license-cache.bin.zstd");
 
-    fn create_retriever() -> HostedRetriever {
+    fn create_retriever() -> retriever::Hosted {
         let store = Store::from_cache(LICENSE_CACHE).ok();
-        HostedRetriever::new(store)
+        retriever::Hosted::new(store)
     }
 
     #[tokio::test]

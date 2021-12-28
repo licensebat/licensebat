@@ -1,7 +1,7 @@
 mod dart_dependency;
 
 use self::dart_dependency::{DartDependencies, DartDependency};
-use crate::retriever::Retriever;
+use crate::retriever::hosted::Retriever;
 use futures::prelude::*;
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
@@ -173,9 +173,9 @@ fn build_retrieved_dependency(
 
 #[cfg(test)]
 mod tests {
-    use super::dart_dependency::Description;
     use super::*;
-    use crate::retriever::HostedRetriever;
+    use crate::collector::dart_dependency::Description;
+    use crate::retriever;
     use std::fs::File;
 
     #[tokio::test]
@@ -195,7 +195,7 @@ mod tests {
         };
         let cache = File::open("../datasets/license-cache.bin.zstd").unwrap();
         let store = askalono::Store::from_cache(cache).ok();
-        let retriever = Arc::new(HostedRetriever::new(store));
+        let retriever = Arc::new(retriever::Hosted::new(store));
         let res = get_dependency(dep, retriever).await;
         assert_eq!(res.name, dependency_name);
         assert!(res.licenses.is_some());
