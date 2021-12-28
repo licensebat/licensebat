@@ -65,6 +65,7 @@ impl Retriever for CratesIo {
             .send()
             .and_then(reqwest::Response::json)
             .map_ok(|metadata: Value| {
+                // TODO: this could fail?
                 let license = metadata["version"]["license"].clone();
                 vec![license.as_str().unwrap().to_string()]
                 // TODO: GET LICENSE IN CASE OF non-standard license

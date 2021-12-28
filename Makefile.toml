@@ -1,3 +1,39 @@
+[tasks.spdx]
+workspace = false
+script_runner = "@rust"
+script = '''
+//! ```cargo
+//! [dependencies]
+//! askalono = "0.4.3"
+//! ```
+use askalono::Store;
+use std::{fs::File, path::Path};
+
+const LICENSE_CACHE: &str = "./datasets/license-cache.bin.zstd";
+const SPDX_PATH: &str = "./datasets/modules/spdx-license-list-data/json/details";
+
+fn main() {
+    let root = Path::new(env!("CARGO_MAKE_WORKING_DIRECTORY"));
+    let cache_path = root.join(LICENSE_CACHE);
+    if cache_path.exists() {
+        println!("The cache file already exists. Avoiding rebuild.");
+        return;
+    }
+
+    let spdx_path = root.join(SPDX_PATH);
+    let mut store = Store::new();
+    store
+        .load_spdx(spdx_path.as_path(), true)
+        .expect("Couldn't create a store from SPDX data. Have submodules been initialized?");
+
+    let mut cache = File::create(&cache_path).expect("Couldn't open the cache file");
+    store
+        .to_cache(&mut cache)
+        .expect("Couldn't write the cache file");
+
+    println!("License cache created at: {:?}", cache_path);
+}
+'''
 
 [tasks.watch-pro]
 workspace = false

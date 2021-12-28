@@ -32,6 +32,3 @@ askalono = "0.4.3"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros"] }
-
-[build-dependencies]
-askalono = { version = "0.4.3" }
