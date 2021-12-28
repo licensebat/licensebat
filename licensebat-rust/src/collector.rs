@@ -1,10 +1,9 @@
+use crate::retriever::Retriever;
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, FileCollector, RetrievedDependency,
-    Retriever,
 };
-
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
 
@@ -55,7 +54,7 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
                 // TODO: use crates.io retriever
                 return retriever
                     .get_dependency(package.name.as_str(), &package.version.to_string())
-                    .map(std::result::Result::unwrap) // TODO: or else
+                    .map(std::result::Result::unwrap) // infallible
                     .await;
             } else if source.is_remote_registry() {
                 // remote registry
@@ -84,11 +83,32 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
 mod tests {
     use super::*;
     use futures::StreamExt;
-    use licensebat_core::retriever::EmptyRetriever;
+
+    #[derive(Debug)]
+    struct EmptyRetriever(licensebat_core::retriever::EmptyRetriever);
+
+    impl licensebat_core::Retriever for EmptyRetriever {
+        type Error =
+            <licensebat_core::retriever::EmptyRetriever as licensebat_core::Retriever>::Error;
+        type Future =
+            <licensebat_core::retriever::EmptyRetriever as licensebat_core::Retriever>::Future;
+
+        fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Future {
+            self.0.get_dependency(dep_name, dep_version)
+        }
+    }
+
+    impl Retriever for EmptyRetriever {}
+
+    impl EmptyRetriever {
+        fn new() -> Self {
+            Self(licensebat_core::retriever::EmptyRetriever::default())
+        }
+    }
 
     #[tokio::test]
     async fn it_works_for_crates_registry() {
-        let rust = RustCollector::new(EmptyRetriever::default());
+        let rust = RustCollector::new(EmptyRetriever::new());
         let lock_content = r#"
         [[package]]
         name = "mime"
@@ -110,7 +130,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_works_for_crates_registry_with_special_version() {
-        let rust = RustCollector::new(EmptyRetriever::default());
+        let rust = RustCollector::new(EmptyRetriever::new());
         let lock_content = r#"
         [[package]]
         name = "mime"
@@ -133,7 +153,7 @@ mod tests {
     #[tokio::test]
     #[should_panic]
     async fn git_is_not_implemented() {
-        let rust = RustCollector::new(EmptyRetriever::default());
+        let rust = RustCollector::new(EmptyRetriever::new());
         let lock_content = r#"
         [[package]]
         name = "mime"

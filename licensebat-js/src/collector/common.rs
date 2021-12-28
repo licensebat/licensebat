@@ -15,7 +15,7 @@ where
         .map(|dep| {
             retriever
                 .get_dependency(&dep.name, &dep.version)
-                .map(std::result::Result::unwrap) // TODO: handle error
+                .map(std::result::Result::unwrap) // TODO: this will never be not ok! so if'ts ok. consider removing the need of using this as a result.
                 .boxed()
         })
         .collect()

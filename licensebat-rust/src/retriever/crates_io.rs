@@ -1,8 +1,9 @@
+use super::Retriever;
 use futures::{
     future::{self, BoxFuture},
     FutureExt, TryFutureExt,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever};
+use licensebat_core::{Comment, Dependency, RetrievedDependency, Retriever as CoreRetriever};
 use reqwest::Client;
 use serde_json::Value;
 use tracing::instrument;
@@ -11,6 +12,8 @@ use tracing::instrument;
 pub struct CratesIoRetriever {
     client: Client,
 }
+
+impl Retriever for CratesIoRetriever {}
 
 impl Default for CratesIoRetriever {
     /// Creates a new [`CratesIoRetriever`].
@@ -33,7 +36,7 @@ impl CratesIoRetriever {
     }
 }
 
-impl Retriever for CratesIoRetriever {
+impl CoreRetriever for CratesIoRetriever {
     type Error = std::convert::Infallible;
     type Future = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
