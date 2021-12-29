@@ -26,14 +26,14 @@ impl Default for Npm {
     /// Creates a new [`Retriever`].
     /// If you want to reuse a [`reqwest::Client`] pool consider using the [`with_client`] method.
     fn default() -> Self {
-        Self::with_client(Client::new())
+        Self::new(Client::new())
     }
 }
 
 impl Npm {
     /// Creates a new [`Retriever`] using the given [`reqwest::Client`].
     #[must_use]
-    pub const fn with_client(client: Client) -> Self {
+    pub const fn new(client: Client) -> Self {
         Self { client }
     }
 }

@@ -21,31 +21,23 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
 }
 
 pub struct Hosted {
-    pub store: Arc<Option<Store>>,
     client: Client,
+    store: Arc<Option<Store>>,
 }
 
 impl Default for Hosted {
     fn default() -> Self {
-        Self::new(None)
+        Self::new(Client::new(), Arc::new(None))
     }
 }
 
 impl Hosted {
-    /// Creates a new [`Retriever`].
-    /// If you want to reuse a [`reqwest::Client`]
-    /// consider using the [`with_client`] method.
-    #[must_use]
-    pub fn new(store: Option<Store>) -> Self {
-        Self::with_client(Client::new(), store)
-    }
-
     /// Creates a [`Retriever`] reusing a [`reqwest::Client`]
     #[must_use]
-    pub fn with_client(client: Client, store: Option<Store>) -> Self {
+    pub fn new(client: Client, store: Arc<Option<Store>>) -> Self {
         Self {
             client,
-            store: Arc::new(store),
+            store,
         }
     }
 }

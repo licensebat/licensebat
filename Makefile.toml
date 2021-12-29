@@ -9,7 +9,7 @@ script = '''
 use askalono::Store;
 use std::{fs::File, path::Path};
 
-const LICENSE_CACHE: &str = "./datasets/license-cache.bin.zstd";
+const LICENSE_CACHE: &str = "./licensebat-cli/license-cache.bin.zstd";
 const SPDX_PATH: &str = "./datasets/modules/spdx-license-list-data/json/details";
 
 fn main() {

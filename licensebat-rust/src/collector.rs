@@ -1,4 +1,4 @@
-use crate::retriever::crates_io::Retriever;
+use crate::retriever::{self, crates_io::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
@@ -9,11 +9,12 @@ use tracing::instrument;
 
 /// Rust dependency collector
 #[derive(Debug)]
-pub struct RustCollector<R: Retriever> {
+pub struct Rust<R: Retriever> {
     crates_io_retriever: Arc<R>,
 }
 
-impl<R: Retriever> RustCollector<R> {
+impl<R: Retriever> Rust<R> {
+    #[must_use]
     pub fn new(crates_io_retriever: R) -> Self {
         Self {
             crates_io_retriever: Arc::new(crates_io_retriever),
@@ -21,15 +22,22 @@ impl<R: Retriever> RustCollector<R> {
     }
 }
 
-impl<R: Retriever> Collector for RustCollector<R> {
+impl Rust<retriever::CratesIo> {
+    #[must_use]
+    pub fn with_crates_io_retriever(client: reqwest::Client) -> Self {
+        Self::new(retriever::CratesIo::new(client))
+    }
+}
+
+impl<R: Retriever> Collector for Rust<R> {
     fn get_name(&self) -> String {
         String::from("rust")
     }
 }
 
-impl<R: Retriever> FileCollector for RustCollector<R> {
+impl<R: Retriever> FileCollector for Rust<R> {
     fn get_dependency_filename(&self) -> String {
-        String::from("Cargo-lock")
+        String::from("Cargo.lock")
     }
 
     #[instrument(skip(self))]
@@ -102,8 +110,8 @@ mod tests {
         }
     }
 
-    fn build_collector() -> RustCollector<MockRetriever> {
-        RustCollector::new(MockRetriever)
+    fn build_collector() -> Rust<MockRetriever> {
+        Rust::new(MockRetriever)
     }
 
     #[tokio::test]

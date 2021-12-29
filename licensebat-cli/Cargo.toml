@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-cli"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "CLI tool to manage dependencies' license validation"
 edition = "2021"
@@ -19,10 +19,10 @@ path = "src/main.rs"
 
 [dependencies]
 # core libs
-licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"] }
-licensebat-dart = { path = "../licensebat-dart" }
-licensebat-js = { path = "../licensebat-js" }
-licensebat-rust = { path = "../licensebat-rust" }
+licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"], version = "0.0.2" }
+licensebat-dart = { path = "../licensebat-dart", version = "0.0.2" }
+licensebat-js = { path = "../licensebat-js", version = "0.0.2" }
+licensebat-rust = { path = "../licensebat-rust", version = "0.0.2" }
 # main dependencies
 tokio = { version = "1.15.0", features = ["rt-multi-thread", "macros", "fs"] }
 reqwest = "0.11"
@@ -42,3 +42,5 @@ thiserror = "1.0"
 # utils
 dotenv = "0.15"
 futures = "0.3"
+# spdx
+askalono = "0.4.3"

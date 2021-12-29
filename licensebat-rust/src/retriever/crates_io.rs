@@ -24,20 +24,14 @@ pub struct CratesIo {
 impl Default for CratesIo {
     /// Creates a new [`CratesIoRetriever`].
     fn default() -> Self {
-        Self::new()
+        Self::new(Client::new())
     }
 }
 
 impl CratesIo {
-    /// Creates a new [`CratesIoRetriever`].
-    #[must_use]
-    pub fn new() -> Self {
-        Self::with_client(Client::new())
-    }
-
     /// Creates a new [`CratesIoRetriever`] using the given [`reqwest::Client`].
     #[must_use]
-    pub const fn with_client(client: Client) -> Self {
+    pub const fn new(client: Client) -> Self {
         Self { client }
     }
 }

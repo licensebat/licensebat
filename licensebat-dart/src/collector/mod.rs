@@ -1,7 +1,7 @@
 mod dart_dependency;
 
 use self::dart_dependency::{DartDependencies, DartDependency};
-use crate::retriever::hosted::Retriever;
+use crate::retriever::{self, hosted::Retriever};
 use futures::prelude::*;
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
@@ -13,9 +13,35 @@ use tracing::instrument;
 const DART: &str = "dart";
 
 /// Dart Dependency Collector
-#[derive(Debug)]
-pub struct Dart<R> {
+#[derive(Debug, Clone)]
+pub struct Dart<R: Retriever> {
     retriever: Arc<R>,
+}
+
+impl Default for Dart<retriever::Hosted> {
+    fn default() -> Self {
+        let retriever = retriever::Hosted::default();
+        Self::new(retriever)
+    }
+}
+
+impl<R: Retriever> Dart<R> {
+    #[must_use]
+    pub fn new(hosted_retriever: R) -> Self {
+        Self {
+            retriever: Arc::new(hosted_retriever),
+        }
+    }
+}
+
+impl Dart<retriever::Hosted> {
+    #[must_use]
+    pub fn with_hosted_retriever(
+        client: reqwest::Client,
+        store: Arc<Option<askalono::Store>>,
+    ) -> Self {
+        Self::new(retriever::Hosted::new(client, store))
+    }
 }
 
 impl<R: Retriever> Collector for Dart<R> {
@@ -176,7 +202,9 @@ mod tests {
     use super::*;
     use crate::collector::dart_dependency::Description;
     use crate::retriever;
-    use std::fs::File;
+
+    const LICENSE_CACHE: &[u8] =
+        std::include_bytes!("../../../licensebat-cli/license-cache.bin.zstd");
 
     #[tokio::test]
     // #[ignore = "only for dev for the moment"]
@@ -193,9 +221,9 @@ mod tests {
                 name: Some(dependency_name.to_string()),
             },
         };
-        let cache = File::open("../datasets/license-cache.bin.zstd").unwrap();
-        let store = askalono::Store::from_cache(cache).ok();
-        let retriever = Arc::new(retriever::Hosted::new(store));
+
+        let store = Arc::new(askalono::Store::from_cache(LICENSE_CACHE).ok());
+        let retriever = Arc::new(retriever::Hosted::new(reqwest::Client::new(), store));
         let res = get_dependency(dep, retriever).await;
         assert_eq!(res.name, dependency_name);
         assert!(res.licenses.is_some());
