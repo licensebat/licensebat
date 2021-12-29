@@ -131,7 +131,7 @@ mod tests {
         let dep = deps.next().await.unwrap();
 
         assert_eq!(rust.get_name(), "rust");
-        assert_eq!(rust.get_dependency_filename(), "Cargo-lock");
+        assert_eq!(rust.get_dependency_filename(), "Cargo.lock");
         assert_eq!(dep.name, "mime");
         assert_eq!(dep.version, "0.3.16");
     }
@@ -153,7 +153,7 @@ mod tests {
         let dep = deps.next().await.unwrap();
 
         assert_eq!(rust.get_name(), "rust");
-        assert_eq!(rust.get_dependency_filename(), "Cargo-lock");
+        assert_eq!(rust.get_dependency_filename(), "Cargo.lock");
         assert_eq!(dep.name, "mime");
         assert_eq!(dep.version, "3.0.0-beta.4");
     }
@@ -176,7 +176,7 @@ mod tests {
         let dep = deps.next().await.unwrap();
 
         assert_eq!(rust.get_name(), "rust");
-        assert_eq!(rust.get_dependency_filename(), "Cargo-lock");
+        assert_eq!(rust.get_dependency_filename(), "Cargo.lock");
         assert_eq!(dep.name, "mime");
         assert_eq!(dep.version, "3.0.0");
     }
