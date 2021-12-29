@@ -1,8 +1,5 @@
 use askalono::{Store, TextData};
-use futures::{
-    future::{BoxFuture},
-    FutureExt, TryFutureExt, Future,
-};
+use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
 use licensebat_core::{Comment, Dependency, RetrievedDependency};
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
@@ -35,10 +32,7 @@ impl Hosted {
     /// Creates a [`Retriever`] reusing a [`reqwest::Client`]
     #[must_use]
     pub fn new(client: Client, store: Arc<Option<Store>>) -> Self {
-        Self {
-            client,
-            store,
-        }
+        Self { client, store }
     }
 }
 
@@ -103,20 +97,20 @@ impl Retriever for Hosted {
                                 .next()
                                 .flatten()
                         });
-    
+
                     let mut official_license = Selector::parse(r#".detail-container.detail-body-main .highlight pre"#).ok().and_then( |selector| {
                         document.select(&selector).map(|s| s.inner_html()).next()
                     });
-    
+
                     // there are some licenses that are not printed in the same way in pub.dev
                     if official_license.is_none() {
                         official_license = Selector::parse(r#".detail-container.detail-body-main .tab-content"#).ok().and_then( |selector| {
                             document.select(&selector).map(|s| s.inner_html()).next()
                         });
                     }
-    
+
                     let declared_licenses = declared_license.clone().map(|x| vec![x]);
-    
+
                     if let (Some(official_license), Some(store)) = (official_license, store.as_ref()) {
                         // Some licenses, like BSD are represented in an imprecise way in pub dev,
                         // so we must scrape the github license file.
@@ -154,7 +148,7 @@ impl Retriever for Hosted {
                                     );
                                     (declared_license.clone(), Some(comment))
                                 };
-    
+
                                 retrieved_dependency(
                                     &dependency,
                                     license.map(|l| vec![l]),
