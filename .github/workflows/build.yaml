@@ -26,6 +26,6 @@ jobs:
       - name: Run cargo fmt
         run: cargo make format
       - name: Run cargo clippy
-        run: cargo make clippy-stable
+        run: cargo make clippy
       - name: Run tests
         run: cargo test
