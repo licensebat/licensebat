@@ -179,7 +179,7 @@ fn retrieved_dependency(
         name: dependency.name.clone(),
         version: dependency.version.clone(),
         url,
-        dependency_type: "Dart".to_owned(),
+        dependency_type: crate::DART.to_owned(),
         validated: false,
         is_valid: has_licenses && error.is_none(),
         is_ignored: false,

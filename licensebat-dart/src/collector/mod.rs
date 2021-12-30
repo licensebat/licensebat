@@ -10,8 +10,6 @@ use licensebat_core::{
 use std::sync::Arc;
 use tracing::instrument;
 
-const DART: &str = "dart";
-
 /// Dart Dependency Collector
 #[derive(Debug, Clone)]
 pub struct Dart<R: Retriever> {
@@ -46,7 +44,7 @@ impl Dart<retriever::Hosted> {
 
 impl<R: Retriever> Collector for Dart<R> {
     fn get_name(&self) -> String {
-        DART.to_string()
+        crate::DART.to_string()
     }
 }
 
@@ -173,7 +171,7 @@ fn build_retrieved_dependency(
             .map_or("unknown".to_string(), std::borrow::ToOwned::to_owned),
         version: dependency.version.clone(),
         url,
-        dependency_type: DART.to_owned(),
+        dependency_type: crate::DART.to_owned(),
         validated: false,
         is_valid: licenses.is_some() && error.is_none(),
         is_ignored: false,

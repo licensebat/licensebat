@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-cli"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "CLI tool to manage dependencies' license validation"
 edition = "2021"
@@ -20,7 +20,7 @@ path = "src/main.rs"
 [dependencies]
 # core libs
 licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"], version = "0.0.2" }
-licensebat-dart = { path = "../licensebat-dart", version = "0.0.2" }
+licensebat-dart = { path = "../licensebat-dart", version = "0.0.3" }
 licensebat-js = { path = "../licensebat-js", version = "0.0.2" }
 licensebat-rust = { path = "../licensebat-rust", version = "0.0.2" }
 # main dependencies

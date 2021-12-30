@@ -1,3 +1,9 @@
+# [patch.crates-io]
+# licensebat-core = { path = "licensebat-core" }
+# licensebat-dart = { path = "licensebat-dart" }
+# licensebat-js = { path = "licensebat-js" }
+# licensebat-rust = { path = "licensebat-rust" }
+
 [workspace]
 members = [
     "licensebat-cli",
