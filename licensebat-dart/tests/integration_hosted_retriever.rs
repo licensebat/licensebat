@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod hosted_retriever_tests {
+mod integration_hosted_retriever {
     use askalono::Store;
     use licensebat_dart::retriever::{self, hosted::Retriever};
     use std::sync::Arc;
@@ -22,6 +22,7 @@ mod hosted_retriever_tests {
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert!(dep.comment.is_some());
         assert_eq!(dep.name, "flare_dart");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 
     #[tokio::test]
@@ -35,6 +36,7 @@ mod hosted_retriever_tests {
         assert_eq!(Some(vec!["BSD-3-Clause".to_string()]), dep.licenses);
         assert!(dep.comment.is_some());
         assert_eq!(dep.name, "flutter_local_notifications_platform_interface");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 
     #[tokio::test]
@@ -48,6 +50,7 @@ mod hosted_retriever_tests {
         assert_eq!(Some(vec!["BSD-3-Clause".to_string()]), dep.licenses);
         assert!(dep.comment.is_some());
         assert_eq!(dep.name, "file");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 
     // this package does not qualify for the test
@@ -66,6 +69,7 @@ mod hosted_retriever_tests {
             Some(true)
         );
         assert_eq!(dep.name, "fake_async");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 
     #[tokio::test]
@@ -83,6 +87,7 @@ mod hosted_retriever_tests {
             Some(true)
         );
         assert_eq!(dep.name, "random_color");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 
     // this library analysis is 93...
@@ -103,6 +108,7 @@ mod hosted_retriever_tests {
             Some(true)
         );
         assert_eq!(dep.name, "vector_math");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 
     #[tokio::test]
@@ -116,5 +122,6 @@ mod hosted_retriever_tests {
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert!(dep.comment.is_none());
         assert_eq!(dep.name, "flutter_isolate");
+        assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
 }

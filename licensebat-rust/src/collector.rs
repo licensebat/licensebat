@@ -24,8 +24,11 @@ impl<R: Retriever> Rust<R> {
 
 impl Rust<retriever::CratesIo> {
     #[must_use]
-    pub fn with_crates_io_retriever(client: reqwest::Client) -> Self {
-        Self::new(retriever::CratesIo::new(client))
+    pub fn with_crates_io_retriever(
+        client: reqwest::Client,
+        store: Arc<Option<askalono::Store>>,
+    ) -> Self {
+        Self::new(retriever::CratesIo::new(client, store))
     }
 }
 
