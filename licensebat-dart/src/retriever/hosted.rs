@@ -173,34 +173,15 @@ fn retrieved_dependency(
     url: Option<String>,
     comment: Option<Comment>,
 ) -> RetrievedDependency {
-    let has_licenses = licenses.is_some();
-
-    RetrievedDependency {
-        name: dependency.name.clone(),
-        version: dependency.version.clone(),
+    RetrievedDependency::new(
+        dependency.name.clone(),
+        dependency.version.clone(),
+        crate::DART.to_owned(),
         url,
-        dependency_type: crate::DART.to_owned(),
-        validated: false,
-        is_valid: has_licenses && error.is_none(),
-        is_ignored: false,
-        error: if error.is_some() {
-            error
-        } else if has_licenses {
-            None
-        } else {
-            Some("No License".to_owned())
-        },
-        licenses: if has_licenses {
-            licenses
-        } else {
-            Some(vec!["NO-LICENSE".to_string()])
-        },
-        comment: if has_licenses || comment.is_some() {
-            comment
-        } else {
-            Some(Comment::removable("Consider **ignoring** this specific dependency. You can also accept the **NO-LICENSE** key to avoid these issues."))
-        },
-    }
+        licenses,
+        error,
+        comment,
+    )
 }
 
 /// Returns the imprecise license that pub.dev provides

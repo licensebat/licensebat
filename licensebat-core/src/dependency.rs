@@ -37,6 +37,51 @@ pub struct RetrievedDependency {
     pub comment: Option<Comment>,
 }
 
+impl RetrievedDependency {
+    /// Creates a new `RetrievedDependency` with the given parameters.
+    /// Note that some properties will be automatically set depending on the other ones.
+    /// For example, if the `licenses` parameter is `None`, the `is_valid` property will be set to `false`.
+    /// Use the default method if you just want to create an instance with all  the defaults.
+    /// This method it's intended to be used once you have retrieved the dependency from its source (i.e. npm, github, etc).
+    #[must_use]
+    pub fn new(
+        name: String,
+        version: String,
+        dependency_type: String,
+        url: Option<String>,
+        licenses: Option<Vec<String>>,
+        error: Option<String>,
+        comment: Option<Comment>,
+    ) -> Self {
+        let has_licenses = licenses.is_some();
+
+        Self {
+            name,
+            version,
+            dependency_type,
+            url,
+            licenses: licenses.or_else(|| Some(vec!["NO-LICENSE".to_string()])),
+            validated: false,
+            is_valid: has_licenses && error.is_none(),
+            is_ignored: false,
+            error: error.or_else(|| {
+                if has_licenses {
+                    None
+                } else {
+                    Some("No License".to_owned())
+                }
+            }),
+            comment: comment.or_else(|| {
+                if has_licenses {
+                    None
+                } else {
+                    Some(Comment::removable("Consider ignoring this specific dependency. You can also accept the NO-LICENSE key."))
+                }
+            }),
+        }
+    }
+}
+
 /// Represents a comment.
 #[derive(Serialize, Deserialize, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Clone)]
 pub struct Comment {

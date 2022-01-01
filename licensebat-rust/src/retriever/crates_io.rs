@@ -1,6 +1,6 @@
 #![allow(deprecated)]
 
-use super::utils::build_crates_io_retrieved_dependency;
+use super::utils::crates_io_retrieved_dependency;
 use crate::retriever::docs_rs::Retriever as DocsRetriever;
 use askalono::Store;
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
@@ -111,15 +111,10 @@ impl Retriever for CratesIo {
                     } else {
                         // TODO: ADD SUPPORT FOR MULTIPLE LICENSES by using the spdx crate
                         let licenses = vec![license.to_string()];
-                        build_crates_io_retrieved_dependency(
-                            &dependency,
-                            Some(licenses),
-                            None,
-                            None,
-                        )
+                        crates_io_retrieved_dependency(&dependency, Some(licenses), None, None)
                     }
                 } else {
-                    build_crates_io_retrieved_dependency(
+                    crates_io_retrieved_dependency(
                         &dependency,
                         None,
                         Some("No license found in Crates.io API"),
@@ -131,7 +126,7 @@ impl Retriever for CratesIo {
         }
         .unwrap_or_else(move |e| {
             let error = e.to_string();
-            build_crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
+            crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
         })
         .boxed()
     }

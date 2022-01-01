@@ -1,4 +1,4 @@
-use super::utils::build_crates_io_retrieved_dependency;
+use super::utils::crates_io_retrieved_dependency;
 use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
 use licensebat_core::{Dependency, RetrievedDependency};
@@ -112,7 +112,7 @@ impl Retriever for DocsRs {
                     match matches {
                         Some((Some(license), _)) => {
                             // TODO: SUPPORT FOR MULTIPLE LICS HERE
-                            build_crates_io_retrieved_dependency(&dependency, Some(vec![license]), None, None)
+                            crates_io_retrieved_dependency(&dependency, Some(vec![license]), None, None)
                         },
                         Some((_, Some(license_file))) => {
                             get_retrieved_dependency_from_license_file(store, crate_url, license_file, client, &dependency).await
@@ -126,13 +126,13 @@ impl Retriever for DocsRs {
                                 &dependency.name,
                                 &dependency.version,
                             );
-                            build_crates_io_retrieved_dependency(&dependency, None, Some(user_error), None)
+                            crates_io_retrieved_dependency(&dependency, None, Some(user_error), None)
                         }
                     }
                 }
                 Err(e) => {
                     tracing::error!(error = %e, "Error trying to parse docs.rs for crate {} : {}", &dependency.name, &dependency.version);
-                    build_crates_io_retrieved_dependency(
+                    crates_io_retrieved_dependency(
                         &dependency,
                         None,
                         Some("Error trying to parse docs.rs"), None
@@ -143,7 +143,7 @@ impl Retriever for DocsRs {
             Ok::<_, anyhow::Error>(retrieved_dependency)
         }.unwrap_or_else(move |e| {
                 let error = e.to_string();
-                build_crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
+                crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
             })
             .boxed()
     }
@@ -170,7 +170,7 @@ async fn get_retrieved_dependency_from_license_file(
     if let Some(store) = store.as_ref() {
         let license_url = format!("{}{}", crate_url, license);
         if let Ok((license, score)) = get_license_from_docs_rs(&client, store, &license_url).await {
-            build_crates_io_retrieved_dependency(
+            crates_io_retrieved_dependency(
                 dependency,
                 Some(vec![license]),
                 None,
@@ -180,7 +180,7 @@ async fn get_retrieved_dependency_from_license_file(
                 )),
             )
         } else {
-            build_crates_io_retrieved_dependency(
+            crates_io_retrieved_dependency(
                 dependency,
                 None,
                 Some(&format!(
@@ -192,12 +192,7 @@ async fn get_retrieved_dependency_from_license_file(
         }
     } else {
         tracing::error!("No askalono store present in Rust docs.rs retriever");
-        build_crates_io_retrieved_dependency(
-            dependency,
-            None,
-            Some("No askalono store present"),
-            None,
-        )
+        crates_io_retrieved_dependency(dependency, None, Some("No askalono store present"), None)
     }
 }
 

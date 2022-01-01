@@ -88,7 +88,7 @@ async fn get_dependency<R: Retriever>(
 ///
 /// [This Dart document](https://dart.dev/tools/pub/publishing#preparing-to-publish) states that Dart uses this license.
 fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
-    build_retrieved_dependency(
+    retrieved_dependency(
         dependency,
         Some(vec!["BSD-3-Clause".to_owned()]),
         None,
@@ -112,10 +112,10 @@ async fn resolve_hosted_dependency<R: Retriever>(
                     "https://pub.dev/packages/{}/versions/{}",
                     dependency_name, dependency.version,
                 );
-                build_retrieved_dependency(&dependency, None, Some(e.to_string()), Some(url), None)
+                retrieved_dependency(&dependency, None, Some(e.to_string()), Some(url), None)
             })
     } else {
-        build_retrieved_dependency(
+        retrieved_dependency(
             &dependency,
             None,
             Some("No name found for this dependency".to_owned()),
@@ -132,20 +132,18 @@ fn resolve_git_dependency(dependency: &DartDependency) -> RetrievedDependency {
     // so we must get the tree and look for the license...
     // this is complicated as there might be lots of different hosts and we cannot rely on GitHub
     // as the only collector...
-    // probably make a removable comment to warn the user?
-    build_retrieved_dependency(
+    retrieved_dependency(
         dependency,
         None,
         Some("Git source is not supported".to_string()),
         dependency.description.url.clone(),
-        // TODO: this comment will never be shown... revisit this
         Some(Comment::removable("Git projects are not supported yet. We're working on it but there are too many different git hosting providers and supporting private repos is hard. We're marking this as **invalid by default** so you check for yourself the validity of the license. Consider **adding this dependency to the ignored list** in the **.licrc** configuration file if you trust the source.")),
     )
 }
 
 /// Resolves to invalid dependency as we don't support this type for the moment.
 fn resolve_unknown_dependency(dependency: &DartDependency) -> RetrievedDependency {
-    build_retrieved_dependency(
+    retrieved_dependency(
         dependency,
         None,
         Some(format!("Not supported source {}", dependency.source)),
@@ -155,45 +153,26 @@ fn resolve_unknown_dependency(dependency: &DartDependency) -> RetrievedDependenc
 }
 
 /// Builds a `RetrievedDependency`
-fn build_retrieved_dependency(
+fn retrieved_dependency(
     dependency: &DartDependency,
     licenses: Option<Vec<String>>,
     error: Option<String>,
     url: Option<String>,
     comment: Option<Comment>,
 ) -> RetrievedDependency {
-    let has_licenses = licenses.is_some();
-
-    RetrievedDependency {
-        name: dependency
+    RetrievedDependency::new(
+        dependency
             .description
             .name
             .as_ref()
             .map_or("unknown".to_string(), std::borrow::ToOwned::to_owned),
-        version: dependency.version.clone(),
+        dependency.version.clone(),
+        crate::DART.to_string(),
         url,
-        dependency_type: crate::DART.to_owned(),
-        validated: false,
-        is_valid: licenses.is_some() && error.is_none(),
-        is_ignored: false,
-        error: if error.is_some() {
-            error
-        } else if has_licenses {
-            None
-        } else {
-            Some("No License".to_owned())
-        },
-        licenses: if has_licenses {
-            licenses
-        } else {
-            Some(vec!["NO-LICENSE".to_string()])
-        },
-        comment: if has_licenses {
-            comment
-        } else {
-            Some(Comment::removable("Consider **ignoring** this specific dependency. You can also accept the **NO-LICENSE** key to avoid these issues."))
-        },
-    }
+        licenses,
+        error,
+        comment,
+    )
 }
 
 #[cfg(test)]

@@ -3,7 +3,7 @@ use futures::{
     future::{self, BoxFuture},
     Future, FutureExt, TryFutureExt,
 };
-use licensebat_core::{Comment, Dependency, RetrievedDependency};
+use licensebat_core::{Dependency, RetrievedDependency};
 use reqwest::Client;
 use serde_json::Value;
 use tracing::instrument;
@@ -81,15 +81,15 @@ impl Retriever for Npm {
                     })
             })
             .map_ok(move |licenses: Option<Vec<String>>| {
-                build_retrieved_dependency(&dep_clone, licenses, None)
+                retrieved_dependency(&dep_clone, licenses, None)
             })
-            .or_else(move |e| future::ok(build_retrieved_dependency(&dependency, None, Some(e))))
+            .or_else(move |e| future::ok(retrieved_dependency(&dependency, None, Some(e))))
             .map(std::result::Result::<RetrievedDependency, std::convert::Infallible>::unwrap)
             .boxed()
     }
 }
 
-fn build_retrieved_dependency(
+fn retrieved_dependency(
     dependency: &Dependency,
     licenses: Option<Vec<String>>,
     error: Option<reqwest::Error>,
@@ -99,32 +99,13 @@ fn build_retrieved_dependency(
         dependency.name, dependency.version
     );
 
-    let has_licenses = licenses.is_some();
-
-    RetrievedDependency {
-        name: dependency.name.clone(),
-        version: dependency.version.clone(),
-        url: Some(url),
-        dependency_type: "npm".to_owned(),
-        validated: false,
-        is_valid: has_licenses && error.is_none(),
-        is_ignored: false,
-        error: if let Some(err) = error {
-            Some(err.to_string())
-        } else if has_licenses {
-            None
-        } else {
-            Some("No License".to_owned())
-        },
-        licenses: if has_licenses {
-            licenses
-        } else {
-            Some(vec!["NO-LICENSE".to_string()])
-        },
-        comment: if has_licenses {
-            None
-        } else {
-            Some(Comment::removable("Consider **ignoring** this specific dependency. You can also accept the **NO-LICENSE** key to avoid these issues."))
-        },
-    }
+    RetrievedDependency::new(
+        dependency.name.clone(),
+        dependency.version.clone(),
+        crate::NPM.to_owned(),
+        Some(url),
+        licenses,
+        error.map(|e| e.to_string()),
+        None,
+    )
 }
