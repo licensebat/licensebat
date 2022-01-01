@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use super::utils::build_crates_io_retrieved_dependency;
 use crate::retriever::docs_rs::Retriever as DocsRetriever;
 use askalono::Store;
@@ -17,10 +19,10 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
 }
 
-// #[deprecated(
-//     since = "0.0.3",
-//     note = "Consider using DocsRs retriever instead of this one. We're just keeping this just in case docs.rs doesn't work."
-// )]
+#[deprecated(
+    since = "0.0.3",
+    note = "Consider using DocsRs retriever instead. We're just keeping this one just in case docs.rs doesn't work."
+)]
 pub struct CratesIo {
     client: Client,
     store: Arc<Option<Store>>,

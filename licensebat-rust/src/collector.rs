@@ -1,4 +1,4 @@
-use crate::retriever::{self, crates_io::Retriever};
+use crate::retriever::{self, docs_rs::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
@@ -10,25 +10,25 @@ use tracing::instrument;
 /// Rust dependency collector
 #[derive(Debug)]
 pub struct Rust<R: Retriever> {
-    crates_io_retriever: Arc<R>,
+    docs_rs_retriever: Arc<R>,
 }
 
 impl<R: Retriever> Rust<R> {
     #[must_use]
-    pub fn new(crates_io_retriever: R) -> Self {
+    pub fn new(docs_rs_retriever: R) -> Self {
         Self {
-            crates_io_retriever: Arc::new(crates_io_retriever),
+            docs_rs_retriever: Arc::new(docs_rs_retriever),
         }
     }
 }
 
-impl Rust<retriever::CratesIo> {
+impl Rust<retriever::DocsRs> {
     #[must_use]
-    pub fn with_crates_io_retriever(
+    pub fn with_docs_rs_retriever(
         client: reqwest::Client,
         store: Arc<Option<askalono::Store>>,
     ) -> Self {
-        Self::new(retriever::CratesIo::new(client, store))
+        Self::new(retriever::DocsRs::new(client, store))
     }
 }
 
@@ -46,7 +46,7 @@ impl<R: Retriever> FileCollector for Rust<R> {
     #[instrument(skip(self))]
     fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
-        let retriever = &self.crates_io_retriever;
+        let retriever = &self.docs_rs_retriever;
 
         Ok(lockfile
             .packages
