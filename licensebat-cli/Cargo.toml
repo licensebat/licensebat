@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-cli"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "CLI tool to manage dependencies' license validation"
 edition = "2021"
