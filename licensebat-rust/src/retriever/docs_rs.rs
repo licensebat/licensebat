@@ -3,7 +3,7 @@ use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
 use licensebat_core::{Dependency, RetrievedDependency};
 use reqwest::Client;
-use std::sync::Arc;
+use std::{string::String, sync::Arc};
 use thiserror::Error;
 use tracing::instrument;
 
@@ -87,8 +87,6 @@ impl Retriever for DocsRs {
                 .text()
                 .await?;
 
-                println!("{:?}", html);
-
             // Pattern to get license information from the Cargo.toml
             // docs.rs exposes the content of the Cargo.toml as <code></code> and then applies some JS to format it.
             // When getting the raw html we'll get code that we can convert into toml
@@ -96,17 +94,31 @@ impl Retriever for DocsRs {
                 r#"<div id="source-code"><pre><code>{{value}}</code></pre></div>"#,
             )
             .map(|pattern| pattern.matches(&html))
-            .map(|m| m.get(0).and_then(|m| m.get("value")))
-            .map(|code| toml::from_str::<toml::Value>(&code)).map(|t| {
-                let package = t.get("package");
-                (package.get("license").and_then(|x| x.as_str()), package.get("license-file").and_then(|x| x.as_str()))
-            });
+            .map(|m| m.get(0)
+                .and_then(|m| m.get("value"))
+                .and_then(|code| toml::from_str::<toml::Value>(code).ok())
+                .and_then(|t| t.get("package")
+                .map(|p|
+                    (
+                        p.get("license").and_then(toml::Value::as_str).map(ToString::to_string), 
+                        p.get("license-file").and_then(toml::Value::as_str).map(ToString::to_string),
+                    )
+                )
+            ));
 
             let retrieved_dependency = match matches {
                 Ok(matches) => {
                     // normally, there's only on item but someone could have decided to inform both `license` and `license-file` attributes.
-                    match matches.len() {
-                        0 => {
+                    match matches {
+                        Some((Some(license), _)) => {
+                            // TODO: SUPPORT FOR MULTIPLE LICS HERE
+                            build_crates_io_retrieved_dependency(&dependency, Some(vec![license]), None, None)
+                        },
+                        Some((_, Some(license_file))) => {
+                            get_retrieved_dependency_from_license_file(store, crate_url, license_file, client, &dependency).await
+                        },
+                        // no info found or toml parsing failed
+                        _ => {
                             let user_error = "No information found in Cargo.toml regarding license or license-file.";
                             tracing::error!(
                                 "{} Crate {} : {}",
@@ -115,30 +127,6 @@ impl Retriever for DocsRs {
                                 &dependency.version,
                             );
                             build_crates_io_retrieved_dependency(&dependency, None, Some(user_error), None)
-                        }
-                        1 => {
-                            let key = &matches[0]["key"];
-                            let license = matches[0]["value"].clone();
-                            if key == "" {
-                                // TODO: SUPPORT FOR MULTIPLE LICS HERE
-                                build_crates_io_retrieved_dependency(&dependency, Some(vec![license]), None, None)
-                            } else {
-                                get_retrieved_dependency_from_license_file(store, crate_url, license, client, &dependency).await
-                            }
-                        }
-                        _ => {
-                            // find license and use that one
-                            // TODO: SUPPORT FOR MULTIPLE LICS HERE
-                            if let Some(license) = matches
-                                .iter()
-                                .find(|m| m["key"] == "")
-                                .map(|m| m["value"].clone())
-                            {
-                                build_crates_io_retrieved_dependency(&dependency, Some(vec![license]), None, None)
-                            } else {
-                                tracing::error!("No license key in docs.rs found in a two attribute group. Check Cargo.toml file for crate {} : {}", &dependency.name, &dependency.version);
-                                build_crates_io_retrieved_dependency(&dependency, None, Some("No license key in docs.rs found in a two attribute group. Check Cargo.toml file."), None)
-                            }
                         }
                     }
                 }
@@ -226,8 +214,10 @@ async fn get_license_from_docs_rs(
         .text()
         .await?;
 
-    let pattern = easy_scraper::Pattern::new(r#"<code class="hljs sql">{{value:*}}</code>"#)
-        .map_err(|e| Error(e))?;
+    let pattern = easy_scraper::Pattern::new(
+        r#"<div id="source-code"><pre><code>{{value}}</code></pre></div>"#,
+    )
+    .map_err(Error)?;
 
     let matches = pattern.matches(&html);
     if matches.is_empty() {

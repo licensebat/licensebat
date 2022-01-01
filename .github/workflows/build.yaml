@@ -24,8 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run cargo fmt
-        run: cargo make format
+        run: makers format
       - name: Run cargo clippy
-        run: cargo make clippy
+        run: makers clippy
       - name: Run tests
-        run: cargo test
+        run: makers test-all

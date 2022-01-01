@@ -15,8 +15,8 @@ mod integration_crates_io_retriever {
         // https://crates.io/api/v1/crates/futurify/0.2.0
         let retriever = retriever::CratesIo::default();
         let dep: RetrievedDependency = retriever.get_dependency("futurify", "0.2.0").await;
-        assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
+        assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert_eq!(dep.name, "futurify");
     }
 
@@ -26,7 +26,7 @@ mod integration_crates_io_retriever {
         let retriever = retriever::CratesIo::default();
         let dep: RetrievedDependency = retriever.get_dependency("ring", "0.16.20").await;
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
-        assert_eq!(Some(vec!["non-standard".to_string()]), dep.licenses);
+        assert_eq!(Some(vec!["NO-LICENSE".to_string()]), dep.licenses);
         assert_eq!(dep.name, "ring");
     }
 
@@ -35,8 +35,8 @@ mod integration_crates_io_retriever {
         // https://crates.io/api/v1/crates/ring/0.17.0-alpha.9
         let retriever = retriever::CratesIo::default();
         let dep: RetrievedDependency = retriever.get_dependency("ring", "0.17.0-alpha.9").await;
-        assert_eq!(Some(vec!["non-standard".to_string()]), dep.licenses);
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
+        assert_eq!(Some(vec!["NO-LICENSE".to_string()]), dep.licenses);
         assert_eq!(dep.name, "ring");
     }
 
@@ -45,12 +45,11 @@ mod integration_crates_io_retriever {
         // https://crates.io/api/v1/crates/futurify/0.2.0
         let retriever = create_store_retriever();
         let dep: RetrievedDependency = retriever.get_dependency("futurify", "0.2.0").await;
-        assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
+        assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert_eq!(dep.name, "futurify");
     }
 
-    #[ignore]
     #[tokio::test]
     async fn store_does_resolve_non_standard() {
         // https://crates.io/api/v1/crates/ring/0.16.20
@@ -59,6 +58,7 @@ mod integration_crates_io_retriever {
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
         assert_eq!(Some(vec!["OpenSSL".to_string()]), dep.licenses);
         assert_eq!(dep.name, "ring");
+        assert_eq!(dep.comment.map(|c| c.text.contains("score")), Some(true));
     }
 
     #[tokio::test]
@@ -66,9 +66,10 @@ mod integration_crates_io_retriever {
         // https://crates.io/api/v1/crates/ring/0.17.0-alpha.9
         let retriever = create_store_retriever();
         let dep: RetrievedDependency = retriever.get_dependency("ring", "0.17.0-alpha.9").await;
-        assert_eq!(Some(vec!["OpenSSL".to_string()]), dep.licenses);
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
+        assert_eq!(Some(vec!["OpenSSL".to_string()]), dep.licenses);
         assert_eq!(dep.name, "ring");
+        assert_eq!(dep.comment.map(|c| c.text.contains("score")), Some(true));
     }
 
     // TODO: TEST ERRORS...
