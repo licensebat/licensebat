@@ -61,6 +61,7 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
     if let Some(source) = package.source {
         // Registries
         if source.is_registry() {
+            #[allow(clippy::if_same_then_else)]
             if source.is_default_registry() {
                 // this is the only one supported for now
                 // TODO: use crates.io retriever
