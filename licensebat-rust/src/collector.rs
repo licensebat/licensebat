@@ -2,7 +2,8 @@ use crate::retriever::{self, docs_rs::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, FileCollector, RetrievedDependency,
+    collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
+    RetrievedDependency,
 };
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
@@ -69,10 +70,10 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
             } else if source.is_remote_registry() {
                 // remote registry
                 // TODO: create remote registry retriever
-                todo!("implement remote registry")
+                // todo!("implement remote registry")
             } else {
                 // TODO: create local registry retriever
-                todo!("implement local registry")
+                // todo!("implement local registry")
             }
         }
         // git
@@ -86,7 +87,21 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
     }
     // this should be filesystem, we can check it source.is_path()
     // this won't ever be implemented
-    unimplemented!()
+    // unimplemented!()
+
+    // for the moment we're returning a default not implemented.
+    RetrievedDependency {
+            name: package.name.to_string(),
+            version: package.version.to_string(),
+            url: None,
+            dependency_type: crate::RUST.to_owned(),
+            validated: false,
+            is_valid: false,
+            is_ignored: false,
+            error: Some("Crate type not Supported".to_owned()),
+            licenses:  Some(vec!["NO-LICENSE".to_string()]),
+            comment: Some(Comment::removable("Git, Local and Remote registries are not supported yet. We're working on it. We're marking this as invalid by default so you can check the validity of the license. Consider adding this dependency to the ignored list in the .licrc configuration file if you trust the source.")),
+        }
 }
 
 #[cfg(test)]

@@ -138,6 +138,7 @@ fn resolve_git_dependency(dependency: &DartDependency) -> RetrievedDependency {
         None,
         Some("Git source is not supported".to_string()),
         dependency.description.url.clone(),
+        // TODO: this comment will never be shown... revisit this
         Some(Comment::removable("Git projects are not supported yet. We're working on it but there are too many different git hosting providers and supporting private repos is hard. We're marking this as **invalid by default** so you check for yourself the validity of the license. Consider **adding this dependency to the ignored list** in the **.licrc** configuration file if you trust the source.")),
     )
 }
