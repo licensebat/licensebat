@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod integration_npm_retriever {
     use licensebat_core::RetrievedDependency;
     use licensebat_js::retriever::{self, npm::Retriever};
 

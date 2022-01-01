@@ -22,7 +22,7 @@ path = "src/main.rs"
 licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"], version = "0.0.2" }
 licensebat-dart = { path = "../licensebat-dart", version = "0.0.3" }
 licensebat-js = { path = "../licensebat-js", version = "0.0.2" }
-licensebat-rust = { path = "../licensebat-rust", version = "0.0.2" }
+licensebat-rust = { path = "../licensebat-rust", version = "0.0.3" }
 # main dependencies
 tokio = { version = "1.15.0", features = ["rt-multi-thread", "macros", "fs"] }
 reqwest = "0.11"

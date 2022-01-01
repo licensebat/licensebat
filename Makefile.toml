@@ -81,14 +81,20 @@ install_crate = "cargo-clippy"
 command = "cargo"
 args = ["clippy", "--all", "--", "-D", "clippy::pedantic", "-D", "clippy::nursery", "-D", "warnings"]
 
-
-[tasks.test-single]
+[tasks.test-integration]
+workspace = false
 command = "cargo"
-args = ["test", "single_thread_test", "--", "--test-threads=1", "--ignored"]
+args = ["test", "--test", "integration_*"]
+
+[tasks.test-unit]
+workspace = false
+command = "cargo"
+args = ["test", "--lib", "--bins"]
 
 [tasks.test-all]
+workspace = false
 run_task = [
-    { name = ["test", "test-single"], parallel = false },
+    { name = ["test-unit", "test-integration"] },
 ]
 
 [tasks.all]

@@ -1,10 +1,13 @@
-use futures::{
-    future::{self, BoxFuture},
-    Future, FutureExt, TryFutureExt,
-};
-use licensebat_core::{Comment, Dependency, RetrievedDependency};
+#![allow(deprecated)]
+
+use super::utils::build_crates_io_retrieved_dependency;
+use crate::retriever::docs_rs::Retriever as DocsRetriever;
+use askalono::Store;
+use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
+use licensebat_core::{Dependency, RetrievedDependency};
 use reqwest::Client;
 use serde_json::Value;
+use std::sync::Arc;
 use tracing::instrument;
 
 /// Trait used by the [`CratesIo`] struct to retrieve dependencies.
@@ -16,23 +19,52 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
 }
 
-#[derive(Debug, Clone)]
+#[deprecated(
+    since = "0.0.3",
+    note = "Consider using DocsRs retriever instead. We're just keeping this one just in case docs.rs doesn't work."
+)]
 pub struct CratesIo {
     client: Client,
-}
-
-impl Default for CratesIo {
-    /// Creates a new [`CratesIoRetriever`].
-    fn default() -> Self {
-        Self::new(Client::new())
-    }
+    store: Arc<Option<Store>>,
 }
 
 impl CratesIo {
     /// Creates a new [`CratesIoRetriever`] using the given [`reqwest::Client`].
     #[must_use]
-    pub const fn new(client: Client) -> Self {
-        Self { client }
+    pub const fn new(client: Client, store: Arc<Option<Store>>) -> Self {
+        Self { client, store }
+    }
+}
+
+impl Default for CratesIo {
+    /// Creates a new [`CratesIoRetriever`].
+    fn default() -> Self {
+        Self::new(Client::new(), Arc::new(None))
+    }
+}
+
+impl Clone for CratesIo {
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            store: self.store.clone(),
+        }
+    }
+}
+
+impl std::fmt::Debug for CratesIo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DocsRs")
+            .field("client", &self.client)
+            .field(
+                "store",
+                if self.store.is_some() {
+                    &"Some(Store)"
+                } else {
+                    &"None"
+                },
+            )
+            .finish()
     }
 }
 
@@ -52,66 +84,55 @@ impl Retriever for CratesIo {
         };
 
         let dep_clone = dependency.clone();
+        let client = self.client.clone();
+        let store = self.store.clone();
 
-        self.client
-            .get(&url)
-            .header("User-Agent", "licensebat-cli (licensebat.com)")
-            .send()
-            .and_then(reqwest::Response::json)
-            .map_ok(|metadata: Value| {
-                // TODO: this could fail?
+        async move {
+            let metadata: Value = client
+                .get(&url)
+                .header("User-Agent", "licensebat-cli (licensebat.com)")
+                .send()
+                .await?
+                .json()
+                .await?;
+
+            let retrieved_dependency = {
                 let license = metadata["version"]["license"].clone();
-                vec![license.as_str().unwrap().to_string()]
-                // TODO: GET LICENSE IN CASE OF non-standard license
-                // we should get the repo info, get the cargo.toml, read the license_file key, get the file,
-                // read it and use askalono to get the license.
-                // TODO: ADD SUPPORT FOR MULTIPLE LICENSES
-            })
-            .map_ok(move |licenses| build_retrieved_dependency(&dep_clone, Some(licenses), None))
-            .or_else(move |e| future::ok(build_retrieved_dependency(&dependency, None, Some(e))))
-            .map(std::result::Result::<RetrievedDependency, std::convert::Infallible>::unwrap)
-            .boxed()
-    }
-}
-
-#[instrument(level = "debug")]
-fn build_retrieved_dependency(
-    dependency: &Dependency,
-    licenses: Option<Vec<String>>,
-    error: Option<reqwest::Error>,
-) -> RetrievedDependency {
-    let url = format!(
-        "https://crates.io/crates/{}/{}",
-        dependency.name, dependency.version
-    );
-
-    let has_licenses = licenses.is_some();
-
-    // TODO: THIS SHOULD BE EXTRACTED AS IT SEEMS TO BE THE SAME FOR ALL DEPENDENCY TYPES
-    RetrievedDependency {
-        name: dependency.name.clone(),
-        version: dependency.version.clone(),
-        url: Some(url),
-        dependency_type: "npm".to_owned(),
-        validated: false,
-        is_valid: has_licenses && error.is_none(),
-        is_ignored: false,
-        error: if let Some(err) = error {
-            Some(err.to_string())
-        } else if has_licenses {
-            None
-        } else {
-            Some("No License".to_owned())
-        },
-        licenses: if has_licenses {
-            licenses
-        } else {
-            Some(vec!["NO-LICENSE".to_string()])
-        },
-        comment: if has_licenses {
-            None
-        } else {
-            Some(Comment::removable("Consider **ignoring** this specific dependency. You can also accept the **NO-LICENSE** key to avoid these issues."))
-        },
+                if let Some(license) = license.as_str() {
+                    // this should always be informed.
+                    // either by the declared license in the crates' Cargo.toml
+                    // or by a generic `non-standard` license.
+                    if license == "non-standard" {
+                        // we're going to use the docs.rs retriever here
+                        let docs_rs = super::docs_rs::DocsRs::new(client, store);
+                        docs_rs
+                            .get_dependency(&dependency.name, &dependency.version)
+                            .await
+                    } else {
+                        // TODO: ADD SUPPORT FOR MULTIPLE LICENSES by using the spdx crate
+                        let licenses = vec![license.to_string()];
+                        build_crates_io_retrieved_dependency(
+                            &dependency,
+                            Some(licenses),
+                            None,
+                            None,
+                        )
+                    }
+                } else {
+                    build_crates_io_retrieved_dependency(
+                        &dependency,
+                        None,
+                        Some("No license found in Crates.io API"),
+                        None,
+                    )
+                }
+            };
+            Ok::<_, anyhow::Error>(retrieved_dependency)
+        }
+        .unwrap_or_else(move |e| {
+            let error = e.to_string();
+            build_crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
+        })
+        .boxed()
     }
 }

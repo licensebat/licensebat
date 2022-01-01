@@ -1,8 +1,9 @@
-use crate::retriever::{self, crates_io::Retriever};
+use crate::retriever::{self, docs_rs::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, FileCollector, RetrievedDependency,
+    collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
+    RetrievedDependency,
 };
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
@@ -10,22 +11,25 @@ use tracing::instrument;
 /// Rust dependency collector
 #[derive(Debug)]
 pub struct Rust<R: Retriever> {
-    crates_io_retriever: Arc<R>,
+    docs_rs_retriever: Arc<R>,
 }
 
 impl<R: Retriever> Rust<R> {
     #[must_use]
-    pub fn new(crates_io_retriever: R) -> Self {
+    pub fn new(docs_rs_retriever: R) -> Self {
         Self {
-            crates_io_retriever: Arc::new(crates_io_retriever),
+            docs_rs_retriever: Arc::new(docs_rs_retriever),
         }
     }
 }
 
-impl Rust<retriever::CratesIo> {
+impl Rust<retriever::DocsRs> {
     #[must_use]
-    pub fn with_crates_io_retriever(client: reqwest::Client) -> Self {
-        Self::new(retriever::CratesIo::new(client))
+    pub fn with_docs_rs_retriever(
+        client: reqwest::Client,
+        store: Arc<Option<askalono::Store>>,
+    ) -> Self {
+        Self::new(retriever::DocsRs::new(client, store))
     }
 }
 
@@ -43,7 +47,7 @@ impl<R: Retriever> FileCollector for Rust<R> {
     #[instrument(skip(self))]
     fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
-        let retriever = &self.crates_io_retriever;
+        let retriever = &self.docs_rs_retriever;
 
         Ok(lockfile
             .packages
@@ -57,6 +61,7 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
     if let Some(source) = package.source {
         // Registries
         if source.is_registry() {
+            #[allow(clippy::if_same_then_else)]
             if source.is_default_registry() {
                 // this is the only one supported for now
                 // TODO: use crates.io retriever
@@ -66,10 +71,10 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
             } else if source.is_remote_registry() {
                 // remote registry
                 // TODO: create remote registry retriever
-                todo!("implement remote registry")
+                // todo!("implement remote registry")
             } else {
                 // TODO: create local registry retriever
-                todo!("implement local registry")
+                // todo!("implement local registry")
             }
         }
         // git
@@ -83,7 +88,21 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> Re
     }
     // this should be filesystem, we can check it source.is_path()
     // this won't ever be implemented
-    unimplemented!()
+    // unimplemented!()
+
+    // for the moment we're returning a default not implemented.
+    RetrievedDependency {
+            name: package.name.to_string(),
+            version: package.version.to_string(),
+            url: None,
+            dependency_type: crate::RUST.to_owned(),
+            validated: false,
+            is_valid: false,
+            is_ignored: false,
+            error: Some("Crate type not Supported".to_owned()),
+            licenses:  Some(vec!["NO-LICENSE".to_string()]),
+            comment: Some(Comment::removable("Git, Local and Remote registries are not supported yet. We're working on it. We're marking this as invalid by default so you can check the validity of the license. Consider adding this dependency to the ignored list in the .licrc configuration file if you trust the source.")),
+        }
 }
 
 #[cfg(test)]
@@ -159,7 +178,6 @@ mod tests {
     }
 
     #[tokio::test]
-    #[should_panic]
     async fn git_is_not_implemented() {
         let rust = build_collector();
         let lock_content = r#"

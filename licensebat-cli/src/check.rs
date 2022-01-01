@@ -39,9 +39,9 @@ pub async fn run(cli: Cli) -> anyhow::Result<Vec<RetrievedDependency>> {
     let npm_retriever = licensebat_js::retriever::Npm::new(client.clone());
     let npm_collector = licensebat_js::collector::Npm::new(npm_retriever.clone());
     let yarn_collector = licensebat_js::collector::Yarn::new(npm_retriever);
-    let rust_collector = licensebat_rust::collector::Rust::with_crates_io_retriever(client.clone());
-    let dart_collector =
-        licensebat_dart::collector::Dart::with_hosted_retriever(client.clone(), store.clone());
+    let rust_collector =
+        licensebat_rust::collector::Rust::with_docs_rs_retriever(client.clone(), store.clone());
+    let dart_collector = licensebat_dart::collector::Dart::with_hosted_retriever(client, store);
 
     let file_collectors: Vec<Box<dyn FileCollector>> = vec![
         Box::new(npm_collector),

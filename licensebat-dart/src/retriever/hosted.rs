@@ -22,17 +22,17 @@ pub struct Hosted {
     store: Arc<Option<Store>>,
 }
 
-impl Default for Hosted {
-    fn default() -> Self {
-        Self::new(Client::new(), Arc::new(None))
-    }
-}
-
 impl Hosted {
     /// Creates a [`Retriever`] reusing a [`reqwest::Client`]
     #[must_use]
     pub fn new(client: Client, store: Arc<Option<Store>>) -> Self {
         Self { client, store }
+    }
+}
+
+impl Default for Hosted {
+    fn default() -> Self {
+        Self::new(Client::new(), Arc::new(None))
     }
 }
 
