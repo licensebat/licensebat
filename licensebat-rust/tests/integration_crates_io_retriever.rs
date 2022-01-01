@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 #[cfg(test)]
 mod integration_crates_io_retriever {
     use licensebat_core::RetrievedDependency;

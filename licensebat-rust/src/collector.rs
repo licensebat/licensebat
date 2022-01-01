@@ -178,7 +178,6 @@ mod tests {
     }
 
     #[tokio::test]
-    #[should_panic]
     async fn git_is_not_implemented() {
         let rust = build_collector();
         let lock_content = r#"
