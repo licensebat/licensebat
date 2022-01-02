@@ -1,9 +1,9 @@
 # Licensebat
 
-<center>
+<div align="center">
 <img src="https://licensebat.com/images/not_used/logo_orange.png" width="120">
 <p>A tool to help you verify that your dependencies comply with your license policies.</p>
-</center>
+</div>
 
 ## Crates
 
