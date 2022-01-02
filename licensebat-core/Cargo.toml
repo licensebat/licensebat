@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-core"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "Types and Traits for building Licensebat libraries"
 edition = "2021"
@@ -30,3 +30,7 @@ tracing = "0.1"
 toml = {version = "0.5", optional = true }
 # errors
 thiserror = "1.0.21"
+
+# see https://docs.rs/about/metadata
+[package.metadata.docs.rs]
+all-features = true

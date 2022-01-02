@@ -17,8 +17,11 @@
 //!
 //! Anyway, having those two different approaches would be still valuable because there are scenarios where we don't have access to all the codebase. While using the CLI, through [licensebat-cli] it makes sense to avoid making http requests at all cost, this is not possible in [Licensebat's GitHub Service](https://github.com/marketplace/licensebat) as we don't have access to all the codebase but only a few files.
 //!
+//! # Features
 //!
-//! [licensebat-cli]: http://crates.io/crates/licensebat-core
+//! - **licrc-from-file**: Allows to retrieve license information from a file by enabling a `LicRc::from_relative_path` associated function.
+//!
+//! [licensebat-cli]: https://docs.rs/licensebat-cli/latest/licensebat_cli/
 //! [`RetrievedDependencyStreamResult`]: collector::RetrievedDependencyStreamResult
 //! [`cargo-metadata`]: https://docs.rs/cargo_metadata/latest/cargo_metadata
 
