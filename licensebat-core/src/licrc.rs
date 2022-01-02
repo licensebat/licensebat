@@ -1,8 +1,14 @@
+//! Exposes a struct to manage the `.licrc` file information and validate the dependencies accordingly.
+//!
+//! When using the `licrc-from-file` feature, [`LicRc::from_relative_path`] method will be available for you to load the information from a file.
+
 use crate::RetrievedDependency;
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
-/// Represents the Privateer configuration file.
+/// Represents the `.licrc` configuration file.
+/// This file is the one used in your project to define which licenses are accepted/unaccepted
+/// and which dependencies should be ignored.
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct LicRc {
     /// List of accepted and unaccepted licenses.
@@ -17,14 +23,18 @@ pub struct LicRc {
 #[cfg(feature = "licrc-from-file")]
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Error trying to open or read the .licrc file
     #[error("Error trying to open and read the .licrc file: {0}")]
     Io(#[from] std::io::Error),
+    /// Error parsing the .licrc file
     #[error("Error trying to parse the .licrc file: {0}")]
     Toml(#[from] toml::de::Error),
 }
 
 #[cfg(feature = "licrc-from-file")]
 impl LicRc {
+    /// Loads a .licrc from a relative path.
+    /// You must compile this crate with the `licrc-from-file` feature for this to be available.
     #[instrument(skip(relative_path))]
     pub fn from_relative_path(relative_path: impl AsRef<std::path::Path>) -> Result<Self, Error> {
         let licrc_path = std::env::current_dir()?.join(relative_path);
@@ -35,6 +45,9 @@ impl LicRc {
 }
 
 impl LicRc {
+    /// Validates a specific [`RetrievedDependency`].
+    /// Note that it will set the dependency's `validated` property to `true`.
+    /// While checking it's validaty against what's been declared in the `.licrc` file it can also modify `is_ignored` and `is_valid` properties.
     #[instrument(skip(self))]
     pub fn validate(&self, dependency: &mut RetrievedDependency) {
         dependency.validated = true;
@@ -73,6 +86,7 @@ impl LicRc {
     }
 }
 
+/// Marks a dependency as invalid and if it doesnt' have any error it adds one saying `Not compliant`.
 #[instrument]
 fn make_invalid(dependency: &mut RetrievedDependency, license: &str) {
     tracing::debug!(
@@ -90,7 +104,9 @@ fn make_invalid(dependency: &mut RetrievedDependency, license: &str) {
 /// Holds information about the accepted or unaccepted licenses.
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct LicRcLicenses {
+    /// List of accepted licenses (see <https://spdx.org/licenses/>)
     pub accepted: Option<Vec<String>>,
+    /// List of unaccepted licenses (see <https://spdx.org/licenses/>)
     pub unaccepted: Option<Vec<String>>,
 }
 
@@ -99,17 +115,17 @@ pub struct LicRcLicenses {
 pub struct LicRcDependencies {
     /// List of ignored dependencies.
     /// These dependencies won't be validated.
+    /// You must use the name of the dependency here.
     pub ignored: Option<Vec<String>>,
 }
 
 /// Holds information about the behavior of the validation process.
-/// This only applies for the GITHUB API integrated project.
+/// **This only applies for the [GITHUB API integrated project](https://github.com/marketplace/licensebat)**.
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct LicRcBehavior {
-    /// If set to false Privateer will validate the dependencies no matter what
-    /// file has been modified. If set to true, validation will only
-    /// happen when one of the dependency files or the .licrc files has been modified in the commit.
+    /// If set to false Licensebat will validate the dependencies no matter what file has been modified.
+    /// If set to true, validation will only happen when one of the dependency files or the .licrc files has been modified in the commit.
     pub run_only_on_dependency_modification: Option<bool>,
-    /// If set to true, Privateer will execute the check but it won't block the PR
+    /// If set to true, Licensebat will execute the check but it won't block the PR.
     pub do_not_block_pr: Option<bool>,
 }
