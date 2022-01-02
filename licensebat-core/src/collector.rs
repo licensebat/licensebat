@@ -5,7 +5,7 @@ use std::fmt::Debug;
 /// Stream of [`RetrievedDependency`]
 pub type RetrievedDependencyStream<'a> = FuturesUnordered<BoxFuture<'a, RetrievedDependency>>;
 
-/// [`DependencyCollector`] result returning either a [`RetrievedDependencyStream`] or a [`DependencyCollectorError`]
+/// Result returning either a [`RetrievedDependencyStream`] or an [`Error`]
 pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<'a>, Error>;
 
 // TODO: REMOVE DEPENDENCIES FROM serde_json, serde_value, cargo_lock, yarn_lock

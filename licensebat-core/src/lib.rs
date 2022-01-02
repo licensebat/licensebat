@@ -1,4 +1,5 @@
 #![allow(clippy::module_name_repetitions)]
+#![warn(missing_docs)]
 
 //! Core types and traits for [`licensebat-cli`].
 //!

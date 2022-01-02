@@ -1,3 +1,5 @@
+#![warn(missing_docs)]
+
 use structopt::StructOpt;
 
 #[tokio::main]

@@ -22,7 +22,7 @@ pub struct DocsRs {
 }
 
 impl DocsRs {
-    /// Creates a new [`DocsRsRetriever`] using the given [`reqwest::Client`].
+    /// Creates a new [`DocsRs`] [`Retriever`] using the given [`reqwest::Client`].
     #[must_use]
     pub const fn new(client: Client, store: Arc<Option<Store>>) -> Self {
         Self { client, store }
@@ -30,7 +30,7 @@ impl DocsRs {
 }
 
 impl Default for DocsRs {
-    /// Creates a new [`DocsRsRetriever`].
+    /// Creates a new [`DocsRs`] [`Retriever`].
     fn default() -> Self {
         Self::new(Client::new(), Arc::new(None))
     }

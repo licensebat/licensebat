@@ -24,7 +24,7 @@ pub struct Npm {
 
 impl Default for Npm {
     /// Creates a new [`Retriever`].
-    /// If you want to reuse a [`reqwest::Client`] pool consider using the [`with_client`] method.
+    /// If you want to reuse a [`reqwest::Client`] pool consider using the `new` method.
     fn default() -> Self {
         Self::new(Client::new())
     }
