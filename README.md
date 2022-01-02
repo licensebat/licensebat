@@ -5,11 +5,40 @@
 <p>A tool to help you verify that your dependencies comply with your license policies.</p>
 </div>
 
-## Crates
+## What is Licensebat?
 
-This is a monorepo exposing several crates.
+`Licensebat` is a **CLI** that you can use for free to verify that the dependencies of your project follow your license policies.
 
-Two of them correspond to the core traits and the cli, and the rest are dedicated to support specific languages.
+Let's say, for instance, that you are building a commercial application. In that case, you may consider avoiding the use of some software with a restrictive license like `GPL`.
+
+By using `Licensebat`, you can check you don't have any dependency with such a restrictive license. Normally, it will look in all the the dependency tree of your project, so transient dependencies will also be considered.
+
+Feel free to use the `CLI` in your CI/CD pipeline, or in your continuous integration server.
+
+**IMPORTANT**: `licensebat-cli` is still in development so you may use it at your own risk.
+
+## Licensebat GitHub App
+
+`Licensebat` can be used directly in your GitHub repositories by installing the [GitHub App](https://github.com/marketplace/licensebat).
+
+Note that this app is **totally free for open source projects**.
+
+It has paid tiers for commercial projects, although you can still leverage the free tier if you don't have many changes in your repository.
+
+## Supported languages
+
+These are the languages that `Licensebat` is supporting right now:
+
+- [JavaScript](./licensebat-js/README.md)
+- [TypeScript](./licensebat-js/README.md)
+- [Dart](./licensebat-dart/README.md)
+- [Rust](./licensebat-rust/README.md)
+
+## Project structure
+
+This is a **monorepo exposing several crates**.
+
+Two of them correspond to the **core traits and the cli**, and the rest are dedicated to **support specific languages**.
 
 Although in this repository there's only a `bin` (i.e the cli), the language crates are also being use to support the [Licensebat GitHub App](https://github.com/marketplace/licensebat).
 
