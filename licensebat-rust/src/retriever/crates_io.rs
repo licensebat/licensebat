@@ -29,7 +29,7 @@ pub struct CratesIo {
 }
 
 impl CratesIo {
-    /// Creates a new [`CratesIoRetriever`] using the given [`reqwest::Client`].
+    /// Creates a new [`CratesIo`] [`Retriever`] using the given [`reqwest::Client`].
     #[must_use]
     pub const fn new(client: Client, store: Arc<Option<Store>>) -> Self {
         Self { client, store }
@@ -37,7 +37,7 @@ impl CratesIo {
 }
 
 impl Default for CratesIo {
-    /// Creates a new [`CratesIoRetriever`].
+    /// Creates a new [`CratesIo`] [`Retriever`].
     fn default() -> Self {
         Self::new(Client::new(), Arc::new(None))
     }
