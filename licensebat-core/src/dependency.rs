@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-/// Generic dependency.
+/// Generic and plain dependency without any extra information.
 /// Language agnostic, just holds the name and the version.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd, Default)]
 pub struct Dependency {
@@ -11,7 +11,8 @@ pub struct Dependency {
     pub version: String,
 }
 
-/// A dependency that has been retrieved.
+/// A dependency that has been retrieved from its source.
+/// The source can be anything, from a third party API (i.e. npm, pub.dev or crates.io APIs) to the file system.
 /// It holds information about licenses, errors while validating...
 #[derive(Serialize, Deserialize, Debug, Eq, Ord, PartialEq, PartialOrd, Clone, Default)]
 pub struct RetrievedDependency {
@@ -82,10 +83,11 @@ impl RetrievedDependency {
     }
 }
 
-/// Represents a comment.
+/// A comment to be added in a [`RetrievedDependency`] once it has been retrieved or validated.
+/// It normally adds information about what went wrong.
 #[derive(Serialize, Deserialize, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Clone)]
 pub struct Comment {
-    /// The comment.
+    /// The comment text.
     pub text: String,
     /// If true, the comment won't be shown if the dependency is valid.
     pub remove_when_valid: bool,
@@ -93,6 +95,7 @@ pub struct Comment {
 
 impl Comment {
     /// Builds a removable comment.
+    /// This basically mean it won't be shown if the dependency is flagged as valid.
     pub fn removable(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
@@ -100,7 +103,8 @@ impl Comment {
         }
     }
 
-    /// Builds a non removable comment
+    /// Builds a non removable comment.
+    /// This comment will be shown no matter if the dependency is valid or not.
     pub fn non_removable(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),

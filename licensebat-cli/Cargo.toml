@@ -19,7 +19,7 @@ path = "src/main.rs"
 
 [dependencies]
 # core libs
-licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"], version = "0.0.3" }
+licensebat-core = { path = "../licensebat-core", features = ["licrc-from-file"], version = "0.0.4" }
 licensebat-dart = { path = "../licensebat-dart", version = "0.0.4" }
 licensebat-js = { path = "../licensebat-js", version = "0.0.3" }
 licensebat-rust = { path = "../licensebat-rust", version = "0.0.4" }

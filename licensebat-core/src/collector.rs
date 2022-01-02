@@ -1,3 +1,7 @@
+//! Collector traits.
+//!
+//!
+
 use crate::dependency::RetrievedDependency;
 use futures::{future::BoxFuture, stream::FuturesUnordered};
 use std::fmt::Debug;
@@ -12,12 +16,16 @@ pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<
 /// Error raised by a collector while parsing/getting the dependencies.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Error produced when deserializing a `yaml file` (pubspec.yaml...).
     #[error("Error deserialiazing yaml: {0}")]
     YamlSerde(#[from] serde_yaml::Error),
+    /// Error produced when deserializing a `json file` (package-lock.json...).
     #[error("Error deserialiazing json: {0}")]
     JsonSerde(#[from] serde_json::Error),
+    /// Error produced when deserializing a `yarn.lock` file.
     #[error("Error parsing yarn.lock file {0}")]
     YarnLock(#[from] yarn_lock_parser::YarnLockError),
+    /// Error produced when deserializing a `Cargo.lock` file.
     #[error("Error parsing Cargo.lock file {0}")]
     CargoLock(#[from] cargo_lock::Error),
 }
@@ -28,7 +36,7 @@ pub trait Collector: Debug + Send + Sync {
     fn get_name(&self) -> String;
 }
 
-/// Trait to be implemented for every collector dealing with a dependency file
+/// Trait to be implemented for every [`Collector`] dealing with a dependency file.
 pub trait FileCollector: Collector {
     /// Gets the name of the file holding all the dependencies.
     /// i.e. for npm package-lock.json, for rust cargo.lock
