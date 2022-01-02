@@ -40,18 +40,18 @@ This is a **monorepo exposing several crates**.
 
 Two of them correspond to the **core traits and the cli**, and the rest are dedicated to **support specific languages**.
 
-Although in this repository there's only a `bin` (i.e the cli), the language crates are also being use to support the [Licensebat GitHub App](https://github.com/marketplace/licensebat).
+Although in this repository there's only a `bin` (i.e the CLI), the language crates are also being use to support the [Licensebat GitHub App](https://github.com/marketplace/licensebat).
 
 ### Main crates
 
-![Crates.io](https://img.shields.io/crates/v/licensebat-core?label=licensebat-core&style=flat-square)
-![Crates.io](https://img.shields.io/crates/v/licensebat-cli?label=licensebat-cli&style=flat-square)
+[![Crates.io](https://img.shields.io/crates/v/licensebat-core?label=licensebat-core&style=flat-square)](https://crates.io/crates/licensebat-core)
+[![Crates.io](https://img.shields.io/crates/v/licensebat-cli?label=licensebat-cli&style=flat-square)](https://crates.io/crates/licensebat-cli)
 
 ### Language crates
 
-![Crates.io](https://img.shields.io/crates/v/licensebat-js?label=licensebat-js&style=flat-square)
-![Crates.io](https://img.shields.io/crates/v/licensebat-dart?label=licensebat-dart&style=flat-square)
-![Crates.io](https://img.shields.io/crates/v/licensebat-rust?label=licensebat-rust&style=flat-square)
+[![Crates.io](https://img.shields.io/crates/v/licensebat-js?label=licensebat-js&style=flat-square)](https://crates.io/crates/licensebat-js)
+[![Crates.io](https://img.shields.io/crates/v/licensebat-dart?label=licensebat-dart&style=flat-square)](https://crates.io/crates/licensebat-dart)
+[![Crates.io](https://img.shields.io/crates/v/licensebat-rust?label=licensebat-rust&style=flat-square)](https://crates.io/crates/licensebat-rust)
 
 ## Supporting a new language
 

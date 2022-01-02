@@ -12,7 +12,6 @@ pub type RetrievedDependencyStream<'a> = FuturesUnordered<BoxFuture<'a, Retrieve
 /// Result returning either a [`RetrievedDependencyStream`] or an [`Error`]
 pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<'a>, Error>;
 
-// TODO: REMOVE DEPENDENCIES FROM serde_json, serde_value, cargo_lock, yarn_lock
 /// Error raised by a collector while parsing/getting the dependencies.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
