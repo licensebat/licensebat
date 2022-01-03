@@ -1,5 +1,6 @@
 use structopt::StructOpt;
 
+/// Struct representing the args of the CLI.
 #[derive(Debug, StructOpt, Clone)]
 #[structopt(
     name = "🦇  Licensebat",

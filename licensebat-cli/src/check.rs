@@ -6,16 +6,18 @@ use std::sync::Arc;
 const LICENSE_CACHE: &[u8] = std::include_bytes!("../license-cache.bin.zstd");
 
 #[derive(Debug, thiserror::Error)]
-pub enum CheckError {
+enum CheckError {
     #[error("Error reading dependency file: {0}")]
     DependencyFile(#[from] std::io::Error),
 }
 
-/// Check the dependencies of a project.
+/// Checks the dependencies of a project.
 /// This is the main entry point of the CLI.
 /// # Errors
 ///
-/// Errors can be caused by anything.
+/// Errors can be caused by many causes, including:
+/// - Reading a dependency manifest file (package-lock.json, yarn.lock, etc.)
+/// - Reading the .licrc file
 pub async fn run(cli: Cli) -> anyhow::Result<Vec<RetrievedDependency>> {
     tracing::info!(
         dependency_file = %cli.dependency_file,

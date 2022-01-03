@@ -1,3 +1,4 @@
+//! CLI executable logic lives here.
 #![doc(html_logo_url = "https://licensebat.com/images/not_used/logo_red_ferris.png")]
 #![doc(html_favicon_url = "https://licensebat.com/images/not_used/favicons_red/favicon.ico")]
 #![warn(missing_docs)]
@@ -6,15 +7,6 @@ use structopt::StructOpt;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // with the cli we're not constrained to normal files
-    // we can also get into the dependency directory itself and
-    // traverse it.
-    // This basically means we can either parse a dependency manifest
-    // or some directory and that the collectors don't need a specific api. So, for each supported language a different strategy may be used.
-
-    // The user has to provide a list of languages supported and then
-    // for each language, a strategy will be used.
-
     dotenv::dotenv().ok();
     set_up_tracing();
     let cli = licensebat_cli::Cli::from_args();
