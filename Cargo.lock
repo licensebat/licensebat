@@ -802,7 +802,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-dart"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "askalono",
  "futures",
@@ -818,7 +818,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-js"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "futures",
  "licensebat-core",
@@ -832,7 +832,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-rust"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "anyhow",
  "askalono",

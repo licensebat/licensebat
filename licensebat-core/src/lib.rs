@@ -1,8 +1,3 @@
-#![doc(html_logo_url = "https://licensebat.com/images/not_used/logo_red_ferris.png")]
-#![doc(html_favicon_url = "https://licensebat.com/images/not_used/favicons_red/favicon.ico")]
-#![allow(clippy::module_name_repetitions)]
-#![warn(missing_docs)]
-
 //! Core types and traits for [licensebat-cli].
 //!
 //! Libraries authors that want to provide [`Collector`] implementations should use this crate.
@@ -24,6 +19,10 @@
 //! [licensebat-cli]: https://docs.rs/licensebat-cli/latest/licensebat_cli/
 //! [`RetrievedDependencyStreamResult`]: collector::RetrievedDependencyStreamResult
 //! [`cargo-metadata`]: https://docs.rs/cargo_metadata/latest/cargo_metadata
+#![doc(html_logo_url = "https://licensebat.com/images/not_used/logo_red_ferris.png")]
+#![doc(html_favicon_url = "https://licensebat.com/images/not_used/favicons_red/favicon.ico")]
+#![allow(clippy::module_name_repetitions)]
+#![warn(missing_docs)]
 
 pub mod collector;
 mod dependency;

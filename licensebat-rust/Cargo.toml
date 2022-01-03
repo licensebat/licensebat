@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-rust"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your Rust dependencies"
