@@ -25,6 +25,10 @@ Note that this app is **totally free for open source projects**.
 
 It has paid tiers for commercial projects, although you can still leverage the free tier if you don't have many changes in your repository.
 
+## Licensebat CLI
+
+If you want to learn more about the CLI, take a look at the [project's README.md](./licensebat-cli/README.md). There you will find information about how to use it.
+
 ## Supported languages
 
 These are the languages that `Licensebat` is supporting right now:
