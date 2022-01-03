@@ -1,3 +1,16 @@
+//! Collectors for Rust dependencies
+//!
+//! A [`Collector`] is responsible for extracting the dependencies of a particular project and then get information about them, usually by using a [`Retriever`].
+//!
+//! This crate currently exposes one [`FileCollector`] implementation that uses a [`Retriever`].
+//!
+//! It's important to notice that a [`Collector`] is generic over a [`Retriever`] (or several).
+//!
+//! This is useful so we can mock the [`Retriever`] in our tests.
+//!
+//! [`Collector`]: licensebat_core::Collector
+//! [`FileCollector`]: licensebat_core::FileCollector
+//! [`Retriever`]: crate::retriever::docs_rs::Retriever
 use crate::retriever::{self, docs_rs::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
@@ -8,13 +21,20 @@ use licensebat_core::{
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
 
-/// Rust dependency collector
+/// Rust dependency collector.
+///
+/// It will parse the content of the `Cargo.lock` file and get information about the dependencies by scraping the `docs.rs` website.
 #[derive(Debug)]
 pub struct Rust<R: Retriever> {
     docs_rs_retriever: Arc<R>,
 }
 
 impl<R: Retriever> Rust<R> {
+    /// Creates a new [`Rust`] [`FileCollector`].
+    ///
+    /// # Arguments
+    ///
+    /// * `docs_rs_retriever` - [`Retriever`] for the docs.rs API.
     #[must_use]
     pub fn new(docs_rs_retriever: R) -> Self {
         Self {
@@ -24,6 +44,9 @@ impl<R: Retriever> Rust<R> {
 }
 
 impl Rust<retriever::DocsRs> {
+    /// Creates a new [`Rust`] [`FileCollector`] that uses a [`retriever::DocsRs`].
+    ///
+    /// It's basically sintactic sugar to save you from instantiating the [`retriever::DocsRs`].
     #[must_use]
     pub fn with_docs_rs_retriever(
         client: reqwest::Client,

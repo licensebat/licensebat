@@ -1,3 +1,12 @@
+//! [`Retriever`] that uses the [Docs.rs website].
+//!
+//! Here you can find both the trait and the implementation.
+//!
+//! Usually, [`Collectors`](licensebat_core::Collector) are generic over a [`Retriever`] (or several). This comes in handy for mocking the [`Retriever`] in our tests.
+//!
+//! [`Retriever`]: crate::retriever::docs_rs::Retriever
+//! [Docs.rs website]: https://docs.rs/
+
 use super::utils::crates_io_retrieved_dependency;
 use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
@@ -16,13 +25,25 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
 }
 
+/// [`docs.rs`] [`Retriever`] implementation.
+///
+/// It uses [`reqwest::Client`] to scrap the [`docs.rs`] website and retrieve the metadata of a dependency.
+///
+/// Note that when a crate is published it takes a while for the [`docs.rs`] website to compile it, so it can take a while to retrieve the metadata of recently uploaded crate.
+///
+/// You can provide yourself an instance of [`reqwest::Client`] by using the [`DocsRs::new`] constructor.
+///
+/// If you use [`DocsRs::default`], it will instantiate a new [`reqwest::Client`] under the hood.
+///
+/// [`docs.rs`]: https://docs.rs
 pub struct DocsRs {
     client: Client,
     store: Arc<Option<Store>>,
 }
 
 impl DocsRs {
-    /// Creates a new [`DocsRs`] [`Retriever`] using the given [`reqwest::Client`].
+    /// Creates a new [`Retriever`].
+    /// If you want to reuse a [`reqwest::Client`] pool consider using the [`DocsRs::new`] method.
     #[must_use]
     pub const fn new(client: Client, store: Arc<Option<Store>>) -> Self {
         Self { client, store }
@@ -30,7 +51,8 @@ impl DocsRs {
 }
 
 impl Default for DocsRs {
-    /// Creates a new [`DocsRs`] [`Retriever`].
+    /// Creates a new [`Retriever`] using the given [`reqwest::Client`].
+    /// If you don't want to pass a [`reqwest::Client`] instance, consider using the [`DocsRs::default`] method.
     fn default() -> Self {
         Self::new(Client::new(), Arc::new(None))
     }
@@ -228,4 +250,4 @@ async fn get_license_from_docs_rs(
 
 #[derive(Error, Debug)]
 #[error("DocRs Error: {0}")]
-pub struct Error(String);
+struct Error(String);

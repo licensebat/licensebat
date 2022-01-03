@@ -9,6 +9,8 @@ use std::sync::Arc;
 use tracing::instrument;
 
 /// Yarn dependency [`FileCollector`] generic over [`Retriever`].
+///
+/// This [`FileCollector`] parses a `yarn.lock` file and then retrieves information about the dependencies from the npm registry API.
 #[derive(Debug)]
 pub struct Yarn<R: Retriever> {
     retriever: Arc<R>,

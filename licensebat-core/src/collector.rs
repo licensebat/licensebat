@@ -1,7 +1,4 @@
 //! Collector traits.
-//!
-//!
-
 use crate::dependency::RetrievedDependency;
 use futures::{future::BoxFuture, stream::FuturesUnordered};
 use std::fmt::Debug;

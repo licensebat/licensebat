@@ -16,7 +16,6 @@
 //! [`Collector`]: licensebat_core::Collector
 //! [`FileCollector`]: licensebat_core::FileCollector
 //! [`Retriever`]: crate::retriever::npm::Retriever
-//!
 mod common;
 mod npm;
 mod npm_dependency;

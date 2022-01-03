@@ -12,12 +12,15 @@ use std::sync::Arc;
 use tracing::instrument;
 
 /// NPM dependency [`FileCollector`] generic over [`Retriever`].
+///
+/// This [`FileCollector`] parses a `package-lock.json` file and then retrieves information about the dependencies from the npm registry API.
 #[derive(Debug, Clone)]
 pub struct Npm<R: Retriever> {
     retriever: Arc<R>,
 }
 
 impl Default for Npm<retriever::Npm> {
+    /// Creates a new [`Npm`] [`FileCollector`] that uses a [`retriever::Npm`].
     fn default() -> Self {
         let retriever = retriever::Npm::default();
         Self::new(retriever)

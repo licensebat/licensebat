@@ -1,3 +1,12 @@
+//! [`Retriever`] that uses the [pub.dev website].
+//!
+//! Here you can find both the trait and the implementation.
+//!
+//! Usually, [`Collectors`](licensebat_core::Collector) are generic over a [`Retriever`] (or several). This comes in handy for mocking the [`Retriever`] in our tests.
+//!
+//! [`Retriever`]: crate::retriever::hosted::Retriever
+//! [pub.dev website]: https://pub.dev/
+
 use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
 use licensebat_core::{Comment, Dependency, RetrievedDependency};
@@ -17,13 +26,23 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
 }
 
+/// [`pub.dev`] [`Retriever`] implementation.
+///
+/// It uses [`reqwest::Client`] to scrap the [`pub.dev`] website and retrieve the metadata of a dependency.
+///
+/// You can provide yourself an instance of [`reqwest::Client`] by using the [`Hosted::new`] constructor.
+///
+/// If you use [`Hosted::default`], it will instantiate a new [`reqwest::Client`] under the hood.
+///
+/// [`pub.dev`]: https://pub.dev
 pub struct Hosted {
     client: Client,
     store: Arc<Option<Store>>,
 }
 
 impl Hosted {
-    /// Creates a [`Retriever`] reusing a [`reqwest::Client`]
+    /// Creates a new [`Retriever`].
+    /// If you want to reuse a [`reqwest::Client`] pool consider using the [`Hosted::new`] method.
     #[must_use]
     pub fn new(client: Client, store: Arc<Option<Store>>) -> Self {
         Self { client, store }
@@ -31,6 +50,8 @@ impl Hosted {
 }
 
 impl Default for Hosted {
+    /// Creates a new [`Retriever`] using the given [`reqwest::Client`].
+    /// If you don't want to pass a [`reqwest::Client`] instance, consider using the [`Hosted::default`] method.
     fn default() -> Self {
         Self::new(Client::new(), Arc::new(None))
     }

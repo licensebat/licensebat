@@ -4,7 +4,7 @@
 //!
 //! Here you can find both the trait and the implementation.
 //!
-//! Usually, [`Collectors`](crate::collector::Collector) are generic over a [`Retriever`] (or several). This comes in handy for mocking the [`Retriever`] in our tests.
+//! Usually, [`Collectors`](licensebat_core::Collector) are generic over a [`Retriever`] (or several). This comes in handy for mocking the [`Retriever`] in our tests.
 //!
 //! [`Retriever`]: crate::retriever::npm::Retriever
 use crate::retriever::npm_metadata::NpmMetadata;

@@ -1,3 +1,14 @@
+//! Collectors for Dart dependencies
+//!
+//! A [`Collector`] is responsible for extracting the dependencies of a particular project and then get information about them, usually by using a [`Retriever`].
+//!
+//! It's important to notice that a [`Collector`] is generic over a [`Retriever`] (or several).
+//!
+//! This is useful so we can mock the [`Retriever`] in our tests.
+//!
+//! [`Collector`]: licensebat_core::Collector
+//! [`FileCollector`]: licensebat_core::FileCollector
+//! [`Retriever`]: crate::retriever::hosted::Retriever
 mod dart_dependency;
 
 use self::dart_dependency::{DartDependencies, DartDependency};
@@ -10,13 +21,16 @@ use licensebat_core::{
 use std::sync::Arc;
 use tracing::instrument;
 
-/// Dart Dependency Collector
+/// Dart Dependency Collector.
+///
+/// It will parse the content of the `pubspec.yaml` file and get information about the dependencies scraping the `pub.dev` website.
 #[derive(Debug, Clone)]
 pub struct Dart<R: Retriever> {
     retriever: Arc<R>,
 }
 
 impl Default for Dart<retriever::Hosted> {
+    /// Creates a new [`Dart`] [`FileCollector`] that uses a [`retriever::Hosted`].
     fn default() -> Self {
         let retriever = retriever::Hosted::default();
         Self::new(retriever)
@@ -24,6 +38,7 @@ impl Default for Dart<retriever::Hosted> {
 }
 
 impl<R: Retriever> Dart<R> {
+    /// Creates a new [`Dart`] [`FileCollector`].
     #[must_use]
     pub fn new(hosted_retriever: R) -> Self {
         Self {
@@ -33,6 +48,9 @@ impl<R: Retriever> Dart<R> {
 }
 
 impl Dart<retriever::Hosted> {
+    /// Creates a new [`Dart`] [`FileCollector`] that uses a [`retriever::Hosted`].
+    ///
+    /// It's basically sintactic sugar to save you from instantiating the [`retriever::Hosted`].
     #[must_use]
     pub fn with_hosted_retriever(
         client: reqwest::Client,

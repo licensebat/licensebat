@@ -1,7 +1,6 @@
 //! Exposes a struct to manage the `.licrc` file information and validate the dependencies accordingly.
 //!
-//! When using the `licrc-from-file` feature, a [`LicRc::from_relative_path`] associated funcition will be available for you to load the information from a file.
-
+//! When using the `licrc-from-file` feature, a [`LicRc::from_relative_path`] associated function will be available for you to load the information from a file.
 use crate::RetrievedDependency;
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
