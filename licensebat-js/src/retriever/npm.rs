@@ -1,3 +1,12 @@
+//! [`Retriever`] that uses the [npm API](https://registry.npmjs.org/).
+//!
+//! Note that this API is subjected to rate limits and may fail from time to time.
+//!
+//! Here you can find both the trait and the implementation.
+//!
+//! Usually, [`Collectors`](crate::collector::Collector) are generic over a [`Retriever`] (or several). This comes in handy for mocking the [`Retriever`] in our tests.
+//!
+//! [`Retriever`]: crate::retriever::npm::Retriever
 use crate::retriever::npm_metadata::NpmMetadata;
 use futures::{
     future::{self, BoxFuture},
@@ -8,15 +17,23 @@ use reqwest::Client;
 use serde_json::Value;
 use tracing::instrument;
 
-/// Trait used by the [`Npm`] struct to retrieve dependencies.
+/// Trait implemented by the [`Npm`] struct to retrieve dependencies.
 pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// Future that resolves to a [`RetrievedDependency`].
     /// It cannot fail.
+    /// If there's some error while retrieving the dependency, it will return the error in the [`RetrievedDependency`]'s `error` field.
     type Response: Future<Output = RetrievedDependency> + Send;
     /// Validates dependency's information from the original source.
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
 }
 
+/// Npm [`Retriever`] implementation.
+///
+/// It uses [`reqwest::Client`] to connect to the npm registry and retrieve the metadata of a dependency.
+///
+/// You can provide yourself an instance of [`reqwest::Client`] by using the [`Npm::new`] constructor.
+///
+/// If you use [`Npm::default`], it will instantiate a new [`reqwest::Client`] under the hood.
 #[derive(Debug, Clone)]
 pub struct Npm {
     client: Client,
@@ -24,7 +41,7 @@ pub struct Npm {
 
 impl Default for Npm {
     /// Creates a new [`Retriever`].
-    /// If you want to reuse a [`reqwest::Client`] pool consider using the `new` method.
+    /// If you want to reuse a [`reqwest::Client`] pool consider using the [`Npm::new`] method.
     fn default() -> Self {
         Self::new(Client::new())
     }
@@ -32,6 +49,7 @@ impl Default for Npm {
 
 impl Npm {
     /// Creates a new [`Retriever`] using the given [`reqwest::Client`].
+    /// If you don't want to pass a [`reqwest::Client`] instance, consider using the [`Npm::default`] method.
     #[must_use]
     pub const fn new(client: Client) -> Self {
         Self { client }
@@ -41,8 +59,7 @@ impl Npm {
 impl Retriever for Npm {
     type Response = BoxFuture<'static, RetrievedDependency>;
 
-    /// Gets a dependency from NPM.
-    /// This method attacks the npm api.
+    /// Gets a dependency from the [`npm API`](https://registry.npmjs.org/).
     #[instrument(skip(self), level = "debug")]
     fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
         let url = format!("https://registry.npmjs.org/{}", dep_name);

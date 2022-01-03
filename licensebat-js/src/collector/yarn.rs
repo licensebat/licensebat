@@ -8,7 +8,7 @@ use licensebat_core::{
 use std::sync::Arc;
 use tracing::instrument;
 
-/// Yarn dependency collector
+/// Yarn dependency [`FileCollector`] generic over [`Retriever`].
 #[derive(Debug)]
 pub struct Yarn<R: Retriever> {
     retriever: Arc<R>,
@@ -22,6 +22,7 @@ impl Default for Yarn<retriever::Npm> {
 }
 
 impl<R: Retriever> Yarn<R> {
+    /// Creates a new [`Yarn`] [`FileCollector`].
     pub fn new(retriever: R) -> Self {
         Self {
             retriever: Arc::new(retriever),

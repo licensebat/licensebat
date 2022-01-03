@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
+/// Holds information about dependency metadata coming from the npm registry.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NpmMetadata {
     pub name: String,
@@ -17,6 +18,7 @@ pub struct NpmMetadata {
 }
 
 impl NpmMetadata {
+    /// Returns the license/s of the dependency.
     #[must_use]
     pub fn get_licenses(self) -> Option<Vec<String>> {
         if self.licenses.is_some() {

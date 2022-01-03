@@ -11,7 +11,7 @@ use licensebat_core::{
 use std::sync::Arc;
 use tracing::instrument;
 
-/// NPM dependency collector
+/// NPM dependency [`FileCollector`] generic over [`Retriever`].
 #[derive(Debug, Clone)]
 pub struct Npm<R: Retriever> {
     retriever: Arc<R>,
@@ -25,6 +25,7 @@ impl Default for Npm<retriever::Npm> {
 }
 
 impl<R: Retriever> Npm<R> {
+    /// Creates a new [`Npm`] [`FileCollector`].
     pub fn new(retriever: R) -> Self {
         Self {
             retriever: Arc::new(retriever),

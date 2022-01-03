@@ -35,7 +35,7 @@ pub trait Collector: Debug + Send + Sync {
     fn get_name(&self) -> String;
 }
 
-/// Trait to be implemented for every [`Collector`] dealing with a dependency file.
+/// Trait to be implemented for every [`Collector`] dealing with a dependency file (package-lock.json, pubspec.yaml...).
 pub trait FileCollector: Collector {
     /// Gets the name of the file holding all the dependencies.
     /// i.e. for npm package-lock.json, for rust cargo.lock
