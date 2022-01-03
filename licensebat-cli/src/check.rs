@@ -11,14 +11,24 @@ enum CheckError {
     DependencyFile(#[from] std::io::Error),
 }
 
+/// Result of the dependency validation.
+pub struct RunResult {
+    /// The [`LicRc`] file.
+    pub licrc: LicRc,
+    /// The validated dependencies.
+    pub dependencies: Vec<RetrievedDependency>,
+}
+
 /// Checks the dependencies of a project.
+///
 /// This is the main entry point of the CLI.
+///
 /// # Errors
 ///
 /// Errors can be caused by many causes, including:
 /// - Reading a dependency manifest file (package-lock.json, yarn.lock, etc.)
 /// - Reading the .licrc file
-pub async fn run(cli: Cli) -> anyhow::Result<Vec<RetrievedDependency>> {
+pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     tracing::info!(
         dependency_file = %cli.dependency_file,
         "Licensebat running! Using {}", cli.dependency_file
@@ -69,7 +79,10 @@ pub async fn run(cli: Cli) -> anyhow::Result<Vec<RetrievedDependency>> {
     }
 
     tracing::info!("Done!");
-    Ok(validated_deps)
+    Ok(RunResult {
+        licrc,
+        dependencies: validated_deps,
+    })
 }
 
 async fn get_dep_file_content(dependency_file: &str) -> Result<String, CheckError> {

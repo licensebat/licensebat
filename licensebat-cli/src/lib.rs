@@ -26,6 +26,8 @@
 //!
 //! ## How to use it
 //!
+//! Just run this:
+//!
 //! ```bash
 //! licensebat --dependency-file ./Cargo.lock
 //! ```
@@ -37,16 +39,42 @@
 //! ```txt
 //! USAGE:
 //! licensebat [OPTIONS] --dependency-file <dependency-file>
-//!
 //! FLAGS:
 //!     -h, --help       Prints help information
 //!     -V, --version    Prints version information
-//!
 //! OPTIONS:
 //!     -d, --dependency-file <dependency-file>    Path to the file containing the dependencies of the project. i.e.
 //!                                                package-lock.json for npm projects, yarn.lock for yarn projects, etc
 //!     -l, --licrc-file <licrc-file>              Path to the .licrc file [default: .licrc]
-//! ````
+//! ```
+//!
+//! ## The .licrc file
+//!
+//! But before running, you have to be sure you have a `.licrc` file available in your project.
+//!
+//! You can get a copy from this [gist](https://gist.github.com/robertohuertasm/4770217e40209ad6a65acb1d725c3f87).
+//! It's a `TOML` file with configuration about which are the accepted or denied licenses, ignored dependencies
+//! or whether to block or not the PR (exit code == 1) in case it finds invalid dependencies.
+//!
+//! ```toml
+//! [licenses]
+//! # This indicates which are the only licenses that Licensebat will accept.
+//! # The rest will be flagged as not allowed.
+//! accepted = ["MIT", "MSC", "BSD"]
+//! # This will indicate which licenses are not accepted.
+//! # The rest will be accepted, except for the unknown licenses or dependencies without licenses.
+//! # unaccepted = ["LGPL"]
+//! # Note that only one of the previous options can be enabled at once.
+//! # If both of them are informed, only accepted will be considered.
+//!
+//! [dependencies]
+//! # This will allow users to flag some dependencies so that Licensebat will not check for their license.
+//! ignored=["ignored_dep1", "ignored_dep2"]
+//!
+//! [behavior]
+//! # False by default (always exit code == 0), if true, it will exit with code 1 in case some invalid dependency is found.
+//! do_not_block_pr = false
+//! ```
 //!
 //! ## Logs
 //!
@@ -63,6 +91,6 @@
 mod check;
 mod cli;
 
-pub use check::run;
+pub use check::{run, RunResult};
 #[doc(hidden)]
 pub use cli::Cli;
