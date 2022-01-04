@@ -26,7 +26,7 @@ use tracing::instrument;
 /// It will parse the content of the `Cargo.lock` file and get information about the dependencies by scraping the `docs.rs` website.
 #[derive(Debug)]
 pub struct Rust<R: Retriever> {
-    docs_rs_retriever: Arc<R>,
+    docs_rs_retriever: R,
 }
 
 impl<R: Retriever> Rust<R> {
@@ -37,9 +37,7 @@ impl<R: Retriever> Rust<R> {
     /// * `docs_rs_retriever` - [`Retriever`] for the docs.rs API.
     #[must_use]
     pub fn new(docs_rs_retriever: R) -> Self {
-        Self {
-            docs_rs_retriever: Arc::new(docs_rs_retriever),
-        }
+        Self { docs_rs_retriever }
     }
 }
 
@@ -70,17 +68,16 @@ impl<R: Retriever> FileCollector for Rust<R> {
     #[instrument(skip(self))]
     fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
-        let retriever = &self.docs_rs_retriever;
 
         Ok(lockfile
             .packages
             .into_iter()
-            .map(|p| get_dependency(p, retriever.clone()).boxed())
+            .map(|p| get_dependency(p, &self.docs_rs_retriever).boxed())
             .collect())
     }
 }
 
-async fn get_dependency<R: Retriever>(package: Package, retriever: Arc<R>) -> RetrievedDependency {
+async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> RetrievedDependency {
     if let Some(source) = package.source {
         // Registries
         if source.is_registry() {
