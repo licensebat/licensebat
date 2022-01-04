@@ -5,7 +5,6 @@ use crate::{
 use licensebat_core::{
     collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
 };
-use std::sync::Arc;
 use tracing::instrument;
 
 /// Yarn dependency [`FileCollector`] generic over [`Retriever`].
@@ -13,7 +12,7 @@ use tracing::instrument;
 /// This [`FileCollector`] parses a `yarn.lock` file and then retrieves information about the dependencies from the npm registry API.
 #[derive(Debug)]
 pub struct Yarn<R: Retriever> {
-    retriever: Arc<R>,
+    retriever: R,
 }
 
 impl Default for Yarn<retriever::Npm> {
@@ -26,9 +25,7 @@ impl Default for Yarn<retriever::Npm> {
 impl<R: Retriever> Yarn<R> {
     /// Creates a new [`Yarn`] [`FileCollector`].
     pub fn new(retriever: R) -> Self {
-        Self {
-            retriever: Arc::new(retriever),
-        }
+        Self { retriever }
     }
 }
 
