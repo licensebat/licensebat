@@ -219,8 +219,8 @@ mod tests {
         };
 
         let store = Arc::new(askalono::Store::from_cache(LICENSE_CACHE).ok());
-        let retriever = Arc::new(retriever::Hosted::new(reqwest::Client::new(), store));
-        let res = get_dependency(dep, retriever).await;
+        let retriever = retriever::Hosted::new(reqwest::Client::new(), store);
+        let res = get_dependency(dep, &retriever).await;
         assert_eq!(res.name, dependency_name);
         assert!(res.licenses.is_some());
     }
