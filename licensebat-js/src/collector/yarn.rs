@@ -52,7 +52,6 @@ impl<R: Retriever> FileCollector for Yarn<R> {
                 version: entry.version.to_owned(),
             });
 
-        let retriever = self.retriever.clone();
-        Ok(retrieve_from_npm(npm_deps, &retriever))
+        Ok(retrieve_from_npm(npm_deps, &self.retriever))
     }
 }
