@@ -26,7 +26,7 @@ use tracing::instrument;
 /// It will parse the content of the `pubspec.yaml` file and get information about the dependencies scraping the `pub.dev` website.
 #[derive(Debug, Clone)]
 pub struct Dart<R: Retriever> {
-    retriever: Arc<R>,
+    retriever: R,
 }
 
 impl Default for Dart<retriever::Hosted> {
@@ -42,7 +42,7 @@ impl<R: Retriever> Dart<R> {
     #[must_use]
     pub fn new(hosted_retriever: R) -> Self {
         Self {
-            retriever: Arc::new(hosted_retriever),
+            retriever: hosted_retriever,
         }
     }
 }
@@ -78,7 +78,7 @@ impl<R: Retriever> FileCollector for Dart<R> {
 
         Ok(dependencies
             .into_iter()
-            .map(|dep| get_dependency(dep, self.retriever.clone()).boxed())
+            .map(|dep| get_dependency(dep, &self.retriever).boxed())
             .collect())
     }
 }
@@ -92,7 +92,7 @@ impl<R: Retriever> FileCollector for Dart<R> {
 /// git dependencies will require to access GitHub repos, check the path and ref, and look for a LICENSE file.
 async fn get_dependency<R: Retriever>(
     dependency: DartDependency,
-    retriever: Arc<R>,
+    retriever: &R,
 ) -> RetrievedDependency {
     match dependency.source.as_ref() {
         "sdk" => resolve_sdk_dependency(&dependency),
@@ -119,7 +119,7 @@ fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
 #[allow(clippy::too_many_lines, clippy::single_match_else)]
 async fn resolve_hosted_dependency<R: Retriever>(
     dependency: DartDependency,
-    retriever: Arc<R>,
+    retriever: &R,
 ) -> RetrievedDependency {
     if let Some(dependency_name) = &dependency.description.name {
         retriever
