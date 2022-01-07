@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-rust"
-version = "0.0.6"
+version = "0.0.7"
 edition = "2021"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your Rust dependencies"
@@ -30,7 +30,7 @@ anyhow = "1.0"
 # docs rs
 easy-scraper = "0.2.0"
 html2text = "0.2.1"
-askalono = "0.4.3"
+askalono = "0.4.4"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros"] }
