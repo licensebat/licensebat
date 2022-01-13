@@ -120,7 +120,7 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> Retrie
             is_valid: false,
             is_ignored: false,
             error: Some("Crate type not Supported".to_owned()),
-            licenses:  Some(vec!["NO-LICENSE".to_string()]),
+            licenses:  None,
             comment: Some(Comment::removable("Git, Local and Remote registries are not supported yet. We're working on it. We're marking this as invalid by default so you can check the validity of the license. Consider adding this dependency to the ignored list in the .licrc configuration file if you trust the source.")),
         }
 }

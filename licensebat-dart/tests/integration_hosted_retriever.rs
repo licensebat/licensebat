@@ -100,7 +100,7 @@ mod integration_hosted_retriever {
             .get_dependency("vector_math", "2.0.8")
             .await
             .unwrap();
-        assert_eq!(Some(vec!["NO-LICENSE".to_string()]), dep.licenses);
+        assert_eq!(None, dep.licenses);
         assert!(dep.comment.is_some());
         assert_eq!(
             dep.comment
