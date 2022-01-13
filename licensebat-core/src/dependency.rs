@@ -61,7 +61,7 @@ impl RetrievedDependency {
             version,
             dependency_type,
             url,
-            licenses: licenses.or_else(|| Some(vec!["NO-LICENSE".to_string()])),
+            licenses,
             validated: false,
             is_valid: has_licenses && error.is_none(),
             is_ignored: false,
@@ -76,7 +76,7 @@ impl RetrievedDependency {
                 if has_licenses {
                     None
                 } else {
-                    Some(Comment::removable("Consider ignoring this specific dependency. You can also accept the NO-LICENSE key."))
+                    Some(Comment::removable("Consider manually checking this dependency's license. Remember this: https://choosealicense.com/no-permission/ and ignore it if you feel confident about it to avoid this warning."))
                 }
             }),
         }

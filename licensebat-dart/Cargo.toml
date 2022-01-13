@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-dart"
-version = "0.0.7"
+version = "0.0.8"
 edition = "2021"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your Dart dependencies"
@@ -16,7 +16,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 # core
-licensebat-core = { path = "../licensebat-core", version = "0.0.6" }
+licensebat-core = { path = "../licensebat-core", version = "0.0.7" }
 # serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
