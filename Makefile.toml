@@ -97,6 +97,24 @@ run_task = [
     { name = ["test-unit", "test-integration"] },
 ]
 
+[tasks.nextest-unit]
+workspace = false
+install_crate = "cargo-nextest"
+command = "cargo"
+args = ["nextest", "run", "--lib", "--bins"]
+
+[tasks.nextest-integration]
+workspace = false
+install_crate = "cargo-nextest"
+command = "cargo"
+args = ["nextest", "run", "--test", "integration_*"]
+
+[tasks.nextest-all]
+workspace = false
+install_crate = "cargo-nextest"
+command = "cargo"
+args = ["nextest", "run"]
+
 [tasks.all]
 workspace = false
 dependencies = [
