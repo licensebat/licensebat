@@ -149,7 +149,7 @@ impl Retriever for Hosted {
                                 );
                                 // TODO:  MAGIC NUMBER HERE! THIS SHOULD BE CONFIGURABLE
                                 let (license, comment) = if result.score >= 0.8 {
-                                    let comment = if Some(result.name.replace("-", " ")) == declared_license {
+                                    let comment = if Some(result.name.replace('-', " ")) == declared_license {
                                         None
                                     } else {
                                         let comment = format!(
