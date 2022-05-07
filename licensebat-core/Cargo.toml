@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-core"
-version = "0.0.7"
+version = "0.0.9"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "Types and Traits for building Licensebat libraries"
 edition = "2021"
@@ -22,7 +22,7 @@ licrc-from-file = ["toml"]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.8"
-yarn-lock-parser = "0.1.1"
+yarn-lock-parser = "0.3.0"
 cargo-lock = "7.0.1"
 # utils
 futures = { version = "0.3.6" } 
