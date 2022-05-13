@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        rust: [stable]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            rust: stable
+            artifact_name: licensebat
+            asset_name: licensebat_linux.zip
+          - os: macOS-latest
+            rust: stable
+            artifact_name: licensebat
+            asset_name: licensebat_osx.zip
+          - os: windows-latest
+            rust: stable
+            artifact_name: licensebat.exe
+            asset_name: licensebat_windows.zip
+    steps:
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: ${{ matrix.rust }}
+            override: true
+            target: x86_64-unknown-linux-musl
+      - name: Install musl tools
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get install -y musl-tools
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build the crate for release
+        shell: bash
+        run: |
+          if [[ "${{matrix.os}}" == "ubuntu-latest" ]]
+          then
+            cargo build --release --target x86_64-unknown-linux-musl
+          else
+           cargo build --release
+          fi
+          ls -la target/release
+      - name: Apply upx
+        uses: svenstaro/upx-action@v1-release
+        with:
+          file: target/release/${{ matrix.artifact_name }}
+      - name: Zip the artifact
+        shell: bash
+        run: |
+          echo "Setting exec permissions"
+          chmod +x ./target/release/${{ matrix.artifact_name }}
+          echo "Zipping"
+          if [[ "${{matrix.os}}" == "macOS-latest" ]]
+          then
+            zip ${{matrix.asset_name}} target/release/${{matrix.artifact_name}}
+          else
+            7z a ${{matrix.asset_name}} target/release/${{matrix.artifact_name}}
+          fi
+      - name: Upload binaries to GitHub release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.asset_name }}
+          asset_name: ${{ matrix.asset_name }}
+          tag: ${{ github.ref }}
