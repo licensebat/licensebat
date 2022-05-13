@@ -24,7 +24,7 @@ impl NpmMetadata {
         if self.licenses.is_some() {
             self.licenses
         } else {
-            self.license.map(|lic| vec![lic.replace("\"", "")])
+            self.license.map(|lic| vec![lic.replace('\"', "")])
         }
     }
 }
