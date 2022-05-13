@@ -32,23 +32,13 @@ jobs:
         with:
             toolchain: ${{ matrix.rust }}
             override: true
-            target: x86_64-unknown-linux-musl
-      - name: Install musl tools
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get install -y musl-tools
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build the crate for release
         shell: bash
         run: |
-          if [[ "${{matrix.os}}" == "ubuntu-latest" ]]
-          then
-            cargo build --release --target x86_64-unknown-linux-musl
-          else
            cargo build --release
-          fi
-          ls -la target/release
+           ls -la target/release
       - name: Apply upx
         uses: svenstaro/upx-action@v1-release
         with:
