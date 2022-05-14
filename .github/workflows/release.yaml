@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         rust: [stable]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-20.04, macOS-latest, windows-latest]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             rust: stable
             artifact_name: licensebat
             asset_name: licensebat_linux.zip
