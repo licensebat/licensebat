@@ -49,10 +49,7 @@ fn show_result_as_json(deps: &[RetrievedDependency]) -> anyhow::Result<()> {
 }
 
 /// Prints the dependencies in the stdout as markdown
-fn show_result_as_markdown(
-    deps: &mut [RetrievedDependency],
-    invalid_dependencies_count: usize,
-) -> () {
+fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencies_count: usize) {
     tracing::debug!("Showing results as MARKDOWN");
     let total = deps.len();
 
