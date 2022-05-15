@@ -46,6 +46,7 @@
 //!     -d, --dependency-file <dependency-file>    Path to the file containing the dependencies of the project. i.e.
 //!                                                package-lock.json for npm projects, yarn.lock for yarn projects, etc
 //!     -l, --licrc-file <licrc-file>              Path to the .licrc file [default: .licrc]
+//!     -f, --output-format <output-format>        Output format (json | markdown). Defaults to json.
 //! ```
 //!
 //! ## The .licrc file
@@ -93,4 +94,4 @@ mod cli;
 
 pub use check::{run, RunResult};
 #[doc(hidden)]
-pub use cli::Cli;
+pub use cli::{Cli, OutputFormat};
