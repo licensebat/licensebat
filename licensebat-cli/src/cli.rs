@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use structopt::StructOpt;
 
 /// Struct representing the args of the CLI.
@@ -21,4 +22,27 @@ pub struct Cli {
     /// Path to the .licrc file
     #[structopt(short, long, default_value = ".licrc")]
     pub licrc_file: String,
+    /// Output format (json | markdown). Defaults to json.
+    #[structopt(short = "f", long, default_value = "json")]
+    pub output_format: OutputFormat,
+}
+
+/// Format of the CLIs output
+#[derive(Debug, Clone)]
+pub enum OutputFormat {
+    /// Json format
+    Json,
+    /// Markdown format
+    Markdown,
+}
+
+impl FromStr for OutputFormat {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "markdown" | "md" => Ok(OutputFormat::Markdown),
+            _ => Ok(OutputFormat::Json),
+        }
+    }
 }
