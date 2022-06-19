@@ -23,10 +23,10 @@ use tracing::instrument;
 
 /// Rust dependency collector.
 ///
-/// It will parse the content of the `Cargo.lock` file and get information about the dependencies by scraping the `docs.rs` website.
+/// It will parse the content of the `Cargo.lock` file and get information about the dependencies.
 #[derive(Debug)]
 pub struct Rust<R: Retriever> {
-    docs_rs_retriever: R,
+    retriever: R,
 }
 
 impl<R: Retriever> Rust<R> {
@@ -34,10 +34,10 @@ impl<R: Retriever> Rust<R> {
     ///
     /// # Arguments
     ///
-    /// * `docs_rs_retriever` - [`Retriever`] for the docs.rs API.
+    /// * `retriever` - [`Retriever`] for the docs.rs API.
     #[must_use]
-    pub fn new(docs_rs_retriever: R) -> Self {
-        Self { docs_rs_retriever }
+    pub fn new(retriever: R) -> Self {
+        Self { retriever }
     }
 }
 
@@ -72,7 +72,7 @@ impl<R: Retriever> FileCollector for Rust<R> {
         Ok(lockfile
             .packages
             .into_iter()
-            .map(|p| get_dependency(p, &self.docs_rs_retriever).boxed())
+            .map(|p| get_dependency(p, &self.retriever).boxed())
             .collect())
     }
 }
