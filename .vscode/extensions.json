@@ -8,7 +8,7 @@
     "eamodio.gitlens",
     "belfz.search-crates-io",
     "serayuzgur.crates",
-    "matklad.rust-analyzer",
+    "rust-lang.rust-analyzer",
     "swellaby.vscode-rust-test-adapter",
     "hbenl.vscode-test-explorer",
     "humao.rest-client",
