@@ -120,7 +120,7 @@ mod integration_hosted_retriever {
             .await
             .unwrap();
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
-        assert!(dep.comment.is_none());
+        assert!(dep.comment.is_some());
         assert_eq!(dep.name, "flutter_isolate");
         assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }
