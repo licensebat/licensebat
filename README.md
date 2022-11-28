@@ -9,7 +9,7 @@
 
 `Licensebat` is a **CLI** that you can use for free to verify that the dependencies of your project follow your license policies.
 
-Let's say, for instance, that you are building a commercial application. In that case, you may consider avoiding the use of some software with a restrictive license like `GPL`.
+Let's say, for instance, that you are building a proprietary application. In that case, you may consider avoiding the use of some software with a restrictive license like `GPL`.
 
 By using `Licensebat`, you can check you don't have any dependency with such a restrictive license. Normally, it will look in all the the dependency tree of your project, so transient dependencies will also be considered.
 
