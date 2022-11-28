@@ -742,7 +742,7 @@ checksum = "8e167738f1866a7ec625567bae89ca0d44477232a4f7c52b1c7f2adc2c98804f"
 
 [[package]]
 name = "licensebat-cli"
-version = "0.0.14"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "askalono",
