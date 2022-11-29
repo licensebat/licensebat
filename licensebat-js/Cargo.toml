@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-js"
-version = "0.0.10"
+version = "0.0.11"
 edition = "2021"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your JS/TS dependencies"
@@ -15,7 +15,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 # core
-licensebat-core = { path = "../licensebat-core", version = "0.0.10" }
+licensebat-core = { path = "../licensebat-core", version = "0.0.11" }
 # serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -23,7 +23,7 @@ serde_json = "1.0"
 futures = { version = "0.3.6" } 
 tracing = "0.1"
 reqwest = { version = "0.11.1", features = ["json"] }
-yarn-lock-parser = "0.3.2"
+yarn-lock-parser = "0.4.1"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros"] }
