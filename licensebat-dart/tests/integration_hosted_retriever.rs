@@ -60,7 +60,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/fake_async/versions/1.2.0-nullsafety.1
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("fake_async", "1.1.0-nullsafety.1")
+            .get_dependency("fake_async", "1.2.0-nullsafety.1")
             .await
             .unwrap();
         assert_eq!(Some(vec!["Apache-2.0".to_string()]), dep.licenses);
@@ -70,6 +70,10 @@ mod integration_hosted_retriever {
         );
         assert_eq!(dep.name, "fake_async");
         assert_eq!(&dep.dependency_type, licensebat_dart::DART);
+        assert_eq!(
+            Some(vec![("Apache-2.0".to_string(), 1.0)]),
+            dep.suggested_licenses
+        );
     }
 
     #[tokio::test]
@@ -88,6 +92,10 @@ mod integration_hosted_retriever {
         );
         assert_eq!(dep.name, "random_color");
         assert_eq!(&dep.dependency_type, licensebat_dart::DART);
+        let suggested_licenses = dep.suggested_licenses.unwrap();
+        assert_eq!(1, suggested_licenses.len());
+        assert_eq!(suggested_licenses[0].0, "MIT");
+        assert!(suggested_licenses[0].1 > 0.9);
     }
 
     // this library analysis is 93...
@@ -123,5 +131,6 @@ mod integration_hosted_retriever {
         assert!(dep.comment.is_some());
         assert_eq!(dep.name, "flutter_isolate");
         assert_eq!(&dep.dependency_type, licensebat_dart::DART);
+        assert_eq!(Some(vec![("MIT".to_string(), 1.0)]), dep.suggested_licenses);
     }
 }

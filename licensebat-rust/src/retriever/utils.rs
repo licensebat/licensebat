@@ -7,6 +7,7 @@ pub fn crates_io_retrieved_dependency(
     licenses: Option<Vec<String>>,
     error: Option<&str>,
     comment: Option<String>,
+    suggested_licenses: Option<Vec<(String, f32)>>,
 ) -> RetrievedDependency {
     let url = format!(
         "https://crates.io/crates/{}/{}",
@@ -21,5 +22,6 @@ pub fn crates_io_retrieved_dependency(
         licenses,
         error.map(std::string::ToString::to_string),
         comment.map(Comment::removable),
+        suggested_licenses,
     )
 }

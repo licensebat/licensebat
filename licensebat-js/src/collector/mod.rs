@@ -21,5 +21,6 @@ mod npm;
 mod npm_dependency;
 mod yarn;
 
+pub use common::NPM;
 pub use npm::Npm;
 pub use yarn::Yarn;

@@ -14,7 +14,7 @@ pub struct Dependency {
 /// A dependency that has been retrieved from its source.
 /// The source can be anything, from a third party API (i.e. npm, pub.dev or crates.io APIs) to the file system.
 /// It holds information about licenses, errors while validating...
-#[derive(Serialize, Deserialize, Debug, Eq, Ord, PartialEq, PartialOrd, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Default)]
 pub struct RetrievedDependency {
     /// Dependency name.
     pub name: String,
@@ -36,6 +36,8 @@ pub struct RetrievedDependency {
     pub error: Option<String>,
     /// Comments about the license validation process.
     pub comment: Option<Comment>,
+    /// In cases where the retriever makes some sort of estimate about the license, this field will contain the suggested licenses.
+    pub suggested_licenses: Option<Vec<(String, f32)>>,
 }
 
 impl RetrievedDependency {
@@ -53,6 +55,7 @@ impl RetrievedDependency {
         licenses: Option<Vec<String>>,
         error: Option<String>,
         comment: Option<Comment>,
+        suggested_licenses: Option<Vec<(String, f32)>>,
     ) -> Self {
         let has_licenses = licenses.is_some();
 
@@ -79,6 +82,7 @@ impl RetrievedDependency {
                     Some(Comment::removable("Consider manually checking this dependency's license. Remember this: https://choosealicense.com/no-permission/ and ignore it if you feel confident about it to avoid this warning."))
                 }
             }),
+            suggested_licenses,
         }
     }
 }

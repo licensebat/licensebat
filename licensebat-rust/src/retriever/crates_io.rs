@@ -139,13 +139,20 @@ impl Retriever for CratesIo {
                     } else {
                         // TODO: ADD SUPPORT FOR MULTIPLE LICENSES by using the spdx crate
                         let licenses = vec![license.to_string()];
-                        crates_io_retrieved_dependency(&dependency, Some(licenses), None, None)
+                        crates_io_retrieved_dependency(
+                            &dependency,
+                            Some(licenses),
+                            None,
+                            None,
+                            None,
+                        )
                     }
                 } else {
                     crates_io_retrieved_dependency(
                         &dependency,
                         None,
                         Some("No license found in Crates.io API"),
+                        None,
                         None,
                     )
                 }
@@ -154,7 +161,7 @@ impl Retriever for CratesIo {
         }
         .unwrap_or_else(move |e| {
             let error = e.to_string();
-            crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
+            crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None, None)
         })
         .boxed()
     }
