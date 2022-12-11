@@ -139,7 +139,7 @@ impl Retriever for Hosted {
                         // so we'll short circuit these ones.
                         #[allow(clippy::single_match_else)]
                         match declared_license.as_deref() {
-                            Some("MIT") => retrieved_dependency(&dependency, declared_licenses, None, Some(url), None),
+                            Some("MIT") => retrieved_dependency(&dependency, declared_licenses, None, Some(url), None, None),
                             _ => {
                                 let result = store.analyze(&TextData::from(official_license.as_str()));
                                 tracing::debug!(
@@ -176,11 +176,12 @@ impl Retriever for Hosted {
                                     None,
                                     Some(url),
                                     comment.map(Comment::non_removable),
+                                    Some(vec![(result.name.to_string(), result.score)])
                                 )
                             }
                         }
                     } else {
-                        retrieved_dependency(&dependency, declared_licenses, None, Some(url), Some(Comment::removable("Using **Pub Dev Generic License**. We couldn't get the original license.")))
+                        retrieved_dependency(&dependency, declared_licenses, None, Some(url), Some(Comment::removable("Using **Pub Dev Generic License**. We couldn't get the original license.")), None)
                     }
                 })
             }).boxed()
@@ -193,6 +194,7 @@ fn retrieved_dependency(
     error: Option<String>,
     url: Option<String>,
     comment: Option<Comment>,
+    suggested_licenses: Option<Vec<(String, f32)>>,
 ) -> RetrievedDependency {
     RetrievedDependency::new(
         dependency.name.clone(),
@@ -202,6 +204,7 @@ fn retrieved_dependency(
         licenses,
         error,
         comment,
+        suggested_licenses,
     )
 }
 
@@ -210,6 +213,11 @@ fn get_imprecise_license(sibling: &ElementRef) -> Option<String> {
     let lic = sibling.inner_html();
     if lic.contains(" (") {
         let imprecise_license = &lic[..lic.find(" (").unwrap()];
+        if imprecise_license.starts_with("<img") && imprecise_license.contains("\">") {
+            return Some(
+                imprecise_license[imprecise_license.find("\">").unwrap() + 2..].to_owned(),
+            );
+        }
         Some(imprecise_license.to_owned())
     } else {
         None

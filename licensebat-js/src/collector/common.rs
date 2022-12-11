@@ -3,6 +3,7 @@ use futures::FutureExt;
 use licensebat_core::{collector::RetrievedDependencyStream, Dependency};
 use tracing::instrument;
 
+/// String used to identify the type of dependency
 pub const NPM: &str = "npm";
 
 #[instrument(skip(deps, retriever))]

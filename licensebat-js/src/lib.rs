@@ -5,5 +5,4 @@
 
 pub mod collector;
 pub mod retriever;
-/// String used to identify the type of dependency
-pub const NPM: &str = "npm";
+pub use collector::NPM;

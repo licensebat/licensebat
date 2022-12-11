@@ -124,5 +124,6 @@ fn retrieved_dependency(
         licenses,
         error.map(|e| e.to_string()),
         None,
+        None,
     )
 }

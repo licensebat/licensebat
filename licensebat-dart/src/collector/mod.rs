@@ -112,6 +112,7 @@ fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
         None,
         Some("https://github.com/flutter/flutter".to_string()),
         Some(Comment::removable("SDK dependency. **You should accept this dependency**. Consider adding **BSD-3-Clause** to the **.licrc** configuration file.")),
+        None,
     )
 }
 
@@ -130,13 +131,21 @@ async fn resolve_hosted_dependency<R: Retriever>(
                     "https://pub.dev/packages/{}/versions/{}",
                     dependency_name, dependency.version,
                 );
-                retrieved_dependency(&dependency, None, Some(e.to_string()), Some(url), None)
+                retrieved_dependency(
+                    &dependency,
+                    None,
+                    Some(e.to_string()),
+                    Some(url),
+                    None,
+                    None,
+                )
             })
     } else {
         retrieved_dependency(
             &dependency,
             None,
             Some("No name found for this dependency".to_owned()),
+            None,
             None,
             None,
         )
@@ -156,6 +165,7 @@ fn resolve_git_dependency(dependency: &DartDependency) -> RetrievedDependency {
         Some("Git source is not supported".to_string()),
         dependency.description.url.clone(),
         Some(Comment::removable("Git projects are not supported yet. We're working on it but there are too many different git hosting providers and supporting private repos is hard. We're marking this as **invalid by default** so you check for yourself the validity of the license. Consider **adding this dependency to the ignored list** in the **.licrc** configuration file if you trust the source.")),
+        None,
     )
 }
 
@@ -165,6 +175,7 @@ fn resolve_unknown_dependency(dependency: &DartDependency) -> RetrievedDependenc
         dependency,
         None,
         Some(format!("Not supported source {}", dependency.source)),
+        None,
         None,
         None,
     )
@@ -177,6 +188,7 @@ fn retrieved_dependency(
     error: Option<String>,
     url: Option<String>,
     comment: Option<Comment>,
+    suggested_licenses: Option<Vec<(String, f32)>>,
 ) -> RetrievedDependency {
     RetrievedDependency::new(
         dependency
@@ -190,6 +202,7 @@ fn retrieved_dependency(
         licenses,
         error,
         comment,
+        suggested_licenses,
     )
 }
 

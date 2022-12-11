@@ -141,7 +141,7 @@ impl Retriever for DocsRs {
                             match key.as_ref() {
                                 "license" => {
                                      // TODO: SUPPORT FOR MULTIPLE LICS HERE
-                                crates_io_retrieved_dependency(&dependency, Some(vec![value]), None, None)
+                                crates_io_retrieved_dependency(&dependency, Some(vec![value]), None, None, None)
                                 }
                                 "license-file" => {
                                     get_retrieved_dependency_from_license_file(store, crate_url, value, client, &dependency).await
@@ -149,7 +149,7 @@ impl Retriever for DocsRs {
                                 // this should never happen!
                                 _ => {
                                     tracing::error!("Unknown license key: {}", key);
-                                    crates_io_retrieved_dependency(&dependency, None, Some("Unexpected license key while parsing cargo.toml"), None)
+                                    crates_io_retrieved_dependency(&dependency, None, Some("Unexpected license key while parsing cargo.toml"), None, None)
                                 }
                             }
                         }
@@ -162,7 +162,7 @@ impl Retriever for DocsRs {
                                 &dependency.name,
                                 &dependency.version,
                             );
-                            crates_io_retrieved_dependency(&dependency, None, Some(user_error), None)
+                            crates_io_retrieved_dependency(&dependency, None, Some(user_error), None, None)
                         }
                     }
                 }
@@ -171,7 +171,7 @@ impl Retriever for DocsRs {
                     crates_io_retrieved_dependency(
                         &dependency,
                         None,
-                        Some("Error trying to parse docs.rs"), None
+                        Some("Error trying to parse docs.rs"), None, None
                     )
                 }
             };
@@ -179,7 +179,7 @@ impl Retriever for DocsRs {
             Ok::<_, anyhow::Error>(retrieved_dependency)
         }.unwrap_or_else(move |e| {
                 let error = e.to_string();
-                crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None)
+                crates_io_retrieved_dependency(&dep_clone, None, Some(error.as_str()), None, None)
             })
             .boxed()
     }
@@ -208,12 +208,13 @@ async fn get_retrieved_dependency_from_license_file(
         if let Ok((license, score)) = get_license_from_docs_rs(&client, store, &license_url).await {
             crates_io_retrieved_dependency(
                 dependency,
-                Some(vec![license]),
+                Some(vec![license.clone()]),
                 None,
                 Some(format!(
                     "Our score for this license is {:.2}%.",
                     score * 100.0
                 )),
+                Some(vec![(license, score)]),
             )
         } else {
             crates_io_retrieved_dependency(
@@ -224,11 +225,18 @@ async fn get_retrieved_dependency_from_license_file(
                     license_url
                 )),
                 None,
+                None,
             )
         }
     } else {
         tracing::error!("No askalono store present in Rust docs.rs retriever");
-        crates_io_retrieved_dependency(dependency, None, Some("No askalono store present"), None)
+        crates_io_retrieved_dependency(
+            dependency,
+            None,
+            Some("No askalono store present"),
+            None,
+            None,
+        )
     }
 }
 
