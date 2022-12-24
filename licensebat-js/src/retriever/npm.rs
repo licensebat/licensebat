@@ -68,7 +68,7 @@ impl Retriever for Npm {
         let dependency_version = dependency.version.to_string();
 
         self.client
-            .get(&url)
+            .get(url)
             .send()
             .and_then(reqwest::Response::json)
             .map_ok(|metadata: Value| {

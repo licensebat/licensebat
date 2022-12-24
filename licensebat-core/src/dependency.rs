@@ -66,6 +66,7 @@ impl RetrievedDependency {
     /// For example, if the `licenses` parameter is `None`, the `is_valid` property will be set to `false`.
     /// Use the default method if you just want to create an instance with all  the defaults.
     /// This method it's intended to be used once you have retrieved the dependency from its source (i.e. npm, github, etc).
+    #[allow(clippy::too_many_arguments)]
     #[must_use]
     pub fn new(
         name: String,

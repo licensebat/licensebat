@@ -23,7 +23,7 @@ impl TryInto<Dependency> for DartDependency {
         let name = self
             .description
             .name
-            .ok_or(format!("No name found in Dart dependency"))?;
+            .ok_or_else(|| "No name found in Dart dependency".to_string())?;
 
         Ok(Dependency {
             name,
