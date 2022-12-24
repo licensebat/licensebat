@@ -39,8 +39,10 @@ pub struct RetrievedDependency {
     /// Dependency type (npm, dart, rust, go, python...)
     pub dependency_type: String,
     /// Url of the dependency if available.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
     /// List of licenses of the dependency.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub licenses: Option<Vec<String>>,
     /// Set to true if the dependency has been validated against the licrc.
     pub validated: bool,
@@ -49,14 +51,18 @@ pub struct RetrievedDependency {
     /// Indicates if the dependency has been ignored according to our .licrc configuration file.
     pub is_ignored: bool,
     /// Contains information about any error that may have happened during the validation process.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
     /// Comments about the license validation process.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub comment: Option<Comment>,
     /// In cases where the retriever makes some sort of estimate about the license, this field will contain the suggested licenses.
     pub suggested_licenses: Option<Vec<(String, f32)>>,
     /// Indicates if the dependency is a dev dependency or not. This can be null if we cannot determine it.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_dev: Option<bool>,
     /// Indicates if the dependency is an optional dependency or not. This can be null if we cannot determine it.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_optional: Option<bool>,
 }
 
