@@ -84,10 +84,13 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> Retrie
             #[allow(clippy::if_same_then_else)]
             if source.is_default_registry() {
                 // this is the only one supported for now
-                // TODO: use crates.io retriever
-                return retriever
-                    .get_dependency(package.name.as_str(), &package.version.to_string())
-                    .await;
+                let dependency = licensebat_core::Dependency {
+                    name: package.name.to_string(),
+                    version: package.version.to_string(),
+                    is_dev: None,
+                    is_optional: None,
+                };
+                return retriever.get_dependency(dependency).await;
             } else if source.is_remote_registry() {
                 // remote registry
                 // TODO: create remote registry retriever
@@ -123,6 +126,8 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> Retrie
             licenses:  None,
             comment: Some(Comment::removable("Git, Local and Remote registries are not supported yet. We're working on it. We're marking this as invalid by default so you can check the validity of the license. Consider adding this dependency to the ignored list in the .licrc configuration file if you trust the source.")),
             suggested_licenses: None,
+            is_dev: None,
+            is_optional: None,
         }
 }
 
@@ -133,6 +138,7 @@ mod tests {
         future::{ready, BoxFuture},
         StreamExt,
     };
+    use licensebat_core::Dependency;
 
     #[derive(Debug)]
     struct MockRetriever;
@@ -140,10 +146,10 @@ mod tests {
     impl Retriever for MockRetriever {
         type Response = BoxFuture<'static, RetrievedDependency>;
 
-        fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
+        fn get_dependency(&self, dependency: Dependency) -> Self::Response {
             ready(RetrievedDependency {
-                name: dep_name.to_string(),
-                version: dep_version.to_string(),
+                name: dependency.name.to_string(),
+                version: dependency.version.to_string(),
                 ..RetrievedDependency::default()
             })
             .boxed()

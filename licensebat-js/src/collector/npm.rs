@@ -53,6 +53,8 @@ impl<R: Retriever> FileCollector for Npm<R> {
                 // TODO: for yarn, this key includes the version (as there can be more than one version of a package declared)
                 name: key,
                 version: value.version,
+                is_dev: value.is_dev.or(Some(false)),
+                is_optional: value.is_optional.or(Some(false)),
             });
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))

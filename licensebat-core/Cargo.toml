@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-core"
-version = "0.0.14"
+version = "0.0.15"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "Types and Traits for building Licensebat libraries"
 edition = "2021"

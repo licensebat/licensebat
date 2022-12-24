@@ -13,6 +13,6 @@ where
     R: Retriever + 'a,
 {
     deps.into_iter()
-        .map(|dep| retriever.get_dependency(&dep.name, &dep.version).boxed())
+        .map(|dep| retriever.get_dependency(dep).boxed())
         .collect()
 }

@@ -23,7 +23,7 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// Future that resolves to a [`RetrievedDependency`].
     type Response: Future<Output = Result<RetrievedDependency, Self::Error>> + Send;
     /// Validates dependency's information from the original source.
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
 
 /// [`pub.dev`] [`Retriever`] implementation.
@@ -87,16 +87,11 @@ impl Retriever for Hosted {
     type Response = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
 
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response {
         let url = format!(
             "https://pub.dev/packages/{}/versions/{}",
-            dep_name, dep_version,
+            dependency.name, dependency.version,
         );
-
-        let dependency = Dependency {
-            name: dep_name.to_string(),
-            version: dep_version.to_string(),
-        };
 
         let store = self.store.clone();
 
@@ -205,6 +200,8 @@ fn retrieved_dependency(
         error,
         comment,
         suggested_licenses,
+        dependency.is_dev,
+        dependency.is_optional,
     )
 }
 

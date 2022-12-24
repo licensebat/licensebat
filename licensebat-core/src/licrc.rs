@@ -50,6 +50,7 @@ impl LicRc {
     #[instrument(skip(self))]
     pub fn validate(&self, dependency: &mut RetrievedDependency) {
         dependency.validated = true;
+        // is it explicitly ignored?
         if self
             .dependencies
             .ignored
@@ -62,6 +63,25 @@ impl LicRc {
             return;
         }
 
+        // are dev dependencies ignored?
+        if self.dependencies.ignore_dev_dependencies.unwrap_or(false) {
+            dependency.is_ignored = true;
+            tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
+            return;
+        }
+
+        // are optional dependencies ignored?
+        if self
+            .dependencies
+            .ignore_optional_dependencies
+            .unwrap_or(false)
+        {
+            dependency.is_ignored = true;
+            tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
+            return;
+        }
+
+        // is it compliant with the policy?
         if !dependency.is_valid {
             tracing::debug!(dependency = ?dependency, "Dependency is invalid");
             return;
@@ -116,6 +136,10 @@ pub struct LicRcDependencies {
     /// These dependencies won't be validated.
     /// You must use the name of the dependency here.
     pub ignored: Option<Vec<String>>,
+    /// If set to true, dev dependencies will be ignored.
+    pub ignore_dev_dependencies: Option<bool>,
+    /// If set to true, optional dependencies will be ignored.
+    pub ignore_optional_dependencies: Option<bool>,
 }
 
 /// Holds information about the behavior of the validation process.

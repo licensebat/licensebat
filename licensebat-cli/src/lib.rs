@@ -71,6 +71,10 @@
 //! [dependencies]
 //! # This will allow users to flag some dependencies so that Licensebat will not check for their license.
 //! ignored=["ignored_dep1", "ignored_dep2"]
+//! # If set to true, Licensebat will ignore the dev dependencies.
+//! ignore_dev_dependencies = true
+//! # If set to true, Licensebat will ignore the optional dependencies.
+//! ignore_optional_dependencies = true
 //!
 //! [behavior]
 //! # False by default (always exit code == 0), if true, it will exit with code 1 in case some invalid dependency is found.

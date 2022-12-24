@@ -26,7 +26,7 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// It cannot fail.
     type Response: Future<Output = RetrievedDependency> + Send;
     /// Validates dependency's information from the original source.
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
 
 /// [`crates.io`] [`Retriever`] implementation.
@@ -100,16 +100,11 @@ impl Retriever for CratesIo {
     type Response = BoxFuture<'static, RetrievedDependency>;
 
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response {
         let url = format!(
             "https://crates.io/api/v1/crates/{}/{}",
-            dep_name, dep_version
+            dependency.name, dependency.version
         );
-
-        let dependency = Dependency {
-            name: dep_name.to_string(),
-            version: dep_version.to_string(),
-        };
 
         let dep_clone = dependency.clone();
         let client = self.client.clone();
@@ -133,9 +128,7 @@ impl Retriever for CratesIo {
                     if license == "non-standard" {
                         // we're going to use the docs.rs retriever here
                         let docs_rs = super::docs_rs::DocsRs::new(client, store);
-                        docs_rs
-                            .get_dependency(&dependency.name, &dependency.version)
-                            .await
+                        docs_rs.get_dependency(dependency).await
                     } else {
                         // TODO: ADD SUPPORT FOR MULTIPLE LICENSES by using the spdx crate
                         let licenses = vec![license.to_string()];

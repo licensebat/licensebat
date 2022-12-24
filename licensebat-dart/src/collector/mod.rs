@@ -15,7 +15,7 @@ use self::dart_dependency::{DartDependencies, DartDependency};
 use crate::retriever::{self, hosted::Retriever};
 use futures::prelude::*;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
+    collector::RetrievedDependencyStreamResult, Collector, Comment, Dependency, FileCollector,
     RetrievedDependency,
 };
 use std::sync::Arc;
@@ -122,24 +122,22 @@ async fn resolve_hosted_dependency<R: Retriever>(
     dependency: DartDependency,
     retriever: &R,
 ) -> RetrievedDependency {
-    if let Some(dependency_name) = &dependency.description.name {
-        retriever
-            .get_dependency(dependency_name, &dependency.version)
-            .await
-            .unwrap_or_else(|e| {
-                let url = format!(
-                    "https://pub.dev/packages/{}/versions/{}",
-                    dependency_name, dependency.version,
-                );
-                retrieved_dependency(
-                    &dependency,
-                    None,
-                    Some(e.to_string()),
-                    Some(url),
-                    None,
-                    None,
-                )
-            })
+    if let Ok(dep) = TryInto::<Dependency>::try_into(dependency.clone()) {
+        let dep_name = dep.name.clone();
+        retriever.get_dependency(dep).await.unwrap_or_else(|e| {
+            let url = format!(
+                "https://pub.dev/packages/{}/versions/{}",
+                dep_name, &dependency.version,
+            );
+            retrieved_dependency(
+                &dependency,
+                None,
+                Some(e.to_string()),
+                Some(url),
+                None,
+                None,
+            )
+        })
     } else {
         retrieved_dependency(
             &dependency,
@@ -203,6 +201,8 @@ fn retrieved_dependency(
         error,
         comment,
         suggested_licenses,
+        None,
+        None,
     )
 }
 
@@ -229,6 +229,8 @@ mod tests {
                 url: None,
                 name: Some(dependency_name.to_string()),
             },
+            is_dev: None,
+            is_optional: None,
         };
 
         let store = Arc::new(askalono::Store::from_cache(LICENSE_CACHE).ok());

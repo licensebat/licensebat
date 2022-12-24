@@ -9,6 +9,22 @@ pub struct Dependency {
     pub name: String,
     /// Dependency version
     pub version: String,
+    /// True if the dependency is a dev dependency, false otherwise. Null if we cannot determine it.
+    pub is_dev: Option<bool>,
+    /// True if the dependency is an optional dependency, false otherwise. Null if we cannot determine it.
+    pub is_optional: Option<bool>,
+}
+
+impl Dependency {
+    /// Creates a new dependency without dev or optional information.
+    pub fn new(name: impl Into<String>, version: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            version: version.into(),
+            is_dev: None,
+            is_optional: None,
+        }
+    }
 }
 
 /// A dependency that has been retrieved from its source.
@@ -23,8 +39,10 @@ pub struct RetrievedDependency {
     /// Dependency type (npm, dart, rust, go, python...)
     pub dependency_type: String,
     /// Url of the dependency if available.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
     /// List of licenses of the dependency.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub licenses: Option<Vec<String>>,
     /// Set to true if the dependency has been validated against the licrc.
     pub validated: bool,
@@ -33,11 +51,19 @@ pub struct RetrievedDependency {
     /// Indicates if the dependency has been ignored according to our .licrc configuration file.
     pub is_ignored: bool,
     /// Contains information about any error that may have happened during the validation process.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
     /// Comments about the license validation process.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub comment: Option<Comment>,
     /// In cases where the retriever makes some sort of estimate about the license, this field will contain the suggested licenses.
     pub suggested_licenses: Option<Vec<(String, f32)>>,
+    /// Indicates if the dependency is a dev dependency or not. This can be null if we cannot determine it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_dev: Option<bool>,
+    /// Indicates if the dependency is an optional dependency or not. This can be null if we cannot determine it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_optional: Option<bool>,
 }
 
 impl RetrievedDependency {
@@ -46,6 +72,7 @@ impl RetrievedDependency {
     /// For example, if the `licenses` parameter is `None`, the `is_valid` property will be set to `false`.
     /// Use the default method if you just want to create an instance with all  the defaults.
     /// This method it's intended to be used once you have retrieved the dependency from its source (i.e. npm, github, etc).
+    #[allow(clippy::too_many_arguments)]
     #[must_use]
     pub fn new(
         name: String,
@@ -56,6 +83,8 @@ impl RetrievedDependency {
         error: Option<String>,
         comment: Option<Comment>,
         suggested_licenses: Option<Vec<(String, f32)>>,
+        is_dev: Option<bool>,
+        is_optional: Option<bool>,
     ) -> Self {
         let has_licenses = licenses.is_some();
 
@@ -83,6 +112,8 @@ impl RetrievedDependency {
                 }
             }),
             suggested_licenses,
+            is_dev,
+            is_optional,
         }
     }
 }

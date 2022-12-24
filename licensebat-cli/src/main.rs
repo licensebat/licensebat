@@ -23,6 +23,7 @@ async fn main() -> anyhow::Result<()> {
         .filter(|d| !d.is_valid && !d.is_ignored)
         .count();
 
+    // output to json or markdown
     match format {
         OutputFormat::Json => show_result_as_json(&dependencies)?,
         OutputFormat::Markdown => {
@@ -30,6 +31,7 @@ async fn main() -> anyhow::Result<()> {
         }
     };
 
+    // exit with 1 if there are invalid dependencies and the behavior is set to block PRs
     if invalid_dependencies_count > 0 && !licrc.behavior.do_not_block_pr.unwrap_or(false) {
         std::process::exit(1);
     }
@@ -55,8 +57,8 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
 
     let md = {
         let header =
-            "| Result | Name |  Version | Type | Validity | Ignored | Licenses | Error | Comments |";
-        let header_separator = "|---|---|---|---|---|---|---|---|---|";
+            "| Result | Name |  Version | Type | Validity | Ignored | Licenses | Error | Comments | Is Dev | Is Optional |";
+        let header_separator = "|---|---|---|---|---|---|---|---|---|---|---|";
 
         deps.sort_by(|d1, d2| {
             let o_name = d1.name.cmp(&d2.name);
@@ -72,7 +74,7 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
             .iter()
             .map(|dep| {
                 format!(
-                    "| {} | **{}** | {} | {} | {} | {} | {} | {} | {} |",
+                    "| {} | **{}** | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
                     if dep.is_valid {
                         if let Some(comment) = &dep.comment {
                             if comment.remove_when_valid {
@@ -108,7 +110,13 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
                         } else {
                             c.text.as_str()
                         }
-                    })
+                    }),
+                    dep.is_dev
+                        .map(|b| if b { "True" } else { "False" })
+                        .unwrap_or("-"),
+                    dep.is_optional
+                        .map(|b| if b { "True" } else { "False" })
+                        .unwrap_or("-"),
                 )
             })
             .collect();
