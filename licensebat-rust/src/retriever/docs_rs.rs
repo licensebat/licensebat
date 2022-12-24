@@ -22,7 +22,7 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// It cannot fail.
     type Response: Future<Output = RetrievedDependency> + Send;
     /// Validates dependency's information from the original source.
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
 
 /// [`docs.rs`] [`Retriever`] implementation.
@@ -87,12 +87,7 @@ impl Retriever for DocsRs {
     type Response = BoxFuture<'static, RetrievedDependency>;
 
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
-        let dependency = Dependency {
-            name: dep_name.to_string(),
-            version: dep_version.to_string(),
-        };
-
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response {
         let crate_url = docs_rs_url(&dependency.name, &dependency.version);
         let cargo_toml_url = format!("{}Cargo.toml", crate_url);
 

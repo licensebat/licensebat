@@ -47,6 +47,8 @@ impl<R: Retriever> FileCollector for Yarn<R> {
             .map(|entry| Dependency {
                 name: entry.name.to_owned(),
                 version: entry.version.to_owned(),
+                is_dev: None,
+                is_optional: None,
             });
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))

@@ -23,5 +23,7 @@ pub fn crates_io_retrieved_dependency(
         error.map(std::string::ToString::to_string),
         comment.map(Comment::removable),
         suggested_licenses,
+        dependency.is_dev,
+        dependency.is_optional,
     )
 }

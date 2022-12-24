@@ -1,8 +1,9 @@
+use licensebat_core::Dependency;
 use serde::de::{Error, MapAccess, Visitor};
 use serde::Deserializer;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt;
+use std::fmt::{self};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DartDependency {
@@ -11,6 +12,26 @@ pub struct DartDependency {
     pub dependency: String, // direct main, transitive
     #[serde(deserialize_with = "description_deserialize")]
     pub description: Description,
+    pub is_dev: Option<bool>,
+    pub is_optional: Option<bool>,
+}
+
+impl TryInto<Dependency> for DartDependency {
+    type Error = String;
+
+    fn try_into(self) -> Result<Dependency, Self::Error> {
+        let name = self
+            .description
+            .name
+            .ok_or(format!("No name found in Dart dependency"))?;
+
+        Ok(Dependency {
+            name,
+            version: self.version,
+            is_dev: self.is_dev,
+            is_optional: self.is_optional,
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]

@@ -9,6 +9,22 @@ pub struct Dependency {
     pub name: String,
     /// Dependency version
     pub version: String,
+    /// True if the dependency is a dev dependency, false otherwise. Null if we cannot determine it.
+    pub is_dev: Option<bool>,
+    /// True if the dependency is an optional dependency, false otherwise. Null if we cannot determine it.
+    pub is_optional: Option<bool>,
+}
+
+impl Dependency {
+    /// Creates a new dependency without dev or optional information.
+    pub fn new(name: impl Into<String>, version: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            version: version.into(),
+            is_dev: None,
+            is_optional: None,
+        }
+    }
 }
 
 /// A dependency that has been retrieved from its source.
@@ -38,6 +54,10 @@ pub struct RetrievedDependency {
     pub comment: Option<Comment>,
     /// In cases where the retriever makes some sort of estimate about the license, this field will contain the suggested licenses.
     pub suggested_licenses: Option<Vec<(String, f32)>>,
+    /// Indicates if the dependency is a dev dependency or not. This can be null if we cannot determine it.
+    pub is_dev: Option<bool>,
+    /// Indicates if the dependency is an optional dependency or not. This can be null if we cannot determine it.
+    pub is_optional: Option<bool>,
 }
 
 impl RetrievedDependency {
@@ -56,6 +76,8 @@ impl RetrievedDependency {
         error: Option<String>,
         comment: Option<Comment>,
         suggested_licenses: Option<Vec<(String, f32)>>,
+        is_dev: Option<bool>,
+        is_optional: Option<bool>,
     ) -> Self {
         let has_licenses = licenses.is_some();
 
@@ -83,6 +105,8 @@ impl RetrievedDependency {
                 }
             }),
             suggested_licenses,
+            is_dev,
+            is_optional,
         }
     }
 }

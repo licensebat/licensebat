@@ -24,7 +24,7 @@ pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// If there's some error while retrieving the dependency, it will return the error in the [`RetrievedDependency`]'s `error` field.
     type Response: Future<Output = RetrievedDependency> + Send;
     /// Validates dependency's information from the original source.
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response;
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
 
 /// Npm [`Retriever`] implementation.
@@ -61,15 +61,11 @@ impl Retriever for Npm {
 
     /// Gets a dependency from the [`npm API`](https://registry.npmjs.org/).
     #[instrument(skip(self), level = "debug")]
-    fn get_dependency(&self, dep_name: &str, dep_version: &str) -> Self::Response {
-        let url = format!("https://registry.npmjs.org/{}", dep_name);
+    fn get_dependency(&self, dependency: Dependency) -> Self::Response {
+        let url = format!("https://registry.npmjs.org/{}", dependency.name);
 
-        let dependency = Dependency {
-            name: dep_name.to_string(),
-            version: dep_version.to_string(),
-        };
         let dep_clone = dependency.clone();
-        let dependency_version = dep_version.to_string();
+        let dependency_version = dependency.version.to_string();
 
         self.client
             .get(&url)
@@ -125,5 +121,7 @@ fn retrieved_dependency(
         error.map(|e| e.to_string()),
         None,
         None,
+        dependency.is_dev,
+        dependency.is_optional,
     )
 }

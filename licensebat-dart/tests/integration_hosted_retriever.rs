@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod integration_hosted_retriever {
     use askalono::Store;
+    use licensebat_core::Dependency;
     use licensebat_dart::retriever::{self, hosted::Retriever};
     use std::sync::Arc;
 
@@ -16,7 +17,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/flare_dart/versions/2.3.3
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("flare_dart", "2.3.3")
+            .get_dependency(Dependency::new("flare_dart", "2.3.3"))
             .await
             .unwrap();
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
@@ -30,7 +31,10 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/flutter_local_notifications_platform_interface/versions/1.0.1
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("flutter_local_notifications_platform_interface", "1.0.1")
+            .get_dependency(Dependency::new(
+                "flutter_local_notifications_platform_interface",
+                "1.0.1",
+            ))
             .await
             .unwrap();
         assert_eq!(Some(vec!["BSD-3-Clause".to_string()]), dep.licenses);
@@ -44,7 +48,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/file/versions/6.0.0-nullsafety.2
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("file", "6.0.0-nullsafety.2")
+            .get_dependency(Dependency::new("file", "6.0.0-nullsafety.2"))
             .await
             .unwrap();
         assert_eq!(Some(vec!["BSD-3-Clause".to_string()]), dep.licenses);
@@ -60,7 +64,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/fake_async/versions/1.2.0-nullsafety.1
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("fake_async", "1.2.0-nullsafety.1")
+            .get_dependency(Dependency::new("fake_async", "1.2.0-nullsafety.1"))
             .await
             .unwrap();
         assert_eq!(Some(vec!["Apache-2.0".to_string()]), dep.licenses);
@@ -82,7 +86,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/random_color/versions/1.0.3
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("random_color", "1.0.3")
+            .get_dependency(Dependency::new("random_color", "1.0.3"))
             .await
             .unwrap();
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
@@ -105,7 +109,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/vector_math/versions/2.0.8
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("vector_math", "2.0.8")
+            .get_dependency(Dependency::new("vector_math", "2.0.8"))
             .await
             .unwrap();
         assert_eq!(None, dep.licenses);
@@ -124,7 +128,7 @@ mod integration_hosted_retriever {
         // https://pub.dev/packages/flutter_isolate/versions/1.0.0+14
         let retriever = create_retriever();
         let dep = retriever
-            .get_dependency("flutter_isolate", "1.0.0+14")
+            .get_dependency(Dependency::new("flutter_isolate", "1.0.0+14"))
             .await
             .unwrap();
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
