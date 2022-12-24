@@ -10,7 +10,7 @@
 //!
 //! For the moment, [`FileCollector`] is the only used trait in all language implementations but this can easily change. For instance, for the Rust language, it would be nice to use [`cargo-metadata`] instead of having to parse the `Cargo.lock` file. That would make it cheaper to get information about some dependencies as we wouldn't need to use any APIs to fetch license information.
 //!
-//! Anyway, having those two different approaches would be still valuable because there are scenarios where we don't have access to all the codebase. While using the CLI, through [licensebat-cli] it makes sense to avoid making http requests at all cost, this is not possible in [Licensebat's GitHub Service](https://github.com/marketplace/licensebat) as we don't have access to all the codebase but only a few files.
+//! Anyway, having those two different approaches would be still valuable because there are scenarios where we don't have access to all the codebase. When using the CLI, through [licensebat-cli], it makes sense to avoid making http requests at all cost, but this is not possible in [Licensebat's GitHub Service](https://github.com/marketplace/licensebat) as we don't have access to all the codebase but only a few files.
 //!
 //! # Features
 //!
