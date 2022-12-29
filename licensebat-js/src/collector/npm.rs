@@ -1,8 +1,5 @@
 use crate::{
-    collector::{
-        common::{retrieve_from_npm, NPM},
-        npm_dependency::NpmDependencies,
-    },
+    collector::common::{retrieve_from_npm, NPM},
     retriever::{self, npm::Retriever},
 };
 use licensebat_core::{
@@ -46,15 +43,14 @@ impl<R: Retriever> FileCollector for Npm<R> {
 
     #[instrument(skip(self))]
     fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
-        let npm_deps = serde_json::from_str::<NpmDependencies>(dependency_file_content)?
-            .dependencies
+        let npm_deps = package_lock_json_parser::parse_dependencies(dependency_file_content)?
             .into_iter()
-            .map(|(key, value)| Dependency {
+            .map(|dep| Dependency {
                 // TODO: for yarn, this key includes the version (as there can be more than one version of a package declared)
-                name: key,
-                version: value.version,
-                is_dev: value.is_dev.or(Some(false)),
-                is_optional: value.is_optional.or(Some(false)),
+                name: dep.name,
+                version: dep.version,
+                is_dev: Some(dep.is_dev),
+                is_optional: Some(dep.is_optional),
             });
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))

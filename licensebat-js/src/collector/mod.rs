@@ -18,7 +18,6 @@
 //! [`Retriever`]: crate::retriever::npm::Retriever
 mod common;
 mod npm;
-mod npm_dependency;
 mod yarn;
 
 pub use common::NPM;

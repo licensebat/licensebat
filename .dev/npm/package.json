@@ -1,0 +1,36 @@
+{
+  "name": "cxtl",
+  "version": "1.0.0",
+  "description": "A cryptocurrency trading library with support for 90+ exchanges",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "test": "npm run clean && tsc && jest --coverage --forceExit",
+    "start": "npm run clean && tsc && node dist/src/init.js"
+  },
+  "author": "Roberto Huertas <roberto.huertas@outlook.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^21.1.2",
+    "jest": "^21.2.1",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.3"
+  },
+  "jest": {
+    "verbose": true,
+    "bail": true,
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/typings/"
+    ]
+  },
+  "dependencies": {
+    "rxjs": "^7.8.0"
+  }
+}
