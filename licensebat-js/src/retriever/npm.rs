@@ -112,13 +112,25 @@ fn retrieved_dependency(
         dependency.name, dependency.version
     );
 
+    let mut error_str: Option<String> = None;
+
+    if let Some(error) = error {
+        error_str = Some(error.to_string());
+        tracing::error!(
+            ?error,
+            "Error while retrieving dependency for url {}: {}",
+            url,
+            error
+        );
+    }
+
     RetrievedDependency::new(
         dependency.name.clone(),
         dependency.version.clone(),
         crate::NPM.to_owned(),
         Some(url),
         licenses,
-        error.map(|e| e.to_string()),
+        error_str,
         None,
         None,
         dependency.is_dev,

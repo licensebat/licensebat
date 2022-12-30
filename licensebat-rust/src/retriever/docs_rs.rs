@@ -162,7 +162,7 @@ impl Retriever for DocsRs {
                     }
                 }
                 Err(e) => {
-                    tracing::error!(error = %e, "Error trying to parse docs.rs for crate {} : {}", &dependency.name, &dependency.version);
+                    tracing::error!(error = ?e, "Error trying to parse docs.rs for crate {} : {}", &dependency.name, &dependency.version);
                     crates_io_retrieved_dependency(
                         &dependency,
                         None,
@@ -255,7 +255,7 @@ async fn get_license_from_docs_rs(
 
     let matches = pattern.matches(&html);
     if matches.is_empty() {
-        tracing::error!("Couldn't get original license from docs.rs");
+        tracing::error!(%url, "Couldn't get original license from docs.rs");
         Err(Error(String::from("Not found")).into())
     } else {
         let license_html = matches[0]["value"].clone();
