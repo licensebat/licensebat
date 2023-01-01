@@ -12,7 +12,10 @@ where
     I: Iterator<Item = Dependency>,
     R: Retriever + 'a,
 {
-    deps.into_iter()
+    let iter = deps
+        .into_iter()
         .map(|dep| retriever.get_dependency(dep).boxed())
-        .collect()
+        .collect();
+
+    RetrievedDependencyStream::new(iter)
 }

@@ -1,11 +1,44 @@
 //! Collector traits.
 use crate::dependency::RetrievedDependency;
-use futures::{future::BoxFuture, stream::FuturesUnordered};
-use std::fmt::Debug;
+use futures::stream::Stream;
+use futures::StreamExt;
+use futures::{future::BoxFuture, stream::Iter};
+use std::{
+    fmt::Debug,
+    pin::Pin,
+    task::{Context, Poll},
+    vec::IntoIter,
+};
 
 /// Stream of [`RetrievedDependency`]
-pub type RetrievedDependencyStream<'a> = FuturesUnordered<BoxFuture<'a, RetrievedDependency>>;
+pub struct RetrievedDependencyStream<'a> {
+    stream: Iter<IntoIter<BoxFuture<'a, RetrievedDependency>>>,
+}
 
+impl<'a> RetrievedDependencyStream<'a> {
+    /// Creates a new [`RetrievedDependencyStream`]
+    pub fn new(futures: Vec<BoxFuture<'a, RetrievedDependency>>) -> Self {
+        Self {
+            stream: futures::stream::iter(futures),
+        }
+    }
+
+    /// Returns the inner [`Iter`]
+    pub fn into_inner(self) -> Iter<IntoIter<BoxFuture<'a, RetrievedDependency>>> {
+        self.stream
+    }
+}
+
+impl<'a> Stream for RetrievedDependencyStream<'a> {
+    type Item = BoxFuture<'a, RetrievedDependency>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        self.as_mut().stream.poll_next_unpin(cx)
+    }
+}
+
+/// Stream of [`RetrievedDependency`]
+// pub type RetrievedDependencyStream<'a> = Iter<IntoIter<BoxFuture<'a, RetrievedDependency>>>;
 /// Result returning either a [`RetrievedDependencyStream`] or an [`Error`]
 pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<'a>, Error>;
 

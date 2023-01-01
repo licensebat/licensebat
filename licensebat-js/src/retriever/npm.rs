@@ -124,6 +124,8 @@ fn retrieved_dependency(
         );
     }
 
+    tracing::debug!("Retrieved dependency for url {}", url);
+
     RetrievedDependency::new(
         dependency.name.clone(),
         dependency.version.clone(),

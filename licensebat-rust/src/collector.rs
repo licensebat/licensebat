@@ -15,8 +15,8 @@ use crate::retriever::{self, docs_rs::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Comment, FileCollector,
-    RetrievedDependency,
+    collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
+    Collector, Comment, FileCollector, RetrievedDependency,
 };
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
@@ -68,12 +68,13 @@ impl<R: Retriever> FileCollector for Rust<R> {
     #[instrument(skip(self))]
     fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
-
-        Ok(lockfile
+        let futures = lockfile
             .packages
             .into_iter()
             .map(|p| get_dependency(p, &self.retriever).boxed())
-            .collect())
+            .collect();
+
+        Ok(RetrievedDependencyStream::new(futures))
     }
 }
 
@@ -171,10 +172,15 @@ mod tests {
         checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
         "#;
 
-        let mut deps = rust.get_dependencies(&lock_content).unwrap();
+        let mut deps = rust
+            .get_dependencies(&lock_content)
+            .unwrap()
+            .collect::<Vec<_>>()
+            .await;
+
         assert_eq!(deps.len(), 1);
 
-        let dep = deps.next().await.unwrap();
+        let dep = deps[0].as_mut().fuse().await;
 
         assert_eq!(rust.get_name(), "rust");
         assert_eq!(rust.get_dependency_filename(), "Cargo.lock");
@@ -193,10 +199,15 @@ mod tests {
         checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
         "#;
 
-        let mut deps = rust.get_dependencies(&lock_content).unwrap();
+        let mut deps = rust
+            .get_dependencies(&lock_content)
+            .unwrap()
+            .collect::<Vec<_>>()
+            .await;
+
         assert_eq!(deps.len(), 1);
 
-        let dep = deps.next().await.unwrap();
+        let dep = deps[0].as_mut().fuse().await;
 
         assert_eq!(rust.get_name(), "rust");
         assert_eq!(rust.get_dependency_filename(), "Cargo.lock");
@@ -215,10 +226,15 @@ mod tests {
         checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
         "#;
 
-        let mut deps = rust.get_dependencies(&lock_content).unwrap();
+        let mut deps = rust
+            .get_dependencies(&lock_content)
+            .unwrap()
+            .collect::<Vec<_>>()
+            .await;
+
         assert_eq!(deps.len(), 1);
 
-        let dep = deps.next().await.unwrap();
+        let dep = deps[0].as_mut().fuse().await;
 
         assert_eq!(rust.get_name(), "rust");
         assert_eq!(rust.get_dependency_filename(), "Cargo.lock");

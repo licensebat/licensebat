@@ -151,4 +151,8 @@ pub struct LicRcBehavior {
     pub run_only_on_dependency_modification: Option<bool>,
     /// If set to true, Licensebat will execute the check but it won't block the PR.
     pub do_not_block_pr: Option<bool>,
+    /// This will define the size of the buffer used to retrieve the dependencies.
+    /// It's set to 100 by default.
+    /// If you have a lot of dependencies, you might want to increase this value, but be careful, if the size is too big, the API might return an error.
+    pub retriever_buffer_size: Option<usize>,
 }
