@@ -79,6 +79,10 @@
 //! [behavior]
 //! # False by default (always exit code == 0), if true, it will exit with code 1 in case some invalid dependency is found.
 //! do_not_block_pr = false
+//! # This will define the size of the buffer used to retrieve the dependencies.
+//! # It's set to 100 by default.
+//! # If you have a lot of dependencies, you might want to increase this value, but be careful, if the size is too big, the API might return an error.
+//! retriever_buffer_size: 100,
 //! ```
 //!
 //! ## Logs

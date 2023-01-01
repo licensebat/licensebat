@@ -15,8 +15,8 @@ use self::dart_dependency::{DartDependencies, DartDependency};
 use crate::retriever::{self, hosted::Retriever};
 use futures::prelude::*;
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Comment, Dependency, FileCollector,
-    RetrievedDependency,
+    collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
+    Collector, Comment, Dependency, FileCollector, RetrievedDependency,
 };
 use std::sync::Arc;
 use tracing::instrument;
@@ -76,10 +76,12 @@ impl<R: Retriever> FileCollector for Dart<R> {
         let dependencies = serde_yaml::from_str::<DartDependencies>(dependency_file_content)?
             .into_vec_collection();
 
-        Ok(dependencies
+        let futures = dependencies
             .into_iter()
             .map(|dep| get_dependency(dep, &self.retriever).boxed())
-            .collect())
+            .collect();
+
+        Ok(RetrievedDependencyStream::new(futures))
     }
 }
 

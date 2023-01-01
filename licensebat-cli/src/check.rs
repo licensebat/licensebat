@@ -36,7 +36,12 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
 
     // 0. spdx store & http client
     let store = Arc::new(askalono::Store::from_cache(LICENSE_CACHE).ok());
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .no_proxy()
+        // .danger_accept_invalid_certs(true)
+        // .pool_idle_timeout(None)
+        .build()
+        .expect("Failed to build HTTP client");
 
     // 1 .get information from .licrc file
     tracing::debug!("Reading .licrc file");
@@ -67,11 +72,13 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
         .iter()
         .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
         .and_then(|c| c.get_dependencies(&dep_file_content).ok())
-        .expect("No collector found for dependency file");
+        .expect("No collector found for dependency file")
+        .buffer_unordered(licrc.behavior.retriever_buffer_size.unwrap_or(100));
 
     // 5. validate the dependencies according to the .licrc config
     tracing::debug!("Validating dependencies");
     let mut validated_deps = vec![];
+
     while let Some(mut dependency) = stream.next().await {
         // do the validation here
         licrc.validate(&mut dependency);

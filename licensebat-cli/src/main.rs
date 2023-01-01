@@ -137,12 +137,12 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
 /// Sets up the tracing subscriber.
 /// It will use a pretty print in debug and json in --release mode.
 fn set_up_tracing() {
-    let tracing = tracing_subscriber::fmt()
+    let subscriber = tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env());
 
     if cfg!(debug_assertions) {
-        tracing.pretty().init();
+        subscriber.pretty().init();
     } else {
-        tracing.json().init();
-    }
+        subscriber.json().init();
+    };
 }
