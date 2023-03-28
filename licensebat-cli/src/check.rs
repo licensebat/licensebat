@@ -80,9 +80,19 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     let mut validated_deps = vec![];
 
     while let Some(mut dependency) = stream.next().await {
+        // don't process dev or optional dependencies if the user doesn't want to see them in the final report
+        if (licrc.behavior.do_not_show_dev_dependencies && dependency.is_dev.unwrap_or_default())
+            || licrc.behavior.do_not_show_optional_dependencies
+                && dependency.is_optional.unwrap_or_default()
+        {
+            continue;
+        }
         // do the validation here
         licrc.validate(&mut dependency);
-        validated_deps.push(dependency);
+        //  only add ingored dependencies if the user wants to see them
+        if !(licrc.behavior.do_not_show_ignored_dependencies && dependency.is_ignored) {
+            validated_deps.push(dependency);
+        }
     }
 
     tracing::info!("Done!");

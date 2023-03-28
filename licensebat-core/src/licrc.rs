@@ -64,17 +64,14 @@ impl LicRc {
         }
 
         // are dev dependencies ignored?
-        if self.dependencies.ignore_dev_dependencies.unwrap_or(false) {
+        if self.dependencies.ignore_dev_dependencies && dependency.is_dev.unwrap_or(false) {
             dependency.is_ignored = true;
             tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
             return;
         }
 
         // are optional dependencies ignored?
-        if self
-            .dependencies
-            .ignore_optional_dependencies
-            .unwrap_or(false)
+        if self.dependencies.ignore_optional_dependencies && dependency.is_optional.unwrap_or(false)
         {
             dependency.is_ignored = true;
             tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
@@ -140,22 +137,34 @@ pub struct LicRcDependencies {
     /// You must use the name of the dependency here.
     pub ignored: Option<Vec<String>>,
     /// If set to true, dev dependencies will be ignored.
-    pub ignore_dev_dependencies: Option<bool>,
+    pub ignore_dev_dependencies: bool,
     /// If set to true, optional dependencies will be ignored.
-    pub ignore_optional_dependencies: Option<bool>,
+    #[serde(default)]
+    pub ignore_optional_dependencies: bool,
 }
 
 /// Holds information about the behavior of the validation process.
 /// **This only applies for the [GITHUB API integrated project](https://github.com/marketplace/licensebat)**.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct LicRcBehavior {
     /// If set to false Licensebat will validate the dependencies no matter what file has been modified.
     /// If set to true, validation will only happen when one of the dependency files or the .licrc files has been modified in the commit.
     pub run_only_on_dependency_modification: Option<bool>,
     /// If set to true, Licensebat will execute the check but it won't block the PR.
-    pub do_not_block_pr: Option<bool>,
+    #[serde(default)]
+    pub do_not_block_pr: bool,
     /// This will define the size of the buffer used to retrieve the dependencies.
     /// It's set to 100 by default.
     /// If you have a lot of dependencies, you might want to increase this value, but be careful, if the size is too big, the API might return an error.
     pub retriever_buffer_size: Option<usize>,
+    /// If set to true, Licensebat will not show the ignored dependencies in the final report.
+    #[serde(default)]
+    pub do_not_show_ignored_dependencies: bool,
+    /// If set to true, Licensebat will not show the dev dependencies in the final report.
+    #[serde(default)]
+    pub do_not_show_dev_dependencies: bool,
+    /// If set to true, Licensebat will not show the optional dependencies in the final report.
+    #[serde(default)]
+    pub do_not_show_optional_dependencies: bool,
 }

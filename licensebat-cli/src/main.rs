@@ -32,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // exit with 1 if there are invalid dependencies and the behavior is set to block PRs
-    if invalid_dependencies_count > 0 && !licrc.behavior.do_not_block_pr.unwrap_or(false) {
+    if invalid_dependencies_count > 0 && !licrc.behavior.do_not_block_pr {
         std::process::exit(1);
     }
     Ok(())
