@@ -137,6 +137,7 @@ pub struct LicRcDependencies {
     /// You must use the name of the dependency here.
     pub ignored: Option<Vec<String>>,
     /// If set to true, dev dependencies will be ignored.
+    #[serde(default)]
     pub ignore_dev_dependencies: bool,
     /// If set to true, optional dependencies will be ignored.
     #[serde(default)]
