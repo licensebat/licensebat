@@ -25,7 +25,7 @@ impl Default for Npm<retriever::Npm> {
 
 impl<R: Retriever> Npm<R> {
     /// Creates a new [`Npm`] [`FileCollector`].
-    pub fn new(retriever: R) -> Self {
+    pub const fn new(retriever: R) -> Self {
         Self { retriever }
     }
 }

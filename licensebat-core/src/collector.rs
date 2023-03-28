@@ -17,6 +17,7 @@ pub struct RetrievedDependencyStream<'a> {
 
 impl<'a> RetrievedDependencyStream<'a> {
     /// Creates a new [`RetrievedDependencyStream`]
+    #[must_use]
     pub fn new(futures: Vec<BoxFuture<'a, RetrievedDependency>>) -> Self {
         Self {
             stream: futures::stream::iter(futures),

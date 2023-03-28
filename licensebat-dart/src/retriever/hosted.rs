@@ -96,7 +96,7 @@ impl Retriever for Hosted {
         let store = self.store.clone();
 
         self.client
-            .get(format!("{}/license", url))
+            .get(format!("{url}/license"))
             .send()
             .and_then(reqwest::Response::text)
             .map(move |html| {

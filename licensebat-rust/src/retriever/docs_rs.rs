@@ -89,7 +89,7 @@ impl Retriever for DocsRs {
     #[instrument(skip(self), level = "debug")]
     fn get_dependency(&self, dependency: Dependency) -> Self::Response {
         let crate_url = docs_rs_url(&dependency.name, &dependency.version);
-        let cargo_toml_url = format!("{}Cargo.toml", crate_url);
+        let cargo_toml_url = format!("{crate_url}Cargo.toml");
 
         let dep_clone = dependency.clone();
         let client = self.client.clone();
@@ -131,34 +131,30 @@ impl Retriever for DocsRs {
 
             let retrieved_dependency = match license_info {
                 Ok(license_info) => {
-                    match license_info {
-                        Some((key, value)) => {
-                            match key.as_ref() {
-                                "license" => {
-                                     // TODO: SUPPORT FOR MULTIPLE LICS HERE
+                    if let Some((key, value)) = license_info {
+                        match key.as_ref() {
+                            "license" => {
+                                 // TODO: SUPPORT FOR MULTIPLE LICS HERE
                                 crates_io_retrieved_dependency(&dependency, Some(vec![value]), None, None, None)
-                                }
-                                "license-file" => {
-                                    get_retrieved_dependency_from_license_file(store, crate_url, value, client, &dependency).await
-                                }
-                                // this should never happen!
-                                _ => {
-                                    tracing::error!("Unknown license key: {}", key);
-                                    crates_io_retrieved_dependency(&dependency, None, Some("Unexpected license key while parsing cargo.toml"), None, None)
-                                }
+                            }
+                            "license-file" => {
+                                get_retrieved_dependency_from_license_file(store, crate_url, value, client, &dependency).await
+                            }
+                            // this should never happen!
+                            _ => {
+                                tracing::error!("Unknown license key: {}", key);
+                                crates_io_retrieved_dependency(&dependency, None, Some("Unexpected license key while parsing cargo.toml"), None, None)
                             }
                         }
-                        // no info found or toml parsing failed
-                        _ => {
-                            let user_error = "No information found in Cargo.toml regarding license or license-file.";
-                            tracing::error!(
-                                "{} Crate {} : {}",
-                                user_error,
-                                &dependency.name,
-                                &dependency.version,
-                            );
-                            crates_io_retrieved_dependency(&dependency, None, Some(user_error), None, None)
-                        }
+                    } else {
+                        let user_error = "No information found in Cargo.toml regarding license or license-file.";
+                        tracing::error!(
+                            "{} Crate {} : {}",
+                            user_error,
+                            &dependency.name,
+                            &dependency.version,
+                        );
+                        crates_io_retrieved_dependency(&dependency, None, Some(user_error), None, None)
                     }
                 }
                 Err(e) => {
@@ -182,10 +178,7 @@ impl Retriever for DocsRs {
 
 /// Returns the base url of the crate's source code in docs.rs
 fn docs_rs_url(dependency_name: &str, dependency_version: &str) -> String {
-    format!(
-        "https://docs.rs/crate/{}/{}/source/",
-        dependency_name, dependency_version
-    )
+    format!("https://docs.rs/crate/{dependency_name}/{dependency_version}/source/")
 }
 
 /// Returns a `RetrievedDependency` by looking into the Docs.rs declared license file.
@@ -199,7 +192,7 @@ async fn get_retrieved_dependency_from_license_file(
     dependency: &Dependency,
 ) -> RetrievedDependency {
     if let Some(store) = store.as_ref() {
-        let license_url = format!("{}{}", crate_url, license);
+        let license_url = format!("{crate_url}{license}");
         if let Ok((license, score)) = get_license_from_docs_rs(&client, store, &license_url).await {
             crates_io_retrieved_dependency(
                 dependency,
@@ -216,8 +209,7 @@ async fn get_retrieved_dependency_from_license_file(
                 dependency,
                 None,
                 Some(&format!(
-                    "Not declared in Cargo.toml. Check the url: {}",
-                    license_url
+                    "Not declared in Cargo.toml. Check the url: {license_url}"
                 )),
                 None,
                 None,

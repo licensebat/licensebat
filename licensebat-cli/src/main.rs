@@ -27,7 +27,7 @@ async fn main() -> anyhow::Result<()> {
     match format {
         OutputFormat::Json => show_result_as_json(&dependencies)?,
         OutputFormat::Markdown => {
-            show_result_as_markdown(&mut dependencies, invalid_dependencies_count)
+            show_result_as_markdown(&mut dependencies, invalid_dependencies_count);
         }
     };
 
@@ -46,7 +46,7 @@ fn show_result_as_json(deps: &[RetrievedDependency]) -> anyhow::Result<()> {
     } else {
         serde_json::to_string(&deps)
     }?;
-    println!("{}", json);
+    println!("{json}");
     Ok(())
 }
 
@@ -76,24 +76,22 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
                 format!(
                     "| {} | **{}** | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
                     if dep.is_valid {
-                        if let Some(comment) = &dep.comment {
-                            if comment.remove_when_valid {
+                        dep.comment.as_ref().map_or(":green_circle:", |c| {
+                            if c.remove_when_valid {
                                 ":green_circle:"
                             } else {
                                 ":yellow_circle:"
                             }
-                        } else {
-                            ":green_circle:"
-                        }
+                        })
                     } else if dep.is_ignored {
                         ":large_blue_circle:"
                     } else {
                         ":red_circle:"
                     },
-                    match dep.url.as_ref() {
-                        Some(url) => format!("[{}]({})", dep.name, url,),
-                        None => dep.name.to_owned(),
-                    },
+                    dep.url.as_ref().map_or_else(
+                        || dep.name.clone(),
+                        |url| { format!("[{}]({})", dep.name, url) }
+                    ),
                     dep.version,
                     dep.dependency_type,
                     if dep.is_valid { "" } else { "Invalid" },
@@ -111,12 +109,9 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
                             c.text.as_str()
                         }
                     }),
-                    dep.is_dev
-                        .map(|b| if b { "True" } else { "False" })
-                        .unwrap_or("-"),
+                    dep.is_dev.map_or("_", |b| if b { "True" } else { "False" }),
                     dep.is_optional
-                        .map(|b| if b { "True" } else { "False" })
-                        .unwrap_or("-"),
+                        .map_or("-", |b| if b { "True" } else { "False" })
                 )
             })
             .collect();
@@ -131,7 +126,7 @@ fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencie
         )
     };
 
-    println!("{}", md);
+    println!("{md}");
 }
 
 /// Sets up the tracing subscriber.

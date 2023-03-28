@@ -24,7 +24,7 @@ impl Default for Yarn<retriever::Npm> {
 
 impl<R: Retriever> Yarn<R> {
     /// Creates a new [`Yarn`] [`FileCollector`].
-    pub fn new(retriever: R) -> Self {
+    pub const fn new(retriever: R) -> Self {
         Self { retriever }
     }
 }

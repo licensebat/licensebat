@@ -40,7 +40,7 @@ impl Default for Dart<retriever::Hosted> {
 impl<R: Retriever> Dart<R> {
     /// Creates a new [`Dart`] [`FileCollector`].
     #[must_use]
-    pub fn new(hosted_retriever: R) -> Self {
+    pub const fn new(hosted_retriever: R) -> Self {
         Self {
             retriever: hosted_retriever,
         }

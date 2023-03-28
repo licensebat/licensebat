@@ -51,7 +51,7 @@ impl<'de> Visitor<'de> for LicensesVisitor {
     where
         M: MapAccess<'de>,
     {
-        let mut license = "".to_string();
+        let mut license = String::new();
         while let Some((key, value)) = map.next_entry::<String, String>()? {
             if key == "type" {
                 license = value;
@@ -100,7 +100,7 @@ impl<'de> Visitor<'de> for LicenseVisitor {
     where
         M: MapAccess<'de>,
     {
-        let mut license = "".to_string();
+        let mut license = String::new();
         while let Some((key, value)) = map.next_entry::<String, String>()? {
             if key == "type" {
                 license = value;

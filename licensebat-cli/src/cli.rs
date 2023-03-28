@@ -41,8 +41,8 @@ impl FromStr for OutputFormat {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "markdown" | "md" => Ok(OutputFormat::Markdown),
-            _ => Ok(OutputFormat::Json),
+            "markdown" | "md" => Ok(Self::Markdown),
+            _ => Ok(Self::Json),
         }
     }
 }
