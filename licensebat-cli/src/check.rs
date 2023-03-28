@@ -87,6 +87,7 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
 
     while let Some(mut dependency) = stream.next().await {
         // don't process dev or optional dependencies if the user doesn't want to see them in the final report
+        // TODO: this should be done in the collector to avoid unnecessary requests.
         if (licrc.behavior.do_not_show_dev_dependencies && dependency.is_dev.unwrap_or_default())
             || licrc.behavior.do_not_show_optional_dependencies
                 && dependency.is_optional.unwrap_or_default()
