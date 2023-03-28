@@ -87,19 +87,6 @@ impl LicRc {
             return;
         }
 
-        // dependency.licenses.clone().map_or_else(|| {            tracing::error!("Licenses are None!! At this point, this shouldn't happen. Check out the dependency validation logic");
-        // }, |licenses| for lic in &licenses {
-        //         if let Some(accepted) = self.licenses.accepted.as_ref() {
-        //             if !accepted.contains(lic) {
-        //                 make_invalid(dependency, lic);
-        //             }
-        //         } else if let Some(unaccepted) = self.licenses.unaccepted.as_ref() {
-        //             if unaccepted.contains(lic) {
-        //                 make_invalid(dependency, lic);
-        //             }
-        //         }
-        //     });
-
         dependency.licenses.clone().map_or_else(
             || {
                 tracing::error!("Licenses are None!! At this point, this shouldn't happen. Check out the dependency validation logic");
