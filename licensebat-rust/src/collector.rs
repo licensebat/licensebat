@@ -36,7 +36,7 @@ impl<R: Retriever> Rust<R> {
     ///
     /// * `retriever` - [`Retriever`] for the docs.rs API.
     #[must_use]
-    pub fn new(retriever: R) -> Self {
+    pub const fn new(retriever: R) -> Self {
         Self { retriever }
     }
 }
