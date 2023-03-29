@@ -71,13 +71,18 @@ impl<R: Retriever> FileCollector for Dart<R> {
         "pubspec.lock".to_string()
     }
 
-    #[instrument(skip(self), level = "debug")]
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
+    #[instrument(skip(self, filter_fn,), level = "debug")]
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        filter_fn: &dyn Fn(&Dependency) -> bool,
+    ) -> RetrievedDependencyStreamResult {
         let dependencies = serde_yaml::from_str::<DartDependencies>(dependency_file_content)?
             .into_vec_collection();
 
         let futures = dependencies
             .into_iter()
+            .filter(|dep| filter_fn(&dep.into()))
             .map(|dep| get_dependency(dep, &self.retriever).boxed())
             .collect();
 

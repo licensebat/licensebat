@@ -40,8 +40,12 @@ impl<R: Retriever> FileCollector for Yarn<R> {
         String::from("yarn.lock")
     }
 
-    #[instrument(skip(self))]
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
+    #[instrument(skip(self, filter_fn))]
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        filter_fn: &dyn Fn(&Dependency) -> bool,
+    ) -> RetrievedDependencyStreamResult {
         let npm_deps = yarn_lock_parser::parse_str(dependency_file_content)?
             .into_iter()
             .map(|entry| Dependency {
@@ -49,7 +53,8 @@ impl<R: Retriever> FileCollector for Yarn<R> {
                 version: entry.version.to_owned(),
                 is_dev: None,
                 is_optional: None,
-            });
+            })
+            .filter(filter_fn);
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))
     }

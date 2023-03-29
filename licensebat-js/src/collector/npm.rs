@@ -41,8 +41,12 @@ impl<R: Retriever> FileCollector for Npm<R> {
         String::from("package-lock.json")
     }
 
-    #[instrument(skip(self))]
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
+    #[instrument(skip(self, filter_fn))]
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        filter_fn: &dyn Fn(&Dependency) -> bool,
+    ) -> RetrievedDependencyStreamResult {
         let npm_deps = package_lock_json_parser::parse_dependencies(dependency_file_content)?
             .into_iter()
             .map(|dep| Dependency {
@@ -51,7 +55,8 @@ impl<R: Retriever> FileCollector for Npm<R> {
                 version: dep.version,
                 is_dev: Some(dep.is_dev),
                 is_optional: Some(dep.is_optional),
-            });
+            })
+            .filter(filter_fn);
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))
     }

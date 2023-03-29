@@ -68,10 +68,45 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     ];
 
     // 4. get dependency stream
+    // TODO: this filter function is already calculating ingored dependencies.
+    // we're also doing it in the licrc validator. Ideally we should only do it once.
+    let filter = |dependency: &licensebat_core::Dependency| {
+        let is_dev = dependency.is_dev.unwrap_or_default();
+        let is_optional = dependency.is_optional.unwrap_or_default();
+
+        if licrc.behavior.do_not_show_dev_dependencies && is_dev {
+            return false;
+        }
+        if licrc.behavior.do_not_show_optional_dependencies && is_optional {
+            return false;
+        }
+
+        let is_ignored = licrc
+            .dependencies
+            .ignored
+            .as_ref()
+            .unwrap_or(&vec![])
+            .contains(&dependency.name);
+
+        if licrc.behavior.do_not_show_ignored_dependencies && is_ignored {
+            if is_ignored {
+                return false;
+            }
+            if licrc.dependencies.ignore_dev_dependencies && is_dev {
+                return false;
+            }
+            if licrc.dependencies.ignore_optional_dependencies && is_optional {
+                return false;
+            }
+        }
+
+        true
+    };
+
     let mut stream = file_collectors
         .iter()
         .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
-        .and_then(|c| c.get_dependencies(&dep_file_content).ok())
+        .and_then(|c| c.get_dependencies(&dep_file_content, &filter).ok())
         .expect(
             format!(
                 "No collector found for dependency file {}",
@@ -86,20 +121,9 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     let mut validated_deps = vec![];
 
     while let Some(mut dependency) = stream.next().await {
-        // don't process dev or optional dependencies if the user doesn't want to see them in the final report
-        // TODO: this should be done in the collector to avoid unnecessary requests.
-        if (licrc.behavior.do_not_show_dev_dependencies && dependency.is_dev.unwrap_or_default())
-            || licrc.behavior.do_not_show_optional_dependencies
-                && dependency.is_optional.unwrap_or_default()
-        {
-            continue;
-        }
         // do the validation here
         licrc.validate(&mut dependency);
-        //  only add ingored dependencies if the user wants to see them
-        if !(licrc.behavior.do_not_show_ignored_dependencies && dependency.is_ignored) {
-            validated_deps.push(dependency);
-        }
+        validated_deps.push(dependency);
     }
 
     tracing::info!("Done!");

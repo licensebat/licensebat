@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 /// Generic and plain dependency without any extra information.
-/// Language agnostic, just holds the name and the version.
+/// Language agnostic, just holds the name and the version and some other information.
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd, Default)]
 pub struct Dependency {
     /// Dependency name

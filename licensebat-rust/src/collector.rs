@@ -16,7 +16,7 @@ use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
     collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
-    Collector, Comment, FileCollector, RetrievedDependency,
+    Collector, Comment, Dependency, FileCollector, RetrievedDependency,
 };
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
@@ -65,12 +65,24 @@ impl<R: Retriever> FileCollector for Rust<R> {
         String::from("Cargo.lock")
     }
 
-    #[instrument(skip(self))]
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
+    #[instrument(skip(self, filter_fn))]
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        filter_fn: &dyn Fn(&Dependency) -> bool,
+    ) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
         let futures = lockfile
             .packages
             .into_iter()
+            .filter(|p| {
+                filter_fn(&Dependency {
+                    name: p.name.to_string(),
+                    version: p.version.to_string(),
+                    is_dev: None,
+                    is_optional: None,
+                })
+            })
             .map(|p| get_dependency(p, &self.retriever).boxed())
             .collect();
 
@@ -161,6 +173,10 @@ mod tests {
         Rust::new(MockRetriever)
     }
 
+    fn filter_fn(_: &Dependency) -> bool {
+        true
+    }
+
     #[tokio::test]
     async fn it_works_for_crates_registry() {
         let rust = build_collector();
@@ -173,7 +189,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content)
+            .get_dependencies(&lock_content, &filter_fn)
             .unwrap()
             .collect::<Vec<_>>()
             .await;
@@ -200,7 +216,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content)
+            .get_dependencies(&lock_content, &filter_fn)
             .unwrap()
             .collect::<Vec<_>>()
             .await;
@@ -227,7 +243,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content)
+            .get_dependencies(&lock_content, &filter_fn)
             .unwrap()
             .collect::<Vec<_>>()
             .await;
