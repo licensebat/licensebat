@@ -3,7 +3,7 @@ use crate::{
     retriever::{self, npm::Retriever},
 };
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
+    collector::RetrievedDependencyStreamResult, licrc::LicRc, Collector, Dependency, FileCollector,
 };
 use tracing::instrument;
 
@@ -41,11 +41,11 @@ impl<R: Retriever> FileCollector for Npm<R> {
         String::from("package-lock.json")
     }
 
-    #[instrument(skip(self, filter_fn))]
+    #[instrument(skip(self))]
     fn get_dependencies(
         &self,
         dependency_file_content: &str,
-        filter_fn: &dyn Fn(&Dependency) -> bool,
+        licrc: &LicRc,
     ) -> RetrievedDependencyStreamResult {
         let npm_deps = package_lock_json_parser::parse_dependencies(dependency_file_content)?
             .into_iter()
@@ -56,7 +56,7 @@ impl<R: Retriever> FileCollector for Npm<R> {
                 is_dev: Some(dep.is_dev),
                 is_optional: Some(dep.is_optional),
             })
-            .filter(filter_fn);
+            .filter(|dep| licrc.filter_dependencies_before_retrieval(dep));
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))
     }

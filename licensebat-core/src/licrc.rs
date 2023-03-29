@@ -44,6 +44,8 @@ impl LicRc {
 }
 
 impl LicRc {
+    /// Checks if a dependency should be ignored or not.
+    /// Note that this function will set the dependency's `is_ignored` property to `true` if it's ignored.
     pub fn is_ignored(&self, dependency: &mut RetrievedDependency) -> bool {
         // is it explicitly ignored?
         if self
@@ -72,14 +74,15 @@ impl LicRc {
         false
     }
 
+    /// Checks if a dependency should be retrieved or not.
     pub fn filter_dependencies_before_retrieval(&self, dependency: &Dependency) -> bool {
         let is_dev = dependency.is_dev.unwrap_or_default();
         let is_optional = dependency.is_optional.unwrap_or_default();
 
-        if licrc.behavior.do_not_show_dev_dependencies && is_dev {
+        if self.behavior.do_not_show_dev_dependencies && is_dev {
             return false;
         }
-        if licrc.behavior.do_not_show_optional_dependencies && is_optional {
+        if self.behavior.do_not_show_optional_dependencies && is_optional {
             return false;
         }
 
@@ -94,10 +97,10 @@ impl LicRc {
             if is_ignored {
                 return false;
             }
-            if licrc.dependencies.ignore_dev_dependencies && is_dev {
+            if self.dependencies.ignore_dev_dependencies && is_dev {
                 return false;
             }
-            if licrc.dependencies.ignore_optional_dependencies && is_optional {
+            if self.dependencies.ignore_optional_dependencies && is_optional {
                 return false;
             }
         }

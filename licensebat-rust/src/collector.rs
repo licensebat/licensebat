@@ -16,6 +16,7 @@ use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
     collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
+    licrc::LicRc,
     Collector, Comment, Dependency, FileCollector, RetrievedDependency,
 };
 use std::{str::FromStr, sync::Arc};
@@ -65,18 +66,18 @@ impl<R: Retriever> FileCollector for Rust<R> {
         String::from("Cargo.lock")
     }
 
-    #[instrument(skip(self, filter_fn))]
+    #[instrument(skip(self))]
     fn get_dependencies(
         &self,
         dependency_file_content: &str,
-        filter_fn: &dyn Fn(&Dependency) -> bool,
+        licrc: &LicRc,
     ) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
         let futures = lockfile
             .packages
             .into_iter()
             .filter(|p| {
-                filter_fn(&Dependency {
+                licrc.filter_dependencies_before_retrieval(&Dependency {
                     name: p.name.to_string(),
                     version: p.version.to_string(),
                     is_dev: None,
@@ -173,8 +174,8 @@ mod tests {
         Rust::new(MockRetriever)
     }
 
-    fn filter_fn(_: &Dependency) -> bool {
-        true
+    fn get_licrc() -> LicRc {
+        LicRc::default()
     }
 
     #[tokio::test]
@@ -189,7 +190,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content, &filter_fn)
+            .get_dependencies(&lock_content, &get_licrc())
             .unwrap()
             .collect::<Vec<_>>()
             .await;
@@ -216,7 +217,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content, &filter_fn)
+            .get_dependencies(&lock_content, &get_licrc())
             .unwrap()
             .collect::<Vec<_>>()
             .await;
@@ -243,7 +244,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content, &filter_fn)
+            .get_dependencies(&lock_content, &get_licrc())
             .unwrap()
             .collect::<Vec<_>>()
             .await;

@@ -16,6 +16,7 @@ use crate::retriever::{self, hosted::Retriever};
 use futures::prelude::*;
 use licensebat_core::{
     collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
+    licrc::LicRc,
     Collector, Comment, Dependency, FileCollector, RetrievedDependency,
 };
 use std::sync::Arc;
@@ -71,18 +72,18 @@ impl<R: Retriever> FileCollector for Dart<R> {
         "pubspec.lock".to_string()
     }
 
-    #[instrument(skip(self, filter_fn,), level = "debug")]
+    #[instrument(skip(self), level = "debug")]
     fn get_dependencies(
         &self,
         dependency_file_content: &str,
-        filter_fn: &dyn Fn(&Dependency) -> bool,
+        licrc: &LicRc,
     ) -> RetrievedDependencyStreamResult {
         let dependencies = serde_yaml::from_str::<DartDependencies>(dependency_file_content)?
             .into_vec_collection();
 
         let futures = dependencies
             .into_iter()
-            .filter(|dep| filter_fn(&dep.into()))
+            .filter(|dep| licrc.filter_dependencies_before_retrieval(&dep.into()))
             .map(|dep| get_dependency(dep, &self.retriever).boxed())
             .collect();
 

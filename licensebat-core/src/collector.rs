@@ -1,5 +1,6 @@
 //! Collector traits.
 use crate::dependency::RetrievedDependency;
+use crate::licrc::LicRc;
 use crate::Dependency;
 use futures::stream::Stream;
 use futures::StreamExt;
@@ -82,6 +83,6 @@ pub trait FileCollector: Collector {
     fn get_dependencies(
         &self,
         dependency_file_content: &str,
-        filter_fn: &dyn Fn(&Dependency) -> bool,
+        licrc: &LicRc,
     ) -> RetrievedDependencyStreamResult;
 }

@@ -71,7 +71,7 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     let mut stream = file_collectors
         .iter()
         .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
-        .and_then(|c| c.get_dependencies(&dep_file_content, &filter).ok())
+        .and_then(|c| c.get_dependencies(&dep_file_content, &licrc).ok())
         .expect(
             format!(
                 "No collector found for dependency file {}",
