@@ -3,7 +3,7 @@ use crate::{
     retriever::{self, npm::Retriever},
 };
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, Collector, Dependency, FileCollector,
+    collector::RetrievedDependencyStreamResult, licrc::LicRc, Collector, Dependency, FileCollector,
 };
 use tracing::instrument;
 
@@ -41,7 +41,11 @@ impl<R: Retriever> FileCollector for Yarn<R> {
     }
 
     #[instrument(skip(self))]
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        licrc: &LicRc,
+    ) -> RetrievedDependencyStreamResult {
         let npm_deps = yarn_lock_parser::parse_str(dependency_file_content)?
             .into_iter()
             .map(|entry| Dependency {
@@ -49,7 +53,8 @@ impl<R: Retriever> FileCollector for Yarn<R> {
                 version: entry.version.to_owned(),
                 is_dev: None,
                 is_optional: None,
-            });
+            })
+            .filter(|dep| licrc.filter_dependencies_before_retrieval(dep));
 
         Ok(retrieve_from_npm(npm_deps, &self.retriever))
     }

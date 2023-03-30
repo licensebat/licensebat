@@ -14,7 +14,6 @@
     "humao.rest-client",
     "davidanson.vscode-markdownlint",
     "github.vscode-pull-request-github",
-    "cschleiden.vscode-github-actions",
     "mikestead.dotenv",
     "codestream.codestream",
     "vadimcn.vscode-lldb",

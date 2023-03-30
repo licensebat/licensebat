@@ -71,8 +71,14 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     let mut stream = file_collectors
         .iter()
         .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
-        .and_then(|c| c.get_dependencies(&dep_file_content).ok())
-        .expect("No collector found for dependency file")
+        .and_then(|c| c.get_dependencies(&dep_file_content, &licrc).ok())
+        .expect(
+            format!(
+                "No collector found for dependency file {}",
+                cli.dependency_file
+            )
+            .as_str(),
+        )
         .buffer_unordered(licrc.behavior.retriever_buffer_size.unwrap_or(100));
 
     // 5. validate the dependencies according to the .licrc config

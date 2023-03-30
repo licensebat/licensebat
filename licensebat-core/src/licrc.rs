@@ -1,7 +1,7 @@
 //! Exposes a struct to manage the `.licrc` file information and validate the dependencies accordingly.
 //!
 //! When using the `licrc-from-file` feature, a [`LicRc::from_relative_path`] associated function will be available for you to load the information from a file.
-use crate::RetrievedDependency;
+use crate::{Dependency, RetrievedDependency};
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
@@ -44,12 +44,9 @@ impl LicRc {
 }
 
 impl LicRc {
-    /// Validates a specific [`RetrievedDependency`].
-    /// Note that it will set the dependency's `validated` property to `true`.
-    /// While checking it's validaty against what's been declared in the `.licrc` file it can also modify `is_ignored` and `is_valid` properties.
-    #[instrument(skip(self))]
-    pub fn validate(&self, dependency: &mut RetrievedDependency) {
-        dependency.validated = true;
+    /// Checks if a dependency should be ignored or not.
+    /// Note that this function will set the dependency's `is_ignored` property to `true` if it's ignored.
+    pub fn is_ignored(&self, dependency: &mut RetrievedDependency) -> bool {
         // is it explicitly ignored?
         if self
             .dependencies
@@ -59,28 +56,69 @@ impl LicRc {
             .contains(&dependency.name)
         {
             dependency.is_ignored = true;
-            tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
-            return;
+            return true;
         }
 
         // are dev dependencies ignored?
-        if self.dependencies.ignore_dev_dependencies.unwrap_or(false) {
+        if self.dependencies.ignore_dev_dependencies && dependency.is_dev.unwrap_or(false) {
             dependency.is_ignored = true;
-            tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
-            return;
+            return true;
         }
 
         // are optional dependencies ignored?
-        if self
-            .dependencies
-            .ignore_optional_dependencies
-            .unwrap_or(false)
+        if self.dependencies.ignore_optional_dependencies && dependency.is_optional.unwrap_or(false)
         {
             dependency.is_ignored = true;
+            return true;
+        }
+        false
+    }
+
+    /// Checks if a dependency should be retrieved or not.
+    pub fn filter_dependencies_before_retrieval(&self, dependency: &Dependency) -> bool {
+        let is_dev = dependency.is_dev.unwrap_or_default();
+        let is_optional = dependency.is_optional.unwrap_or_default();
+
+        if self.behavior.do_not_show_dev_dependencies && is_dev {
+            return false;
+        }
+        if self.behavior.do_not_show_optional_dependencies && is_optional {
+            return false;
+        }
+
+        let is_ignored = self
+            .dependencies
+            .ignored
+            .as_ref()
+            .unwrap_or(&vec![])
+            .contains(&dependency.name);
+
+        if self.behavior.do_not_show_ignored_dependencies {
+            if is_ignored {
+                return false;
+            }
+            if self.dependencies.ignore_dev_dependencies && is_dev {
+                return false;
+            }
+            if self.dependencies.ignore_optional_dependencies && is_optional {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Validates a specific [`RetrievedDependency`].
+    /// Note that it will set the dependency's `validated` property to `true`.
+    /// While checking it's validaty against what's been declared in the `.licrc` file it can also modify `is_ignored` and `is_valid` properties.
+    #[instrument(skip(self))]
+    pub fn validate(&self, dependency: &mut RetrievedDependency) {
+        dependency.validated = true;
+        // is it ignored?
+        if self.is_ignored(dependency) {
             tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
             return;
         }
-
         // is it compliant with the policy?
         if !dependency.is_valid {
             tracing::debug!(dependency = ?dependency, "Dependency is invalid");
@@ -140,22 +178,35 @@ pub struct LicRcDependencies {
     /// You must use the name of the dependency here.
     pub ignored: Option<Vec<String>>,
     /// If set to true, dev dependencies will be ignored.
-    pub ignore_dev_dependencies: Option<bool>,
+    #[serde(default)]
+    pub ignore_dev_dependencies: bool,
     /// If set to true, optional dependencies will be ignored.
-    pub ignore_optional_dependencies: Option<bool>,
+    #[serde(default)]
+    pub ignore_optional_dependencies: bool,
 }
 
 /// Holds information about the behavior of the validation process.
 /// **This only applies for the [GITHUB API integrated project](https://github.com/marketplace/licensebat)**.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct LicRcBehavior {
     /// If set to false Licensebat will validate the dependencies no matter what file has been modified.
     /// If set to true, validation will only happen when one of the dependency files or the .licrc files has been modified in the commit.
     pub run_only_on_dependency_modification: Option<bool>,
     /// If set to true, Licensebat will execute the check but it won't block the PR.
-    pub do_not_block_pr: Option<bool>,
+    #[serde(default)]
+    pub do_not_block_pr: bool,
     /// This will define the size of the buffer used to retrieve the dependencies.
     /// It's set to 100 by default.
     /// If you have a lot of dependencies, you might want to increase this value, but be careful, if the size is too big, the API might return an error.
     pub retriever_buffer_size: Option<usize>,
+    /// If set to true, Licensebat will not show the ignored dependencies in the final report.
+    #[serde(default)]
+    pub do_not_show_ignored_dependencies: bool,
+    /// If set to true, Licensebat will not show the dev dependencies in the final report.
+    #[serde(default)]
+    pub do_not_show_dev_dependencies: bool,
+    /// If set to true, Licensebat will not show the optional dependencies in the final report.
+    #[serde(default)]
+    pub do_not_show_optional_dependencies: bool,
 }

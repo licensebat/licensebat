@@ -74,10 +74,28 @@ accepted = ["MIT", "MSC", "BSD"]
 [dependencies]
 # This will allow users to flag some dependencies so that Licensebat will not check for their license.
 ignored=["ignored_dep1", "ignored_dep2"]
+# False by default, if true it will mark all dev dependencies as ignored.
+# Bear in mind that this is only supported by some of the collectors.
+ignore_dev_dependencies = false
+# False by default, if true it will mark all optional dependencies as ignored.
+# Bear in mind that this is only supported by some of the collectors.
+ignore_optional_dependencies = false
 
 [behavior]
 # False by default (always exit code == 0), if true, it will exit with code 1 in case some invalid dependency is found.
 do_not_block_pr = false
+# False by default, if true it will do not show the ignored dependencies in the final report.
+do_not_show_ignored_dependencies = false
+# False by default, if true it will do not show the dev dependencies in the final report.
+# Bear in mind that this is only supported by some of the collectors.
+do_not_show_dev_dependencies = false
+# False by default, if true it will do not show the optional dependencies in the final report.
+# Bear in mind that this is only supported by some of the collectors.
+do_not_show_optional_dependencies = false
+# This will define the size of the buffer used to retrieve the dependencies.
+# It's set to 100 by default.
+# If you have a lot of dependencies, you might want to increase this value, but be careful, if the size is too big, the API might return an error.
+retriever_buffer_size = 100
 ```
 
 ## Logs

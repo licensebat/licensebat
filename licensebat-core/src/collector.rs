@@ -1,5 +1,6 @@
 //! Collector traits.
 use crate::dependency::RetrievedDependency;
+use crate::licrc::LicRc;
 use futures::stream::Stream;
 use futures::StreamExt;
 use futures::{future::BoxFuture, stream::Iter};
@@ -72,9 +73,15 @@ pub trait FileCollector: Collector {
     /// i.e. for npm package-lock.json, for rust cargo.lock
     fn get_dependency_filename(&self) -> String;
     /// Returns a stream of [`RetrievedDependency`] ready to be validated.
-    /// It accepts a &str with the content of the dependency file.
+    /// It accepts a &str with the content of the dependency file
+    /// and a function to filter the dependencies that we don't want to process,
+    /// mainly because the user has expressed the will to not to do so.
     /// # Errors
     ///
     /// Will return an [`Error`] if the parsing of the dependency file fails.
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult;
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        licrc: &LicRc,
+    ) -> RetrievedDependencyStreamResult;
 }

@@ -34,6 +34,19 @@ impl TryInto<Dependency> for DartDependency {
     }
 }
 
+impl From<&DartDependency> for Dependency {
+    fn from(dependency: &DartDependency) -> Self {
+        let name = dependency.description.name.clone().unwrap_or(String::new());
+
+        Dependency {
+            name,
+            version: dependency.version.clone(),
+            is_dev: dependency.is_dev,
+            is_optional: dependency.is_optional,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Description {
     #[serde(default)]

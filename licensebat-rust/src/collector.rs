@@ -16,7 +16,8 @@ use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
     collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
-    Collector, Comment, FileCollector, RetrievedDependency,
+    licrc::LicRc,
+    Collector, Comment, Dependency, FileCollector, RetrievedDependency,
 };
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
@@ -66,11 +67,23 @@ impl<R: Retriever> FileCollector for Rust<R> {
     }
 
     #[instrument(skip(self))]
-    fn get_dependencies(&self, dependency_file_content: &str) -> RetrievedDependencyStreamResult {
+    fn get_dependencies(
+        &self,
+        dependency_file_content: &str,
+        licrc: &LicRc,
+    ) -> RetrievedDependencyStreamResult {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
         let futures = lockfile
             .packages
             .into_iter()
+            .filter(|p| {
+                licrc.filter_dependencies_before_retrieval(&Dependency {
+                    name: p.name.to_string(),
+                    version: p.version.to_string(),
+                    is_dev: None,
+                    is_optional: None,
+                })
+            })
             .map(|p| get_dependency(p, &self.retriever).boxed())
             .collect();
 
@@ -161,6 +174,10 @@ mod tests {
         Rust::new(MockRetriever)
     }
 
+    fn get_licrc() -> LicRc {
+        LicRc::default()
+    }
+
     #[tokio::test]
     async fn it_works_for_crates_registry() {
         let rust = build_collector();
@@ -173,7 +190,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content)
+            .get_dependencies(&lock_content, &get_licrc())
             .unwrap()
             .collect::<Vec<_>>()
             .await;
@@ -200,7 +217,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content)
+            .get_dependencies(&lock_content, &get_licrc())
             .unwrap()
             .collect::<Vec<_>>()
             .await;
@@ -227,7 +244,7 @@ mod tests {
         "#;
 
         let mut deps = rust
-            .get_dependencies(&lock_content)
+            .get_dependencies(&lock_content, &get_licrc())
             .unwrap()
             .collect::<Vec<_>>()
             .await;
