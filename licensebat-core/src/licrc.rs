@@ -1,7 +1,7 @@
 //! Exposes a struct to manage the `.licrc` file information and validate the dependencies accordingly.
 //!
 //! When using the `licrc-from-file` feature, a [`LicRc::from_relative_path`] associated function will be available for you to load the information from a file.
-use crate::RetrievedDependency;
+use crate::{Dependency, RetrievedDependency};
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
@@ -44,12 +44,7 @@ impl LicRc {
 }
 
 impl LicRc {
-    /// Validates a specific [`RetrievedDependency`].
-    /// Note that it will set the dependency's `validated` property to `true`.
-    /// While checking it's validaty against what's been declared in the `.licrc` file it can also modify `is_ignored` and `is_valid` properties.
-    #[instrument(skip(self))]
-    pub fn validate(&self, dependency: &mut RetrievedDependency) {
-        dependency.validated = true;
+    pub fn is_ignored(&self, dependency: &mut RetrievedDependency) -> bool {
         // is it explicitly ignored?
         if self
             .dependencies
@@ -59,25 +54,68 @@ impl LicRc {
             .contains(&dependency.name)
         {
             dependency.is_ignored = true;
-            tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
-            return;
+            return true;
         }
 
         // are dev dependencies ignored?
         if self.dependencies.ignore_dev_dependencies && dependency.is_dev.unwrap_or(false) {
             dependency.is_ignored = true;
-            tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
-            return;
+            return true;
         }
 
         // are optional dependencies ignored?
         if self.dependencies.ignore_optional_dependencies && dependency.is_optional.unwrap_or(false)
         {
             dependency.is_ignored = true;
+            return true;
+        }
+        false
+    }
+
+    pub fn filter_dependencies_before_retrieval(&self, dependency: &Dependency) -> bool {
+        let is_dev = dependency.is_dev.unwrap_or_default();
+        let is_optional = dependency.is_optional.unwrap_or_default();
+
+        if licrc.behavior.do_not_show_dev_dependencies && is_dev {
+            return false;
+        }
+        if licrc.behavior.do_not_show_optional_dependencies && is_optional {
+            return false;
+        }
+
+        let is_ignored = self
+            .dependencies
+            .ignored
+            .as_ref()
+            .unwrap_or(&vec![])
+            .contains(&dependency.name);
+
+        if self.behavior.do_not_show_ignored_dependencies && is_ignored {
+            if is_ignored {
+                return false;
+            }
+            if licrc.dependencies.ignore_dev_dependencies && is_dev {
+                return false;
+            }
+            if licrc.dependencies.ignore_optional_dependencies && is_optional {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Validates a specific [`RetrievedDependency`].
+    /// Note that it will set the dependency's `validated` property to `true`.
+    /// While checking it's validaty against what's been declared in the `.licrc` file it can also modify `is_ignored` and `is_valid` properties.
+    #[instrument(skip(self))]
+    pub fn validate(&self, dependency: &mut RetrievedDependency) {
+        dependency.validated = true;
+        // is it ignored?
+        if self.is_ignored(dependency) {
             tracing::debug!(dependency = ?dependency, "Dependency has been ignored");
             return;
         }
-
         // is it compliant with the policy?
         if !dependency.is_valid {
             tracing::debug!(dependency = ?dependency, "Dependency is invalid");

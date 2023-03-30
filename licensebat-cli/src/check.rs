@@ -68,41 +68,6 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     ];
 
     // 4. get dependency stream
-    // TODO: this filter function is already calculating ingored dependencies.
-    // we're also doing it in the licrc validator. Ideally we should only do it once.
-    let filter = |dependency: &licensebat_core::Dependency| {
-        let is_dev = dependency.is_dev.unwrap_or_default();
-        let is_optional = dependency.is_optional.unwrap_or_default();
-
-        if licrc.behavior.do_not_show_dev_dependencies && is_dev {
-            return false;
-        }
-        if licrc.behavior.do_not_show_optional_dependencies && is_optional {
-            return false;
-        }
-
-        let is_ignored = licrc
-            .dependencies
-            .ignored
-            .as_ref()
-            .unwrap_or(&vec![])
-            .contains(&dependency.name);
-
-        if licrc.behavior.do_not_show_ignored_dependencies && is_ignored {
-            if is_ignored {
-                return false;
-            }
-            if licrc.dependencies.ignore_dev_dependencies && is_dev {
-                return false;
-            }
-            if licrc.dependencies.ignore_optional_dependencies && is_optional {
-                return false;
-            }
-        }
-
-        true
-    };
-
     let mut stream = file_collectors
         .iter()
         .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
