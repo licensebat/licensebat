@@ -93,7 +93,7 @@ impl LicRc {
             .unwrap_or(&vec![])
             .contains(&dependency.name);
 
-        if self.behavior.do_not_show_ignored_dependencies && is_ignored {
+        if self.behavior.do_not_show_ignored_dependencies {
             if is_ignored {
                 return false;
             }

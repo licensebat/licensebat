@@ -1,7 +1,6 @@
 //! Collector traits.
 use crate::dependency::RetrievedDependency;
 use crate::licrc::LicRc;
-use crate::Dependency;
 use futures::stream::Stream;
 use futures::StreamExt;
 use futures::{future::BoxFuture, stream::Iter};
