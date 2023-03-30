@@ -1,7 +1,5 @@
 //! Collector traits.
-use crate::dependency::RetrievedDependency;
-use crate::licrc::LicRc;
-use crate::Dependency;
+use crate::dependency::Dependency;
 use futures::stream::Stream;
 use futures::StreamExt;
 use futures::{future::BoxFuture, stream::Iter};
@@ -12,38 +10,33 @@ use std::{
     vec::IntoIter,
 };
 
-/// Stream of [`RetrievedDependency`]
-pub struct RetrievedDependencyStream<'a> {
-    stream: Iter<IntoIter<BoxFuture<'a, RetrievedDependency>>>,
+/// Stream of [`Dependency`]
+pub struct DependencyStream<'a> {
+    stream: Iter<IntoIter<BoxFuture<'a, Dependency>>>,
 }
 
-impl<'a> RetrievedDependencyStream<'a> {
-    /// Creates a new [`RetrievedDependencyStream`]
+impl<'a> DependencyStream<'a> {
+    /// Creates a new [`DependencyStream`]
     #[must_use]
-    pub fn new(futures: Vec<BoxFuture<'a, RetrievedDependency>>) -> Self {
+    pub fn new(futures: Vec<BoxFuture<'a, Dependency>>) -> Self {
         Self {
             stream: futures::stream::iter(futures),
         }
     }
 
     /// Returns the inner [`Iter`]
-    pub fn into_inner(self) -> Iter<IntoIter<BoxFuture<'a, RetrievedDependency>>> {
+    pub fn into_inner(self) -> Iter<IntoIter<BoxFuture<'a, Dependency>>> {
         self.stream
     }
 }
 
-impl<'a> Stream for RetrievedDependencyStream<'a> {
-    type Item = BoxFuture<'a, RetrievedDependency>;
+impl<'a> Stream for DependencyStream<'a> {
+    type Item = BoxFuture<'a, Dependency>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         self.as_mut().stream.poll_next_unpin(cx)
     }
 }
-
-/// Stream of [`RetrievedDependency`]
-// pub type RetrievedDependencyStream<'a> = Iter<IntoIter<BoxFuture<'a, RetrievedDependency>>>;
-/// Result returning either a [`RetrievedDependencyStream`] or an [`Error`]
-pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<'a>, Error>;
 
 /// Error raised by a collector while parsing/getting the dependencies.
 #[derive(Debug, thiserror::Error)]
@@ -62,6 +55,9 @@ pub enum Error {
     CargoLock(#[from] cargo_lock::Error),
 }
 
+/// Result of a collection of [`Dependency`]
+pub type DependencyCollectionResult = Result<Vec<Dependency>, Error>;
+
 /// Base trait for collectors.
 pub trait Collector: Debug + Send + Sync {
     /// Gets the name of the [`Collector`] (npm, dart, rust, go, python...).
@@ -73,16 +69,16 @@ pub trait FileCollector: Collector {
     /// Gets the name of the file holding all the dependencies.
     /// i.e. for npm package-lock.json, for rust cargo.lock
     fn get_dependency_filename(&self) -> String;
-    /// Returns a stream of [`RetrievedDependency`] ready to be validated.
+    /// Returns a collection of [`Dependency`] from the depdency file content.
+    /// You can filter the dependencies before retrieving their licenses.
+    fn get_dependencies(&self, dependency_file_content: &str) -> DependencyCollectionResult;
+    /// Returns a stream of [`Dependency`] ready to be validated.
     /// It accepts a &str with the content of the dependency file
-    /// and a function to filter the dependencies that we don't want to process,
-    /// mainly because the user has expressed the will to not to do so.
     /// # Errors
     ///
     /// Will return an [`Error`] if the parsing of the dependency file fails.
-    fn get_dependencies(
+    fn retrieve_dependencies(
         &self,
-        dependency_file_content: &str,
-        licrc: &LicRc,
-    ) -> RetrievedDependencyStreamResult;
+        dependencies: impl Iterator<Item = Dependency>,
+    ) -> DependencyStream;
 }

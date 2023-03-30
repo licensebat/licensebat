@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod integration_npm_retriever {
-    use licensebat_core::{Dependency, RetrievedDependency};
+    use licensebat_core::{Dependency, Dependency};
     use licensebat_js::retriever::{self, npm::Retriever};
 
     #[tokio::test]
@@ -12,7 +12,7 @@ mod integration_npm_retriever {
             version: "0.1.2".to_string(),
             ..Dependency::default()
         };
-        let dep: RetrievedDependency = retriever.get_dependency(dependency).await;
+        let dep: Dependency = retriever.get_dependency(dependency).await;
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
         assert_eq!(dep.name, "exit");
     }

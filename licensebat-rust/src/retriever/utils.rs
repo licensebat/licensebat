@@ -1,4 +1,4 @@
-use licensebat_core::{Comment, Dependency, RetrievedDependency};
+use licensebat_core::{Comment, Dependency, Dependency};
 use tracing::instrument;
 
 #[instrument(level = "debug")]
@@ -8,13 +8,13 @@ pub fn crates_io_retrieved_dependency(
     error: Option<&str>,
     comment: Option<String>,
     suggested_licenses: Option<Vec<(String, f32)>>,
-) -> RetrievedDependency {
+) -> Dependency {
     let url = format!(
         "https://crates.io/crates/{}/{}",
         dependency.name, dependency.version
     );
 
-    RetrievedDependency::new(
+    Dependency::new(
         dependency.name.clone(),
         dependency.version.clone(),
         crate::RUST.to_owned(),

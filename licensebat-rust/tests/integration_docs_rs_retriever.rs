@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod integration_docs_rs_retriever {
-    use licensebat_core::{Dependency, RetrievedDependency};
+    use licensebat_core::{Dependency, Dependency};
     use licensebat_rust::retriever::{self, docs_rs::Retriever};
 
     const LICENSE_CACHE: &[u8] = std::include_bytes!("../../licensebat-cli/license-cache.bin.zstd");
@@ -14,7 +14,7 @@ mod integration_docs_rs_retriever {
     async fn default_works_with_declared_license_dependency() {
         // https://crates.io/api/v1/crates/futurify/0.2.0
         let retriever = retriever::DocsRs::default();
-        let dep: RetrievedDependency = retriever
+        let dep: Dependency = retriever
             .get_dependency(Dependency::new("futurify", "0.2.0"))
             .await;
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
@@ -27,7 +27,7 @@ mod integration_docs_rs_retriever {
     async fn default_does_not_resolve_non_standard() {
         // https://crates.io/api/v1/crates/ring/0.16.20
         let retriever = retriever::DocsRs::default();
-        let dep: RetrievedDependency = retriever
+        let dep: Dependency = retriever
             .get_dependency(Dependency::new("ring", "0.16.20"))
             .await;
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
@@ -40,7 +40,7 @@ mod integration_docs_rs_retriever {
     async fn default_does_not_resolve_non_standard_yanked() {
         // https://crates.io/api/v1/crates/ring/0.17.0-alpha.9
         let retriever = retriever::DocsRs::default();
-        let dep: RetrievedDependency = retriever
+        let dep: Dependency = retriever
             .get_dependency(Dependency::new("ring", "0.17.0-alpha.9"))
             .await;
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
@@ -53,7 +53,7 @@ mod integration_docs_rs_retriever {
     async fn store_works_with_declared_license_dependency() {
         // https://crates.io/api/v1/crates/futurify/0.2.0
         let retriever = create_store_retriever();
-        let dep: RetrievedDependency = retriever
+        let dep: Dependency = retriever
             .get_dependency(Dependency::new("futurify", "0.2.0"))
             .await;
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
@@ -66,7 +66,7 @@ mod integration_docs_rs_retriever {
     async fn store_does_resolve_non_standard() {
         // https://crates.io/api/v1/crates/ring/0.16.20
         let retriever = create_store_retriever();
-        let dep: RetrievedDependency = retriever
+        let dep: Dependency = retriever
             .get_dependency(Dependency::new("ring", "0.16.20"))
             .await;
         assert_eq!(&dep.dependency_type, licensebat_rust::RUST);
@@ -83,7 +83,7 @@ mod integration_docs_rs_retriever {
     async fn store_does_resolve_non_standard_yanked() {
         // https://crates.io/api/v1/crates/ring/0.17.0-alpha.9
         let retriever = create_store_retriever();
-        let dep: RetrievedDependency = retriever
+        let dep: Dependency = retriever
             .get_dependency(Dependency::new("ring", "0.17.0-alpha.9"))
             .await;
         assert_eq!(Some(vec!["OpenSSL".to_string()]), dep.licenses);

@@ -1,37 +1,11 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-/// Generic and plain dependency without any extra information.
-/// Language agnostic, just holds the name and the version and some other information.
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd, Default)]
-pub struct Dependency {
-    /// Dependency name
-    pub name: String,
-    /// Dependency version
-    pub version: String,
-    /// True if the dependency is a dev dependency, false otherwise. Null if we cannot determine it.
-    pub is_dev: Option<bool>,
-    /// True if the dependency is an optional dependency, false otherwise. Null if we cannot determine it.
-    pub is_optional: Option<bool>,
-}
-
-impl Dependency {
-    /// Creates a new dependency without dev or optional information.
-    pub fn new(name: impl Into<String>, version: impl Into<String>) -> Self {
-        Self {
-            name: name.into(),
-            version: version.into(),
-            is_dev: None,
-            is_optional: None,
-        }
-    }
-}
-
-/// A dependency that has been retrieved from its source.
+/// A dependency representation.
 /// The source can be anything, from a third party API (i.e. npm, pub.dev or crates.io APIs) to the file system.
 /// It holds information about licenses, errors while validating...
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Clone, Default)]
-pub struct RetrievedDependency {
+pub struct Dependency {
     /// Dependency name.
     pub name: String,
     /// Dependency version.
@@ -66,8 +40,8 @@ pub struct RetrievedDependency {
     pub is_optional: Option<bool>,
 }
 
-impl RetrievedDependency {
-    /// Creates a new `RetrievedDependency` with the given parameters.
+impl Dependency {
+    /// Creates a new `Dependency` with the given parameters.
     /// Note that some properties will be automatically set depending on the other ones.
     /// For example, if the `licenses` parameter is `None`, the `is_valid` property will be set to `false`.
     /// Use the default method if you just want to create an instance with all  the defaults.
@@ -118,7 +92,7 @@ impl RetrievedDependency {
     }
 }
 
-/// A comment to be added in a [`RetrievedDependency`] once it has been retrieved or validated.
+/// A comment to be added in a [`Dependency`] once it has been retrieved or validated.
 /// It normally adds information about what went wrong.
 #[derive(Serialize, Deserialize, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Clone)]
 pub struct Comment {

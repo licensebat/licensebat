@@ -14,7 +14,7 @@ use super::utils::crates_io_retrieved_dependency;
 use crate::retriever::docs_rs::Retriever as DocsRetriever;
 use askalono::Store;
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
-use licensebat_core::{Dependency, RetrievedDependency};
+use licensebat_core::{Dependency, Dependency};
 use reqwest::Client;
 use serde_json::Value;
 use std::sync::Arc;
@@ -22,9 +22,9 @@ use tracing::instrument;
 
 /// Trait used by the [`CratesIo`] struct to retrieve dependencies.
 pub trait Retriever: Send + Sync + std::fmt::Debug {
-    /// Future that resolves to a [`RetrievedDependency`].
+    /// Future that resolves to a [`Dependency`].
     /// It cannot fail.
-    type Response: Future<Output = RetrievedDependency> + Send;
+    type Response: Future<Output = Dependency> + Send;
     /// Validates dependency's information from the original source.
     fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
@@ -97,7 +97,7 @@ impl std::fmt::Debug for CratesIo {
 }
 
 impl Retriever for CratesIo {
-    type Response = BoxFuture<'static, RetrievedDependency>;
+    type Response = BoxFuture<'static, Dependency>;
 
     #[instrument(skip(self), level = "debug")]
     fn get_dependency(&self, dependency: Dependency) -> Self::Response {

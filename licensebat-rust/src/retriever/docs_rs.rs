@@ -10,7 +10,7 @@
 use super::utils::crates_io_retrieved_dependency;
 use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
-use licensebat_core::{Dependency, RetrievedDependency};
+use licensebat_core::Dependency;
 use reqwest::Client;
 use std::{string::String, sync::Arc};
 use thiserror::Error;
@@ -18,9 +18,9 @@ use tracing::instrument;
 
 /// Trait used by the [`DocsRs`] struct to retrieve dependencies.
 pub trait Retriever: Send + Sync + std::fmt::Debug {
-    /// Future that resolves to a [`RetrievedDependency`].
+    /// Future that resolves to a [`Dependency`].
     /// It cannot fail.
-    type Response: Future<Output = RetrievedDependency> + Send;
+    type Response: Future<Output = Dependency> + Send;
     /// Validates dependency's information from the original source.
     fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
@@ -84,7 +84,7 @@ impl std::fmt::Debug for DocsRs {
 }
 
 impl Retriever for DocsRs {
-    type Response = BoxFuture<'static, RetrievedDependency>;
+    type Response = BoxFuture<'static, Dependency>;
 
     #[instrument(skip(self), level = "debug")]
     fn get_dependency(&self, dependency: Dependency) -> Self::Response {
@@ -181,16 +181,16 @@ fn docs_rs_url(dependency_name: &str, dependency_version: &str) -> String {
     format!("https://docs.rs/crate/{dependency_name}/{dependency_version}/source/")
 }
 
-/// Returns a `RetrievedDependency` by looking into the Docs.rs declared license file.
+/// Returns a `Dependency` by looking into the Docs.rs declared license file.
 /// This function will use `askalono::Store` to determine the kind of license.
-/// Note that in the comments of the `RetrievedDependency` there will be a `Comment` with the % score.
+/// Note that in the comments of the `Dependency` there will be a `Comment` with the % score.
 async fn get_retrieved_dependency_from_license_file(
     store: Arc<Option<Store>>,
     crate_url: String,
     license: String,
     client: Client,
     dependency: &Dependency,
-) -> RetrievedDependency {
+) -> Dependency {
     if let Some(store) = store.as_ref() {
         let license_url = format!("{crate_url}{license}");
         if let Ok((license, score)) = get_license_from_docs_rs(&client, store, &license_url).await {

@@ -66,7 +66,7 @@ pub struct DartDependencies {
 
 impl DartDependencies {
     /// Collects all the dependencies into a a vector.
-    pub fn into_vec_collection(self) -> Vec<DartDependency> {
+    pub fn into_vec_collection(self) -> Vec<Dependency> {
         self.packages
             .into_iter()
             .map(|(name, mut dependency)| {
@@ -75,6 +75,8 @@ impl DartDependencies {
                 }
                 dependency
             })
+            // TODO:
+            .map(|dep| dep.try_into())
             .collect()
     }
 }

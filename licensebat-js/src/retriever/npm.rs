@@ -12,17 +12,17 @@ use futures::{
     future::{self, BoxFuture},
     Future, FutureExt, TryFutureExt,
 };
-use licensebat_core::{Dependency, RetrievedDependency};
+use licensebat_core::Dependency;
 use reqwest::Client;
 use serde_json::Value;
 use tracing::instrument;
 
 /// Trait implemented by the [`Npm`] struct to retrieve dependencies.
 pub trait Retriever: Send + Sync + std::fmt::Debug {
-    /// Future that resolves to a [`RetrievedDependency`].
+    /// Future that resolves to a [`Dependency`].
     /// It cannot fail.
-    /// If there's some error while retrieving the dependency, it will return the error in the [`RetrievedDependency`]'s `error` field.
-    type Response: Future<Output = RetrievedDependency> + Send;
+    /// If there's some error while retrieving the dependency, it will return the error in the [`Dependency`]'s `error` field.
+    type Response: Future<Output = Dependency> + Send;
     /// Validates dependency's information from the original source.
     fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
@@ -57,7 +57,7 @@ impl Npm {
 }
 
 impl Retriever for Npm {
-    type Response = BoxFuture<'static, RetrievedDependency>;
+    type Response = BoxFuture<'static, Dependency>;
 
     /// Gets a dependency from the [`npm API`](https://registry.npmjs.org/).
     #[instrument(skip(self), level = "debug")]
@@ -97,7 +97,7 @@ impl Retriever for Npm {
                 retrieved_dependency(&dep_clone, licenses, None)
             })
             .or_else(move |e| future::ok(retrieved_dependency(&dependency, None, Some(e))))
-            .map(std::result::Result::<RetrievedDependency, std::convert::Infallible>::unwrap)
+            .map(std::result::Result::<Dependency, std::convert::Infallible>::unwrap)
             .boxed()
     }
 }
@@ -106,7 +106,7 @@ fn retrieved_dependency(
     dependency: &Dependency,
     licenses: Option<Vec<String>>,
     error: Option<reqwest::Error>,
-) -> RetrievedDependency {
+) -> Dependency {
     let url = format!(
         "https://www.npmjs.com/package/{}/v/{}",
         dependency.name, dependency.version
@@ -126,7 +126,7 @@ fn retrieved_dependency(
 
     tracing::debug!("Retrieved dependency for url {}", url);
 
-    RetrievedDependency::new(
+    Dependency::new(
         dependency.name.clone(),
         dependency.version.clone(),
         crate::NPM.to_owned(),

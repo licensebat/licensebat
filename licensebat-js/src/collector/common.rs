@@ -1,13 +1,13 @@
 use crate::retriever::npm::Retriever;
 use futures::FutureExt;
-use licensebat_core::{collector::RetrievedDependencyStream, Dependency};
+use licensebat_core::{collector::DependencyStream, Dependency};
 use tracing::instrument;
 
 /// String used to identify the type of dependency
 pub const NPM: &str = "npm";
 
 #[instrument(skip(deps, retriever))]
-pub fn retrieve_from_npm<'a, I, R>(deps: I, retriever: &R) -> RetrievedDependencyStream<'a>
+pub fn retrieve_from_npm<'a, I, R>(deps: I, retriever: &R) -> DependencyStream<'a>
 where
     I: Iterator<Item = Dependency>,
     R: Retriever + 'a,
@@ -17,5 +17,5 @@ where
         .map(|dep| retriever.get_dependency(dep).boxed())
         .collect();
 
-    RetrievedDependencyStream::new(iter)
+    DependencyStream::new(iter)
 }

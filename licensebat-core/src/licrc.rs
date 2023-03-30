@@ -1,7 +1,7 @@
 //! Exposes a struct to manage the `.licrc` file information and validate the dependencies accordingly.
 //!
 //! When using the `licrc-from-file` feature, a [`LicRc::from_relative_path`] associated function will be available for you to load the information from a file.
-use crate::{Dependency, RetrievedDependency};
+use crate::Dependency;
 use serde::{Deserialize, Serialize};
 use tracing::instrument;
 
@@ -46,7 +46,7 @@ impl LicRc {
 impl LicRc {
     /// Checks if a dependency should be ignored or not.
     /// Note that this function will set the dependency's `is_ignored` property to `true` if it's ignored.
-    pub fn is_ignored(&self, dependency: &mut RetrievedDependency) -> bool {
+    pub fn is_ignored(&self, dependency: &mut Dependency) -> bool {
         // is it explicitly ignored?
         if self
             .dependencies
@@ -93,7 +93,7 @@ impl LicRc {
             .unwrap_or(&vec![])
             .contains(&dependency.name);
 
-        if self.behavior.do_not_show_ignored_dependencies && is_ignored {
+        if self.behavior.do_not_show_ignored_dependencies {
             if is_ignored {
                 return false;
             }
@@ -108,11 +108,11 @@ impl LicRc {
         true
     }
 
-    /// Validates a specific [`RetrievedDependency`].
+    /// Validates a specific [`Dependency`].
     /// Note that it will set the dependency's `validated` property to `true`.
     /// While checking it's validaty against what's been declared in the `.licrc` file it can also modify `is_ignored` and `is_valid` properties.
     #[instrument(skip(self))]
-    pub fn validate(&self, dependency: &mut RetrievedDependency) {
+    pub fn validate(&self, dependency: &mut Dependency) {
         dependency.validated = true;
         // is it ignored?
         if self.is_ignored(dependency) {
@@ -148,7 +148,7 @@ impl LicRc {
 
 /// Marks a dependency as invalid and if it doesnt' have any error it adds one saying `Not compliant`.
 #[instrument]
-fn make_invalid(dependency: &mut RetrievedDependency, license: &str) {
+fn make_invalid(dependency: &mut Dependency, license: &str) {
     tracing::debug!(
         ?dependency,
         license,

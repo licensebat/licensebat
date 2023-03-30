@@ -3,7 +3,7 @@ use crate::{
     retriever::{self, npm::Retriever},
 };
 use licensebat_core::{
-    collector::RetrievedDependencyStreamResult, licrc::LicRc, Collector, Dependency, FileCollector,
+    collector::DependencyStreamResult, licrc::LicRc, Collector, Dependency, FileCollector,
 };
 use tracing::instrument;
 
@@ -46,7 +46,7 @@ impl<R: Retriever> FileCollector for Npm<R> {
         &self,
         dependency_file_content: &str,
         licrc: &LicRc,
-    ) -> RetrievedDependencyStreamResult {
+    ) -> DependencyStreamResult {
         let npm_deps = package_lock_json_parser::parse_dependencies(dependency_file_content)?
             .into_iter()
             .map(|dep| Dependency {

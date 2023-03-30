@@ -15,9 +15,9 @@ use self::dart_dependency::{DartDependencies, DartDependency};
 use crate::retriever::{self, hosted::Retriever};
 use futures::prelude::*;
 use licensebat_core::{
-    collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
+    collector::{DependencyCollectionResult, DependencyStream, DependencyStreamResult},
     licrc::LicRc,
-    Collector, Comment, Dependency, FileCollector, RetrievedDependency,
+    Collector, Comment, Dependency, FileCollector,
 };
 use std::sync::Arc;
 use tracing::instrument;
@@ -72,36 +72,32 @@ impl<R: Retriever> FileCollector for Dart<R> {
         "pubspec.lock".to_string()
     }
 
-    #[instrument(skip(self), level = "debug")]
-    fn get_dependencies(
-        &self,
-        dependency_file_content: &str,
-        licrc: &LicRc,
-    ) -> RetrievedDependencyStreamResult {
+    #[instrument(skip(self, dependency_file_content), level = "debug")]
+    fn get_dependencies(&self, dependency_file_content: &str) -> DependencyCollectionResult {
         let dependencies = serde_yaml::from_str::<DartDependencies>(dependency_file_content)?
             .into_vec_collection();
+        Ok(dependencies)
+    }
 
+    #[instrument(skip(self, dependencies), level = "debug")]
+    fn retrieve_dependencies(&self, dependencies: Vec<Dependency>) -> DependencyStream {
         let futures = dependencies
             .into_iter()
-            .filter(|dep| licrc.filter_dependencies_before_retrieval(&dep.into()))
             .map(|dep| get_dependency(dep, &self.retriever).boxed())
             .collect();
 
-        Ok(RetrievedDependencyStream::new(futures))
+        DependencyStream::new(futures)
     }
 }
 
 /// Gets a dependency from Dart Pub.
-/// It basically transforms a [`Dependency`] into a [`RetrievedDependency`].
+/// It basically transforms a [`Dependency`] into a [`Dependency`].
 /// Depending on the type of package ([source]) we will use a different strategy to get the dependency information.
 /// There are 3 different sources: sdk, hosted, git.
 /// sdk dependencies will be directly validated and ignored.
 /// hosted dependencies will be found by scrapping the dart pub website as it seems to be the only solution.
 /// git dependencies will require to access GitHub repos, check the path and ref, and look for a LICENSE file.
-async fn get_dependency<R: Retriever>(
-    dependency: DartDependency,
-    retriever: &R,
-) -> RetrievedDependency {
+async fn get_dependency<R: Retriever>(dependency: DartDependency, retriever: &R) -> Dependency {
     match dependency.source.as_ref() {
         "sdk" => resolve_sdk_dependency(&dependency),
         "hosted" => resolve_hosted_dependency(dependency, retriever).await,
@@ -113,7 +109,7 @@ async fn get_dependency<R: Retriever>(
 /// Resolves to a dependency with 3-Clause BSD License.
 ///
 /// [This Dart document](https://dart.dev/tools/pub/publishing#preparing-to-publish) states that Dart uses this license.
-fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
+fn resolve_sdk_dependency(dependency: &DartDependency) -> Dependency {
     retrieved_dependency(
         dependency,
         Some(vec!["BSD-3-Clause".to_owned()]),
@@ -129,7 +125,7 @@ fn resolve_sdk_dependency(dependency: &DartDependency) -> RetrievedDependency {
 async fn resolve_hosted_dependency<R: Retriever>(
     dependency: DartDependency,
     retriever: &R,
-) -> RetrievedDependency {
+) -> Dependency {
     if let Ok(dep) = TryInto::<Dependency>::try_into(dependency.clone()) {
         let dep_name = dep.name.clone();
         retriever.get_dependency(dep).await.unwrap_or_else(|e| {
@@ -158,7 +154,7 @@ async fn resolve_hosted_dependency<R: Retriever>(
     }
 }
 
-fn resolve_git_dependency(dependency: &DartDependency) -> RetrievedDependency {
+fn resolve_git_dependency(dependency: &DartDependency) -> Dependency {
     // TODO: implement git dependencies
     // vamo a ver...
     // here we have the url and the path, and also the sha...
@@ -176,7 +172,7 @@ fn resolve_git_dependency(dependency: &DartDependency) -> RetrievedDependency {
 }
 
 /// Resolves to invalid dependency as we don't support this type for the moment.
-fn resolve_unknown_dependency(dependency: &DartDependency) -> RetrievedDependency {
+fn resolve_unknown_dependency(dependency: &DartDependency) -> Dependency {
     retrieved_dependency(
         dependency,
         None,
@@ -187,7 +183,7 @@ fn resolve_unknown_dependency(dependency: &DartDependency) -> RetrievedDependenc
     )
 }
 
-/// Builds a `RetrievedDependency`
+/// Builds a `Dependency`
 fn retrieved_dependency(
     dependency: &DartDependency,
     licenses: Option<Vec<String>>,
@@ -195,8 +191,8 @@ fn retrieved_dependency(
     url: Option<String>,
     comment: Option<Comment>,
     suggested_licenses: Option<Vec<(String, f32)>>,
-) -> RetrievedDependency {
-    RetrievedDependency::new(
+) -> Dependency {
+    Dependency::new(
         dependency
             .description
             .name

@@ -15,9 +15,7 @@ use crate::retriever::{self, docs_rs::Retriever};
 use cargo_lock::Package;
 use futures::FutureExt;
 use licensebat_core::{
-    collector::{RetrievedDependencyStream, RetrievedDependencyStreamResult},
-    licrc::LicRc,
-    Collector, Comment, Dependency, FileCollector, RetrievedDependency,
+    collector::DependencyStream, licrc::LicRc, Collector, Comment, Dependency, FileCollector,
 };
 use std::{str::FromStr, sync::Arc};
 use tracing::instrument;
@@ -67,11 +65,25 @@ impl<R: Retriever> FileCollector for Rust<R> {
     }
 
     #[instrument(skip(self))]
-    fn get_dependencies(
-        &self,
-        dependency_file_content: &str,
-        licrc: &LicRc,
-    ) -> RetrievedDependencyStreamResult {
+    fn get_dependencies(&self, dependency_file_content: &str) -> Vec<Dependency> {
+        let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
+        let futures = lockfile
+            .packages
+            .into_iter()
+            .filter(|p| {
+                licrc.filter_dependencies_before_retrieval(&Dependency {
+                    name: p.name.to_string(),
+                    version: p.version.to_string(),
+                    is_dev: None,
+                    is_optional: None,
+                })
+            })
+            .map(|p| get_dependency(p, &self.retriever).boxed())
+            .collect();
+    }
+
+    #[instrument(skip(self, dependencies))]
+    fn retrieve_dependencies(&self, dependencies: Vec<Dependency>) -> DependencyStream {
         let lockfile = cargo_lock::Lockfile::from_str(dependency_file_content)?;
         let futures = lockfile
             .packages
@@ -87,11 +99,11 @@ impl<R: Retriever> FileCollector for Rust<R> {
             .map(|p| get_dependency(p, &self.retriever).boxed())
             .collect();
 
-        Ok(RetrievedDependencyStream::new(futures))
+        Ok(DependencyStream::new(futures))
     }
 }
 
-async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> RetrievedDependency {
+async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> Dependency {
     if let Some(source) = package.source {
         // Registries
         if source.is_registry() {
@@ -120,7 +132,7 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> Retrie
             // let repo_ref = source.git_reference();
             // TODO: Implement this, get cargo.toml from git and check for license
             // TODO: CREATE GIT RETRIEVER
-            // return RetrievedDependency::default();
+            // return Dependency::default();
         }
     }
     // this should be filesystem, we can check it source.is_path()
@@ -128,7 +140,7 @@ async fn get_dependency<R: Retriever>(package: Package, retriever: &R) -> Retrie
     // unimplemented!()
 
     // for the moment we're returning a default not implemented.
-    RetrievedDependency {
+    Dependency {
             name: package.name.to_string(),
             version: package.version.to_string(),
             url: None,
@@ -158,13 +170,13 @@ mod tests {
     struct MockRetriever;
 
     impl Retriever for MockRetriever {
-        type Response = BoxFuture<'static, RetrievedDependency>;
+        type Response = BoxFuture<'static, Dependency>;
 
         fn get_dependency(&self, dependency: Dependency) -> Self::Response {
-            ready(RetrievedDependency {
+            ready(Dependency {
                 name: dependency.name.to_string(),
                 version: dependency.version.to_string(),
-                ..RetrievedDependency::default()
+                ..Dependency::default()
             })
             .boxed()
         }

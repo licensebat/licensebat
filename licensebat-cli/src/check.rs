@@ -1,6 +1,6 @@
 use crate::Cli;
 use futures::StreamExt;
-use licensebat_core::{licrc::LicRc, FileCollector, RetrievedDependency};
+use licensebat_core::{licrc::LicRc, Dependency, FileCollector};
 use std::sync::Arc;
 
 const LICENSE_CACHE: &[u8] = std::include_bytes!("../license-cache.bin.zstd");
@@ -16,7 +16,7 @@ pub struct RunResult {
     /// The [`LicRc`] file.
     pub licrc: LicRc,
     /// The validated dependencies.
-    pub dependencies: Vec<RetrievedDependency>,
+    pub dependencies: Vec<Dependency>,
 }
 
 /// Checks the dependencies of a project.
@@ -68,18 +68,41 @@ pub async fn run(cli: Cli) -> anyhow::Result<RunResult> {
     ];
 
     // 4. get dependency stream
-    let mut stream = file_collectors
+    let collector = file_collectors
         .iter()
         .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
-        .and_then(|c| c.get_dependencies(&dep_file_content, &licrc).ok())
         .expect(
             format!(
                 "No collector found for dependency file {}",
                 cli.dependency_file
             )
             .as_str(),
-        )
+        );
+
+    let dependencies = collector.get_dependencies(dependency_file_content);
+
+    // TODO: filter dependencies based on .licrc file
+    let dependencies = dependencies
+        .iter()
+        .filter(|dep| licrc.filter_dependencies_before_retrieval(dep))
+        .collect::<Vec<_>>();
+
+    let mut stream = collector
+        .retrieve_dependencies(dependencies)
         .buffer_unordered(licrc.behavior.retriever_buffer_size.unwrap_or(100));
+
+    // let mut stream = file_collectors
+    //     .iter()
+    //     .find(|c| cli.dependency_file.contains(&c.get_dependency_filename()))
+    //     .and_then(|c| c.get_dependencies(&dep_file_content).ok())
+    //     .expect(
+    //         format!(
+    //             "No collector found for dependency file {}",
+    //             cli.dependency_file
+    //         )
+    //         .as_str(),
+    //     )
+    //     .buffer_unordered(licrc.behavior.retriever_buffer_size.unwrap_or(100));
 
     // 5. validate the dependencies according to the .licrc config
     tracing::debug!("Validating dependencies");

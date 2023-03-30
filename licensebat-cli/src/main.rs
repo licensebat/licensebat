@@ -4,7 +4,7 @@
 #![warn(missing_docs)]
 
 use licensebat_cli::OutputFormat;
-use licensebat_core::RetrievedDependency;
+use licensebat_core::Dependency;
 use structopt::StructOpt;
 
 #[tokio::main]
@@ -39,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 /// Prints the dependencies in the stdout as json
-fn show_result_as_json(deps: &[RetrievedDependency]) -> anyhow::Result<()> {
+fn show_result_as_json(deps: &[Dependency]) -> anyhow::Result<()> {
     tracing::debug!("Showing results as JSON");
     let json = if cfg!(debug_assertions) {
         serde_json::to_string_pretty(&deps)
@@ -51,7 +51,7 @@ fn show_result_as_json(deps: &[RetrievedDependency]) -> anyhow::Result<()> {
 }
 
 /// Prints the dependencies in the stdout as markdown
-fn show_result_as_markdown(deps: &mut [RetrievedDependency], invalid_dependencies_count: usize) {
+fn show_result_as_markdown(deps: &mut [Dependency], invalid_dependencies_count: usize) {
     tracing::debug!("Showing results as MARKDOWN");
     let total = deps.len();
 

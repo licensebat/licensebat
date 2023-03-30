@@ -2,11 +2,11 @@
 //!
 //! Libraries authors that want to provide [`Collector`] implementations should use this crate.
 //!
-//! [`Collector`] is the central trait of this crate and its implementations will be responsible for retrieving information about the dependencies in form of a [`RetrievedDependency].
+//! [`Collector`] is the central trait of this crate and its implementations will be responsible for retrieving information about the dependencies in form of a [`Dependency].
 //!
 //! Note that the [`Collector`] trait is really simple and this is mainly because this trait is intended to serve as the base for more complex traits.
 //!
-//! In our case, this crate exposes the [`FileCollector`] trait which will use dependency manifest files (such as `package-lock.json`, `yarn.lock`, `Cargo.lock` or `pubspec.yaml`) to extract information about the different dependencies (see [`Dependency`]) and return a stream of [`RetrievedDependency`] or [`RetrievedDependencyStreamResult`].
+//! In our case, this crate exposes the [`FileCollector`] trait which will use dependency manifest files (such as `package-lock.json`, `yarn.lock`, `Cargo.lock` or `pubspec.yaml`) to extract information about the different dependencies (see [`Dependency`]) and return a stream of [`Dependency`] or [`DependencyStreamResult`].
 //!
 //! For the moment, [`FileCollector`] is the only used trait in all language implementations but this can easily change. For instance, for the Rust language, it would be nice to use [`cargo-metadata`] instead of having to parse the `Cargo.lock` file. That would make it cheaper to get information about some dependencies as we wouldn't need to use any APIs to fetch license information.
 //!
@@ -17,7 +17,7 @@
 //! - **licrc-from-file**: Allows to retrieve license information from a file by enabling a `LicRc::from_relative_path` associated function.
 //!
 //! [licensebat-cli]: https://docs.rs/licensebat-cli/latest/licensebat_cli/
-//! [`RetrievedDependencyStreamResult`]: collector::RetrievedDependencyStreamResult
+//! [`DependencyStreamResult`]: collector::DependencyStreamResult
 //! [`cargo-metadata`]: https://docs.rs/cargo_metadata/latest/cargo_metadata
 #![doc(html_logo_url = "https://licensebat.com/images/not_used/logo_red_ferris.png")]
 #![doc(html_favicon_url = "https://licensebat.com/images/not_used/favicons_red/favicon.ico")]

@@ -9,7 +9,7 @@
 
 use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
-use licensebat_core::{Comment, Dependency, RetrievedDependency};
+use licensebat_core::{Comment, Dependency};
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 use selectors::Element;
@@ -20,8 +20,8 @@ use tracing::instrument;
 pub trait Retriever: Send + Sync + std::fmt::Debug {
     /// The associated error which can be returned.
     type Error: std::fmt::Debug + std::fmt::Display;
-    /// Future that resolves to a [`RetrievedDependency`].
-    type Response: Future<Output = Result<RetrievedDependency, Self::Error>> + Send;
+    /// Future that resolves to a [`Dependency`].
+    type Response: Future<Output = Result<Dependency, Self::Error>> + Send;
     /// Validates dependency's information from the original source.
     fn get_dependency(&self, dependency: Dependency) -> Self::Response;
 }
@@ -84,7 +84,7 @@ impl std::fmt::Debug for Hosted {
 
 impl Retriever for Hosted {
     type Error = reqwest::Error;
-    type Response = BoxFuture<'static, Result<RetrievedDependency, Self::Error>>;
+    type Response = BoxFuture<'static, Result<Dependency, Self::Error>>;
 
     #[instrument(skip(self), level = "debug")]
     fn get_dependency(&self, dependency: Dependency) -> Self::Response {
@@ -190,8 +190,8 @@ fn retrieved_dependency(
     url: Option<String>,
     comment: Option<Comment>,
     suggested_licenses: Option<Vec<(String, f32)>>,
-) -> RetrievedDependency {
-    RetrievedDependency::new(
+) -> Dependency {
+    Dependency::new(
         dependency.name.clone(),
         dependency.version.clone(),
         crate::DART.to_owned(),
