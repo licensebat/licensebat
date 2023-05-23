@@ -788,7 +788,7 @@ checksum = "99227334921fae1a979cf0bfdfcc6b3e5ce376ef57e16fb6fb3ea2ed6095f80c"
 
 [[package]]
 name = "licensebat-cli"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "anyhow",
  "askalono",
@@ -812,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-core"
-version = "0.0.20"
+version = "0.0.21"
 dependencies = [
  "cargo-lock",
  "futures",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-dart"
-version = "0.0.20"
+version = "0.0.21"
 dependencies = [
  "askalono",
  "futures",
@@ -844,7 +844,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-js"
-version = "0.0.20"
+version = "0.0.21"
 dependencies = [
  "futures",
  "licensebat-core",
@@ -859,7 +859,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-rust"
-version = "0.0.20"
+version = "0.0.21"
 dependencies = [
  "anyhow",
  "askalono",
@@ -1127,9 +1127,9 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "package-lock-json-parser"
-version = "0.2.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e1d0e6260665ffbe7a64a8ed930ba53258da8c63061eeebe2158adacfca13ef"
+checksum = "8707d34f4a67f9c733970b8afc7b82d8623bc0746ff17b460aa6f2ea5ef487d3"
 dependencies = [
  "serde",
  "serde_json",
@@ -2495,9 +2495,9 @@ dependencies = [
 
 [[package]]
 name = "yarn-lock-parser"
-version = "0.4.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17535eec16ab62b85dc1494388af1d46d254d4cb0cd2de9c028d5956fc014d01"
+checksum = "9c356c6556939593eb1edb9b34fe079431512fdf9f7cf4441de304627177b2c3"
 dependencies = [
  "nom",
  "thiserror",
