@@ -48,10 +48,10 @@ pub type RetrievedDependencyStreamResult<'a> = Result<RetrievedDependencyStream<
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// Error produced when deserializing a `yaml file` (pubspec.yaml...).
-    #[error("Error deserialiazing yaml: {0}")]
+    #[error("Error deserializing yaml: {0}")]
     YamlSerde(#[from] serde_yaml::Error),
     /// Error produced when deserializing a `json file` (package-lock.json...).
-    #[error("Error deserialiazing json: {0}")]
+    #[error("Error deserializing json: {0}")]
     JsonSerde(#[from] package_lock_json_parser::PackageLockJsonError),
     /// Error produced when deserializing a `yarn.lock` file.
     #[error("Error parsing yarn.lock file {0}")]
