@@ -9,6 +9,9 @@ members = [
 
 resolver = "2"
 
+[workspace.package]
+version = "0.0.21"
+
 [workspace.dependencies]
 tokio = "1"
 serde = { version = "1.0", features = ["derive"] }

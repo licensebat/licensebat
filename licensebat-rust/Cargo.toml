@@ -1,6 +1,6 @@
 [package]
 name = "licensebat-rust"
-version = "0.0.21"
+version.workspace = true
 edition = "2021"
 authors = ["Roberto Huertas <roberto.huertas@outlook.com>"]
 description = "A library to get information about your Rust dependencies"
@@ -14,8 +14,8 @@ keywords = ["license", "validation", "policy", "compliance", "rust"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
+licensebat-core = { path = "../licensebat-core" }
 # core
-licensebat-core = { path = "../licensebat-core", version = "0.0.21" }
 # serialization
 serde = { workspace = true }
 serde_json = { workspace = true }
