@@ -887,7 +887,7 @@ checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
 
 [[package]]
 name = "licensebat-cli"
-version = "0.0.21"
+version = "0.22.0"
 dependencies = [
  "anyhow",
  "askalono",
@@ -927,7 +927,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-dart"
-version = "0.0.21"
+version = "0.22.0"
 dependencies = [
  "askalono",
  "futures",
@@ -943,7 +943,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-js"
-version = "0.0.21"
+version = "0.22.0"
 dependencies = [
  "futures",
  "licensebat-core",
@@ -958,7 +958,7 @@ dependencies = [
 
 [[package]]
 name = "licensebat-rust"
-version = "0.0.21"
+version = "0.22.0"
 dependencies = [
  "anyhow",
  "askalono",
