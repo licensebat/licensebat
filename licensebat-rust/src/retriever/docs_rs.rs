@@ -124,7 +124,7 @@ impl Retriever for DocsRs {
                     // normally, there's only on item but someone could have decided to inform both `license` and `license-file` attributes.
                     // we will take the first one.
                     text.lines().find(|l| l.starts_with("license")).map(|l| {
-                        let items = l.split('=').collect::<Vec<_>>();
+                        let items = l.split('=').map(|x| x.trim()).collect::<Vec<_>>();
                         (items[0].to_string(), items[1].replace('\"', ""))
                     })
             });

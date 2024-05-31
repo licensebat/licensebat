@@ -11,8 +11,8 @@ use askalono::{Store, TextData};
 use futures::{future::BoxFuture, Future, FutureExt, TryFutureExt};
 use licensebat_core::{Comment, Dependency, RetrievedDependency};
 use reqwest::Client;
+use scraper::Element;
 use scraper::{ElementRef, Html, Selector};
-use selectors::Element;
 use std::{sync::Arc, vec};
 use tracing::instrument;
 

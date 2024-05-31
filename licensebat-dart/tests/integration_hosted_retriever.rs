@@ -21,7 +21,7 @@ mod integration_hosted_retriever {
             .await
             .unwrap();
         assert_eq!(Some(vec!["MIT".to_string()]), dep.licenses);
-        assert!(dep.comment.is_some());
+        assert!(dep.comment.is_none());
         assert_eq!(dep.name, "flare_dart");
         assert_eq!(&dep.dependency_type, licensebat_dart::DART);
     }

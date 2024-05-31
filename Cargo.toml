@@ -4,5 +4,26 @@ members = [
     "licensebat-core",
     "licensebat-js",
     "licensebat-dart",
-    "licensebat-rust"
+    "licensebat-rust",
 ]
+
+resolver = "2"
+
+[workspace.package]
+version = "0.22.0"
+
+[workspace.dependencies]
+tokio = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+futures = "0.3"
+tracing = "0.1"
+reqwest = "0.12"
+askalono = "0.4"
+anyhow = "1.0"
+thiserror = "1.0"
+toml = "0.8"
+package-lock-json-parser = "0.4"
+yarn-lock-parser = "0.7"
+cargo-lock = "9.0"
