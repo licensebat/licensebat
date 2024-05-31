@@ -18,17 +18,17 @@ maintenance = { status = "actively-developed" }
 # core
 licensebat-core = { path = "../licensebat-core", version = "0.0.21" }
 # serialization
-serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.9"
+serde = { workspace = true }
+serde_yaml = { workspace = true }
 # utils
-futures = { version = "0.3.6" } 
-tracing = "0.1"
-reqwest = "0.11"
+futures = { workspace = true }
+tracing = { workspace = true }
+reqwest = { workspace = true }
 # html scraper
 scraper = "0.13"
 selectors = "0.22" # don't update for the moment. 0.23 breaks
 # spdx
-askalono = "0.4.4"
+askalono = { workspace = true }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros"] }
+tokio = { workspace = true, features = ["macros"] }

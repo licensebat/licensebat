@@ -19,18 +19,18 @@ licrc-from-file = ["toml"]
 
 [dependencies]
 # serialization
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-serde_yaml = "0.9"
-yarn-lock-parser = "0.5.0"
-package-lock-json-parser = "0.4.0"
-cargo-lock = "8.0.2"
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+yarn-lock-parser = { workspace = true }
+package-lock-json-parser = { workspace = true }
+cargo-lock = { workspace = true }
 # utils
-futures = { version = "0.3.6" } 
-tracing = "0.1"
-toml = {version = "0.7", optional = true }
+futures = { workspace = true }
+tracing = { workspace = true }
+toml = { workspace = true, optional = true }
 # errors
-thiserror = "1.0.21"
+thiserror = { workspace = true }
 
 # see https://docs.rs/about/metadata
 [package.metadata.docs.rs]
