@@ -25,8 +25,8 @@ futures = { workspace = true }
 tracing = { workspace = true }
 reqwest = { workspace = true }
 # html scraper
-scraper = "0.13"
-selectors = "0.22" # don't update for the moment. 0.23 breaks
+scraper = "0.19"
+selectors = "0.25"
 # spdx
 askalono = { workspace = true }
 
