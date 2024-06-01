@@ -15,7 +15,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 # core
-licensebat-core = { path = "../licensebat-core" }
+licensebat-core = { path = "../licensebat-core", version = "0.22.0" }
 # serialization
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -18,13 +18,13 @@ name = "licensebat"
 path = "src/main.rs"
 
 [dependencies]
-# core libs
-licensebat-core = { path = "../licensebat-core", features = [
+licensebat-core = { path = "../licensebat-core", version = "0.22.0", features = [
     "licrc-from-file",
-] }
-licensebat-dart = { path = "../licensebat-dart" }
-licensebat-js = { path = "../licensebat-js" }
-licensebat-rust = { path = "../licensebat-rust" }
+
+] } # core libs
+licensebat-dart = { path = "../licensebat-dart", version = "0.22.0" }
+licensebat-js = { path = "../licensebat-js", version = "0.22.0" }
+licensebat-rust = { path = "../licensebat-rust", version = "0.22.0" }
 # main dependencies
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "fs"] }
 reqwest = { workspace = true }
