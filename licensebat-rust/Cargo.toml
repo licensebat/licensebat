@@ -14,7 +14,7 @@ keywords = ["license", "validation", "policy", "compliance", "rust"]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-licensebat-core = { path = "../licensebat-core", version = "0.22.0" }
+licensebat-core = { path = "../licensebat-core", version = "0.23.0" }
 # core
 # serialization
 serde = { workspace = true }

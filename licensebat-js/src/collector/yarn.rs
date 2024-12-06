@@ -47,6 +47,7 @@ impl<R: Retriever> FileCollector for Yarn<R> {
         licrc: &LicRc,
     ) -> RetrievedDependencyStreamResult {
         let npm_deps = yarn_lock_parser::parse_str(dependency_file_content)?
+            .entries
             .into_iter()
             .map(|entry| Dependency {
                 name: entry.name.to_owned(),

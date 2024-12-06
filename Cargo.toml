@@ -10,7 +10,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.22.0"
+version = "0.23.0"
 
 [workspace.dependencies]
 
@@ -23,8 +23,8 @@ tracing = "0.1"
 reqwest = "0.12"
 askalono = "0.4"
 anyhow = "1.0"
-thiserror = "1.0"
+thiserror = "2.0"
 toml = "0.8"
 package-lock-json-parser = "0.4"
-yarn-lock-parser = "0.7"
-cargo-lock = "9.0"
+yarn-lock-parser = "0.8"
+cargo-lock = "10.0"
